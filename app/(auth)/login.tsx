@@ -6,16 +6,11 @@ import { z } from "zod";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { AntDesign, Feather } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
+import { useTranslation } from "react-i18next";
 import { Logo } from "../../components/ui/Logo";
 import { Button } from "../../components/ui/Button";
 import { Colors } from "../../constants/colors";
 import { useAuth } from "../../context/AuthContext";
-
-const schema = z.object({
-  email: z.string().email("Ingresá un email válido"),
-  password: z.string().min(1, "Ingresá tu contraseña"),
-});
-type FormData = z.infer<typeof schema>;
 
 export default function LoginScreen() {
   const insets = useSafeAreaInsets();
@@ -23,6 +18,14 @@ export default function LoginScreen() {
   const [showPassword, setShowPassword] = useState(false);
   const [apiError, setApiError] = useState<string | null>(null);
   const { login } = useAuth();
+  const { t } = useTranslation("auth");
+
+  const schema = z.object({
+    email: z.string().email(t("login.errorEmail")),
+    password: z.string().min(1, t("login.errorPassword")),
+  });
+  type FormData = z.infer<typeof schema>;
+
   const {
     control,
     handleSubmit,
@@ -35,7 +38,7 @@ export default function LoginScreen() {
       const profile = await login(data.email, data.password);
       router.replace(profile.coupleId ? "/(app)/" : "/(auth)/link");
     } catch {
-      setApiError("Email o contraseña incorrectos.");
+      setApiError(t("login.errorInvalid"));
     }
   };
 
@@ -46,19 +49,17 @@ export default function LoginScreen() {
       </View>
 
       <View style={styles.content}>
-        <Text style={styles.title}>INICIA SESION.</Text>
-        <Text style={styles.subtitle}>
-          Fortalece la relacion dandole un toque especial.
-        </Text>
+        <Text style={styles.title}>{t("login.title")}</Text>
+        <Text style={styles.subtitle}>{t("login.subtitle")}</Text>
 
-        <Text style={styles.label}>Email</Text>
+        <Text style={styles.label}>{t("login.email")}</Text>
         <Controller
           control={control}
           name="email"
           render={({ field: { onChange, onBlur, value } }) => (
             <TextInput
               style={[styles.input, errors.email && styles.inputError]}
-              placeholder="tu@email.com"
+              placeholder={t("login.emailPlaceholder")}
               placeholderTextColor={Colors.textMuted}
               keyboardType="email-address"
               autoCapitalize="none"
@@ -73,7 +74,7 @@ export default function LoginScreen() {
           <Text style={styles.errorText}>{errors.email.message}</Text>
         )}
 
-        <Text style={[styles.label, styles.labelPassword]}>Contraseña</Text>
+        <Text style={[styles.label, styles.labelPassword]}>{t("login.password")}</Text>
         <Controller
           control={control}
           name="password"
@@ -85,7 +86,7 @@ export default function LoginScreen() {
                   styles.passwordInput,
                   errors.password && styles.inputError,
                 ]}
-                placeholder="••••••••"
+                placeholder={t("login.passwordPlaceholder")}
                 placeholderTextColor={Colors.textMuted}
                 secureTextEntry={!showPassword}
                 autoCapitalize="none"
@@ -113,7 +114,7 @@ export default function LoginScreen() {
         )}
 
         <Pressable style={styles.forgotLink}>
-          <Text style={styles.forgotText}>¿Olvidaste tu contraseña?</Text>
+          <Text style={styles.forgotText}>{t("login.forgotPassword")}</Text>
         </Pressable>
 
         {apiError && <Text style={styles.errorText}>{apiError}</Text>}
@@ -121,14 +122,14 @@ export default function LoginScreen() {
 
       <View style={[styles.ctaArea, { paddingBottom: insets.bottom + 24 }]}>
         <Button
-          label={isSubmitting ? "Ingresando..." : "Ingresar"}
+          label={isSubmitting ? t("login.submitting") : t("login.submit")}
           onPress={handleSubmit(onSubmit)}
           disabled={isSubmitting}
         />
 
         <View style={styles.divider}>
           <View style={styles.dividerLine} />
-          <Text style={styles.dividerText}>o</Text>
+          <Text style={styles.dividerText}>{t("login.or")}</Text>
           <View style={styles.dividerLine} />
         </View>
 
@@ -139,7 +140,7 @@ export default function LoginScreen() {
           ]}
         >
           <AntDesign name="google" size={18} color="currentColor" />
-          <Text style={styles.googleLabel}>Ingresar con Google</Text>
+          <Text style={styles.googleLabel}>{t("login.google")}</Text>
         </Pressable>
 
         <Pressable
@@ -147,8 +148,8 @@ export default function LoginScreen() {
           onPress={() => router.push("/(auth)/register")}
         >
           <Text style={styles.registerLinkText}>
-            ¿No tenés cuenta?{" "}
-            <Text style={styles.registerLinkAccent}>Registrate</Text>
+            {t("login.noAccount")}
+            <Text style={styles.registerLinkAccent}>{t("login.registerLink")}</Text>
           </Text>
         </Pressable>
       </View>

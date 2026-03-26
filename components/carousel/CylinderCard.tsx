@@ -4,6 +4,7 @@ import Animated, {
   interpolate,
   Extrapolation,
 } from "react-native-reanimated";
+import { useTranslation } from "react-i18next";
 
 import { GameCard } from "../cards/GameCard";
 import { RarityKey, rarityGlow } from "../../constants/colors";
@@ -21,12 +22,6 @@ const RARITY_MAP: Record<string, RarityKey> = {
   rare: "rara",
   epic: "epica",
   legendary: "legendaria",
-};
-
-const CATEGORY_LABEL: Record<string, string> = {
-  date: "CITA",
-  action: "ACCIÓN",
-  home: "HOGAR",
 };
 
 function clamp(value: number, min: number, max: number) {
@@ -49,6 +44,11 @@ interface CylinderCardProps {
 export function CylinderCard({ card, index, rotation, dragY }: CylinderCardProps) {
   const rarity = RARITY_MAP[card.rarity] ?? "comun";
   const glow = rarityGlow[rarity];
+  const { t } = useTranslation("common");
+
+  const categoryLabel = t(`category.${card.category}`, {
+    defaultValue: card.category.toUpperCase(),
+  });
 
   const animStyle = useAnimatedStyle(() => {
     const angleDeg = index * ANGLE_PER_CARD - rotation.value;
@@ -104,7 +104,7 @@ export function CylinderCard({ card, index, rotation, dragY }: CylinderCardProps
       <GameCard
         card={{
           rarity,
-          label: CATEGORY_LABEL[card.category] ?? card.category.toUpperCase(),
+          label: categoryLabel,
           title: card.title,
           description: card.description,
         }}

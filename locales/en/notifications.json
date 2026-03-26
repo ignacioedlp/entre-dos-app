@@ -1,0 +1,28 @@
+{
+  "title": "NOTIFICATIONS.",
+  "empty": "No notifications",
+  "emptyDescription": "Your activity and updates will appear here.",
+  "readAll": "Mark all read",
+  "buckets": {
+    "today": "Today",
+    "yesterday": "Yesterday",
+    "earlier": "Earlier"
+  },
+  "setup": {
+    "title": "Enable notifications",
+    "body": "Find out when your partner plays a card and don't miss anything.",
+    "enable": "Enable",
+    "later": "Not now"
+  },
+  "category": {
+    "played": "Played",
+    "system": "System",
+    "deck_reset": "Deck reset"
+  },
+  "alert": {
+    "disabledTitle": "Notifications Disabled",
+    "disabledMessage": "To receive notifications, please enable them in your device Settings.",
+    "cancel": "Cancel",
+    "openSettings": "Open Settings"
+  }
+}

@@ -12,27 +12,27 @@ import { useQuery } from "@tanstack/react-query";
 import { PackCard, PACK_THEMES } from "../../components/cards/PackCard";
 import { Colors } from "../../constants/colors";
 import { apiGetPacks } from "../../lib/api";
+import { useTranslation } from "react-i18next";
 
 const CARD_PADDING = 24;
 
 export default function PacksScreen() {
   const insets = useSafeAreaInsets();
+  const { t } = useTranslation("home");
 
   const { data, isLoading, refetch, isRefetching } = useQuery({
     queryKey: ["packs"],
     queryFn: apiGetPacks,
   });
 
-  const packs = data?.packs.sort((a, b) => a.priceUsd - b.priceUsd) ?? [];
+  const packs =
+    data?.packs.sort((a, b) => Number(b.isBase) - Number(a.isBase)) ?? [];
 
   return (
     <View style={[styles.root, { paddingTop: insets.top + 20 }]}>
       <View style={styles.header}>
-        <Text style={styles.title}>PACKS DISPONIBLES.</Text>
-        <Text style={styles.subtitle}>
-          Agrega mas tarjeta a tu mazo semanal para que tengas mas mejores
-          experiencias.
-        </Text>
+        <Text style={styles.title}>{t("packs.title")}</Text>
+        <Text style={styles.subtitle}>{t("packs.subtitle")}</Text>
       </View>
 
       {isLoading ? (

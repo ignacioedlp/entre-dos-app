@@ -1,0 +1,165 @@
+{
+  "title": "SETTINGS.",
+  "signOut": "Sign Out",
+  "signOutConfirmTitle": "Sign Out",
+  "signOutConfirmMessage": "Are you sure you want to sign out?",
+  "menu": {
+    "notifications": "NOTIFICATIONS",
+    "language": "LANGUAGE",
+    "relationship": "MY RELATIONSHIP",
+    "terms": "TERMS & CONDITIONS",
+    "privacy": "PRIVACY POLICY",
+    "faq": "FAQ"
+  },
+  "notifications": {
+    "title": "NOTIFICATIONS.",
+    "toggleLabel": "Notifications",
+    "toggleDescription": "Stay updated with game activity and announcements."
+  },
+  "language": {
+    "title": "LANGUAGE."
+  },
+  "profile": {
+    "title": "MY PROFILE.",
+    "displayName": "Display Name",
+    "namePlaceholder": "Enter your name",
+    "edit": "Edit",
+    "save": "Save",
+    "cancel": "Cancel",
+    "nameUpdated": "Name updated!",
+    "cardsPlayed": "Cards Played",
+    "noCardsYet": "No cards played yet"
+  },
+  "relationship": {
+    "title": "MY RELATIONSHIP.",
+    "togetherSince": "Together since {{date}}",
+    "anniversary": "Anniversary",
+    "notSet": "Not set yet",
+    "setDate": "Set date",
+    "edit": "Edit",
+    "save": "Save",
+    "cancel": "Cancel",
+    "remove": "Remove date",
+    "saved": "Anniversary saved!",
+    "removed": "Anniversary removed",
+    "errorInvalidDate": "Please enter a valid date",
+    "errorFutureDate": "Date cannot be in the future",
+    "errorRequired": "Please fill in all fields",
+    "day": "DD",
+    "month": "MM",
+    "year": "YYYY"
+  },
+  "terms": {
+    "title": "TERMS & CONDITIONS.",
+    "lastUpdated": "Last updated: March 2026",
+    "items": [
+      {
+        "title": "1. Acceptance of Terms",
+        "body": "By downloading, installing, or using Entre Dos (\"the App\"), you agree to be bound by these Terms & Conditions. If you do not agree, please do not use the App."
+      },
+      {
+        "title": "2. Description of Service",
+        "body": "Entre Dos is a card-based game designed for couples. The App provides digital card decks with activities, questions, and prompts intended to strengthen relationships."
+      },
+      {
+        "title": "3. Eligibility",
+        "body": "You must be at least 18 years old to use the App. By using the App, you represent and warrant that you meet this age requirement."
+      },
+      {
+        "title": "4. User Accounts",
+        "body": "You are responsible for maintaining the confidentiality of your account credentials. You agree to accept responsibility for all activities that occur under your account."
+      },
+      {
+        "title": "5. Acceptable Use",
+        "body": "You agree not to misuse the App, including but not limited to: attempting to gain unauthorized access, interfering with the App's functionality, or using the App for any unlawful purpose."
+      },
+      {
+        "title": "6. Intellectual Property",
+        "body": "All content, design, graphics, and other materials within the App are owned by Entre Dos and are protected by applicable intellectual property laws. You may not reproduce, distribute, or create derivative works without prior written consent."
+      },
+      {
+        "title": "7. Limitation of Liability",
+        "body": "The App is provided on an \"as is\" basis. Entre Dos shall not be liable for any indirect, incidental, special, or consequential damages arising from your use of the App."
+      },
+      {
+        "title": "8. Changes to Terms",
+        "body": "We reserve the right to modify these Terms at any time. Continued use of the App after changes constitutes acceptance of the updated Terms."
+      },
+      {
+        "title": "9. Contact",
+        "body": "If you have any questions about these Terms, please contact us at support@entredos.app."
+      }
+    ]
+  },
+  "privacy": {
+    "title": "PRIVACY POLICY.",
+    "lastUpdated": "Last updated: March 2026",
+    "items": [
+      {
+        "title": "1. Information We Collect",
+        "body": "We collect the information you provide when creating your account, such as your name, email address, and anniversary date. We also collect usage data to improve your experience in the app."
+      },
+      {
+        "title": "2. Use of Information",
+        "body": "We use your information to: operate and maintain the app, personalize your experience, send you game-related notifications, and improve our services."
+      },
+      {
+        "title": "3. Storage and Security",
+        "body": "Your information is stored securely on protected servers. We implement technical and organizational security measures to protect your personal data against unauthorized access."
+      },
+      {
+        "title": "4. Sharing Information",
+        "body": "We do not sell, trade, or transfer your personal information to third parties. We only share data with service providers necessary for the operation of the app."
+      },
+      {
+        "title": "5. Your Rights",
+        "body": "You have the right to access, correct, or delete your personal information at any time. You can request a copy of your data or ask for its deletion by contacting us directly."
+      },
+      {
+        "title": "6. Cookies and Similar Technologies",
+        "body": "We use tracking technologies to improve the app's functionality and analyze usage patterns. You can manage these preferences from your device settings."
+      },
+      {
+        "title": "7. Minors",
+        "body": "Entre Dos is not intended for minors under 18 years of age. We do not intentionally collect information from minors. If we discover that we have collected data from a minor, we will delete it immediately."
+      },
+      {
+        "title": "8. Changes to This Policy",
+        "body": "We reserve the right to update this policy at any time. We will notify you of significant changes through the app or by email."
+      },
+      {
+        "title": "9. Contact",
+        "body": "If you have questions about this privacy policy, you can contact us at support@entredos.app."
+      }
+    ]
+  },
+  "faq": {
+    "title": "FAQ.",
+    "items": [
+      {
+        "question": "What is Entre Dos?",
+        "answer": "Entre Dos is a card-based game designed for couples. Each card contains activities, questions, or prompts to help you connect with your partner."
+      },
+      {
+        "question": "How do I play a card?",
+        "answer": "Open a card from your deck and swipe to confirm. Once played, the card will be marked as completed and added to your history."
+      },
+      {
+        "question": "Can I replay a card?",
+        "answer": "Currently, each card can only be played once. New cards are added to your deck regularly, so there's always something fresh to explore."
+      },
+      {
+        "question": "How do I change my language?",
+        "answer": "Go to Settings > Language and select your preferred language. The app supports English and Spanish."
+      },
+      {
+        "question": "How do notifications work?",
+        "answer": "You can enable or disable notifications in Settings > Notifications. When enabled, you'll receive reminders about new cards and game activity."
+      },
+      {
+        "question": "How do I delete my account?",
+        "answer": "Please contact us at support@entredos.app to request account deletion. We will process your request within 30 days."
+      }
+    ]
+  }
+}

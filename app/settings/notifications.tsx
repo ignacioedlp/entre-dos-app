@@ -10,6 +10,7 @@ import {
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useRouter } from "expo-router";
 import { Ionicons, MaterialIcons } from "@expo/vector-icons";
+import { useTranslation } from "react-i18next";
 
 import { NotificationCard } from "@/components/notifications/notification-card";
 import { useNotificationList } from "@/hooks/use-notification-list";
@@ -21,6 +22,7 @@ export default function NotificationsScreen() {
   const insets = useSafeAreaInsets();
   const router = useRouter();
   const { isEnabled, enable, disable } = useNotifications();
+  const { t } = useTranslation("settings");
 
   return (
     <View style={[styles.root, { paddingTop: insets.top + 20 }]}>
@@ -28,7 +30,7 @@ export default function NotificationsScreen() {
         <Pressable onPress={() => router.back()} style={styles.backBtn}>
           <Ionicons name="arrow-back" size={22} color={Colors.background} />
         </Pressable>
-        <Text style={styles.headerTitle}>NOTIFICACIONES.</Text>
+        <Text style={styles.headerTitle}>{t("notifications.title")}</Text>
       </View>
       {/* Notifications toggle */}
       <View
@@ -66,10 +68,16 @@ export default function NotificationsScreen() {
               color: Colors.textPrimary,
             }}
           >
-            Notifications
+            {t("notifications.toggleLabel")}
           </Text>
-          <Text style={{ color: Colors.textSecondary, marginTop: 1 }}>
-            Stay updated with game activity and announcements.
+          <Text
+            style={{
+              color: Colors.textSecondary,
+              marginTop: 1,
+              maxWidth: "90%",
+            }}
+          >
+            {t("notifications.toggleDescription")}
           </Text>
         </View>
         <Toggle

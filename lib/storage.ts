@@ -13,6 +13,7 @@ export interface ProfileData {
   coupleCode: string;
   locale: 'es' | 'en';
   pushNotifications: boolean;
+  onboardingCompleted: boolean;
 }
 
 export function getToken(): string | null {

@@ -14,18 +14,20 @@ import { Ionicons } from "@expo/vector-icons";
 import { NotificationCard } from "@/components/notifications/notification-card";
 import { useNotificationList } from "@/hooks/use-notification-list";
 import { Colors } from "@/constants/colors";
-
-const BUCKET_LABELS: Record<string, string> = {
-  today: "Hoy",
-  yesterday: "Ayer",
-  earlier: "Anteriores",
-};
+import { useTranslation } from "react-i18next";
 
 export default function NotificationsScreen() {
   const insets = useSafeAreaInsets();
   const router = useRouter();
   const { groups, isLoading, hasUnread, refresh, markRead, markAllRead } =
     useNotificationList();
+  const { t } = useTranslation("notifications");
+
+  const BUCKET_LABELS: Record<string, string> = {
+    today: t("buckets.today"),
+    yesterday: t("buckets.yesterday"),
+    earlier: t("buckets.earlier"),
+  };
 
   return (
     // <View style={[styles.root, { paddingTop: insets.top }]}>
@@ -47,7 +49,7 @@ export default function NotificationsScreen() {
         <Pressable onPress={() => router.back()} style={styles.backBtn}>
           <Ionicons name="arrow-back" size={22} color={Colors.background} />
         </Pressable>
-        <Text style={styles.headerTitle}>NOTIFICACIONES.</Text>
+        <Text style={styles.headerTitle}>{t("title")}</Text>
       </View>
       {isLoading ? (
         <View style={styles.centered}>
@@ -60,10 +62,8 @@ export default function NotificationsScreen() {
             size={48}
             color={Colors.textMuted}
           />
-          <Text style={styles.emptyTitle}>Sin notificaciones</Text>
-          <Text style={styles.emptyBody}>
-            Aquí aparecerán tus actividades y novedades.
-          </Text>
+          <Text style={styles.emptyTitle}>{t("empty")}</Text>
+          <Text style={styles.emptyBody}>{t("emptyDescription")}</Text>
         </View>
       ) : (
         <SectionList
@@ -77,7 +77,7 @@ export default function NotificationsScreen() {
                 }}
               >
                 <TouchableOpacity onPress={markAllRead} activeOpacity={0.7}>
-                  <Text style={styles.markAll}>Leer todo</Text>
+                  <Text style={styles.markAll}>{t("readAll")}</Text>
                 </TouchableOpacity>
               </View>
             ) : null

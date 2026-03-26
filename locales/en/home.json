@@ -1,0 +1,46 @@
+{
+  "screen": {
+    "greeting": "TIME TO HAVE FUN.",
+    "emptyTitle": "Your cards arrive on Monday",
+    "emptyDescription": "Link your partner and next Monday at 00:00 you'll both receive 7 cards.",
+    "deckTitle": "YOUR DECK",
+    "deckHint": "Swipe to browse your cards, and when you want to use one swipe it down."
+  },
+  "playCard": {
+    "title": "Confirm card use.",
+    "description": "By confirming, your partner will receive a notification about it. Have fun.",
+    "played": "You already played this card ✓",
+    "success": "Card played!",
+    "errorLoad": "Could not load the card."
+  },
+  "weekTimeline": {
+    "title": "THIS WEEK",
+    "played_one": "{{count}} play",
+    "played_other": "{{count}} plays",
+    "empty": "No cards played this week yet.",
+    "you": "You",
+    "partner": "Partner"
+  },
+  "partnerLastPlay": {
+    "partner": "Your partner",
+    "now": "now",
+    "minutesAgo": "{{count}}m ago",
+    "hoursAgo": "{{count}}h ago",
+    "daysAgo": "{{count}}d ago"
+  },
+  "allPlayed": {
+    "title": "You played all your cards!",
+    "body": "Next cards arrive on Monday.",
+    "countdown": "NEXT CARDS IN"
+  },
+  "swipeToConfirm": {
+    "label": "CONFIRM"
+  },
+  "packs": {
+    "title": "AVAILABLE PACKS.",
+    "subtitle": "Add more cards to your weekly deck for better experiences.",
+    "free": "FREE",
+    "premium": "PREMIUM",
+    "buy": "BUY PACK"
+  }
+}

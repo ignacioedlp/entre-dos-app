@@ -1,5 +1,12 @@
-import { createContext, useContext, useState, ReactNode } from 'react';
-import { apiLogin, apiRegister } from '../lib/api';
+import {
+  createContext,
+  useContext,
+  useState,
+  ReactNode,
+  useEffect,
+} from "react";
+import * as Localization from "expo-localization";
+import { apiLogin, apiRegister } from "../lib/api";
 import {
   clearAll,
   getProfile,
@@ -7,7 +14,8 @@ import {
   ProfileData,
   setProfile,
   setToken,
-} from '../lib/storage';
+} from "../lib/storage";
+import i18n from "@/i18n";
 
 interface AuthState {
   user: ProfileData | null;
@@ -16,7 +24,11 @@ interface AuthState {
 
 interface AuthContextValue extends AuthState {
   login: (email: string, password: string) => Promise<ProfileData>;
-  register: (email: string, password: string, passwordConfirm: string) => Promise<void>;
+  register: (
+    email: string,
+    password: string,
+    passwordConfirm: string,
+  ) => Promise<void>;
   logout: () => void;
   updateProfile: (profile: ProfileData) => void;
 }
@@ -29,16 +41,34 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     token: getToken(),
   }));
 
+  useEffect(() => {
+    if (state.user) {
+      i18n.changeLanguage(state.user.locale);
+    }
+  }, [state.user]);
+
   async function login(email: string, password: string): Promise<ProfileData> {
     const { accessToken, profile } = await apiLogin(email, password);
     setToken(accessToken);
     setProfile(profile);
     setState({ user: profile, token: accessToken });
+    i18n.changeLanguage(profile.locale);
     return profile;
   }
 
-  async function register(email: string, password: string, passwordConfirm: string): Promise<void> {
-    const { accessToken, profile } = await apiRegister(email, password, passwordConfirm);
+  async function register(
+    email: string,
+    password: string,
+    passwordConfirm: string,
+  ): Promise<void> {
+    const deviceLang = Localization.getLocales()[0]?.languageCode ?? "es";
+    const locale = deviceLang === "en" ? "en" : "es";
+    const { accessToken, profile } = await apiRegister(
+      email,
+      password,
+      passwordConfirm,
+      locale,
+    );
     setToken(accessToken);
     setProfile(profile);
     setState({ user: profile, token: accessToken });
@@ -55,7 +85,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }
 
   return (
-    <AuthContext.Provider value={{ ...state, login, register, logout, updateProfile }}>
+    <AuthContext.Provider
+      value={{ ...state, login, register, logout, updateProfile }}
+    >
       {children}
     </AuthContext.Provider>
   );
@@ -63,6 +95,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
 export function useAuth(): AuthContextValue {
   const ctx = useContext(AuthContext);
-  if (!ctx) throw new Error('useAuth must be used within AuthProvider');
+  if (!ctx) throw new Error("useAuth must be used within AuthProvider");
   return ctx;
 }

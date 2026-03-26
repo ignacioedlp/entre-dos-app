@@ -1,0 +1,24 @@
+{
+  "viewAll": "VIEW ALL",
+  "skip": "Skip",
+  "confirm": "Confirm",
+  "continue": "Continue",
+  "cancel": "Cancel",
+  "back": "Back",
+  "loading": "Loading...",
+  "signOut": "Sign Out",
+  "settings": "Settings",
+  "close": "Close",
+  "category": {
+    "date": "Date",
+    "action": "Action",
+    "home": "Home"
+  },
+  "rarity": {
+    "common": "Common",
+    "rare": "Rare",
+    "epic": "Epic",
+    "legendary": "Legendary",
+    "passion": "Passion"
+  }
+}

@@ -6,5 +6,6 @@ export default function Index() {
 
   if (!user) return <Redirect href="/(auth)/welcome" />;
   if (!user.coupleId) return <Redirect href="/(auth)/link" />;
+  if (!user.onboardingCompleted) return <Redirect href="/(auth)/onboarding" />;
   return <Redirect href="/(app)/" />;
 }

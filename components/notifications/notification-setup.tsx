@@ -1,12 +1,7 @@
 import { useEffect, useRef, useState } from "react";
-import {
-  Modal,
-  View,
-  Text,
-  StyleSheet,
-  Platform,
-} from "react-native";
+import { Modal, View, Text, StyleSheet, Platform } from "react-native";
 import * as Notifications from "expo-notifications";
+import { useTranslation } from "react-i18next";
 
 import { useAuth } from "@/context/AuthContext";
 import { useNotifications } from "@/hooks/use-notifications";
@@ -19,8 +14,8 @@ export function NotificationSetup() {
   const { hasBeenPrompted, enable, markAsPrompted } = useNotifications();
   const promptedRef = useRef(false);
   const [visible, setVisible] = useState(false);
+  const { t } = useTranslation("notifications");
 
-  // Create Android notification channel
   useEffect(() => {
     if (Platform.OS === "android") {
       Notifications.setNotificationChannelAsync("default", {
@@ -32,7 +27,6 @@ export function NotificationSetup() {
     }
   }, []);
 
-  // Show first-time prompt when user logs in
   useEffect(() => {
     if (!user || hasBeenPrompted || promptedRef.current) return;
     promptedRef.current = true;
@@ -54,6 +48,7 @@ export function NotificationSetup() {
       visible={visible}
       transparent
       animationType="fade"
+      presentationStyle="overFullScreen"
       statusBarTranslucent
       onRequestClose={handleNotNow}
     >
@@ -63,19 +58,17 @@ export function NotificationSetup() {
             <Ionicons name="notifications" size={28} color={Colors.pasion} />
           </View>
 
-          <Text style={styles.title}>Activá las notificaciones</Text>
-          <Text style={styles.body}>
-            Enterate cuando tu pareja juega una carta y no te pierdas nada de lo que pasa.
-          </Text>
+          <Text style={styles.title}>{t("setup.title")}</Text>
+          <Text style={styles.body}>{t("setup.body")}</Text>
 
           <View style={styles.actions}>
             <Button
-              label="Activar"
+              label={t("setup.enable")}
               onPress={handleEnable}
               variant="accent"
             />
             <Button
-              label="Ahora no"
+              label={t("setup.later")}
               onPress={handleNotNow}
               variant="ghost"
             />

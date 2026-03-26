@@ -5,6 +5,8 @@ import {
   StyleSheet,
   Pressable,
   ScrollView,
+  KeyboardAvoidingView,
+  Platform,
 } from "react-native";
 import { useState } from "react";
 import { useForm, Controller } from "react-hook-form";
@@ -13,25 +15,11 @@ import { z } from "zod";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { AntDesign, Feather } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
+import { useTranslation } from "react-i18next";
 import { Logo } from "../../components/ui/Logo";
 import { Button } from "../../components/ui/Button";
 import { Colors } from "../../constants/colors";
 import { useAuth } from "../../context/AuthContext";
-
-const schema = z
-  .object({
-    email: z.string().email("Ingresá un email válido"),
-    password: z
-      .string()
-      .min(6, "La contraseña debe tener al menos 6 caracteres"),
-    confirmPassword: z.string().min(1, "Confirmá tu contraseña"),
-  })
-  .refine((data) => data.password === data.confirmPassword, {
-    message: "Las contraseñas no coinciden",
-    path: ["confirmPassword"],
-  });
-
-type FormData = z.infer<typeof schema>;
 
 export default function RegisterScreen() {
   const insets = useSafeAreaInsets();
@@ -40,6 +28,20 @@ export default function RegisterScreen() {
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [apiError, setApiError] = useState<string | null>(null);
   const { register } = useAuth();
+  const { t } = useTranslation("auth");
+
+  const schema = z
+    .object({
+      email: z.string().email(t("register.errorEmail")),
+      password: z.string().min(6, t("register.errorPasswordLength")),
+      confirmPassword: z.string().min(1, t("register.errorPasswordConfirm")),
+    })
+    .refine((data) => data.password === data.confirmPassword, {
+      message: t("register.errorPasswordMatch"),
+      path: ["confirmPassword"],
+    });
+
+  type FormData = z.infer<typeof schema>;
 
   const {
     control,
@@ -53,11 +55,15 @@ export default function RegisterScreen() {
       await register(data.email, data.password, data.confirmPassword);
       router.replace("/(auth)/link");
     } catch {
-      setApiError("No se pudo crear la cuenta. Intentá con otro email.");
+      setApiError(t("register.errorGeneric"));
     }
   };
 
   return (
+    <KeyboardAvoidingView
+      style={styles.keyboardAvoid}
+      behavior={Platform.OS === "ios" ? "padding" : "height"}
+    >
     <View style={[styles.root, { paddingTop: insets.top + 24 }]}>
       <ScrollView
         style={styles.scroll}
@@ -70,20 +76,17 @@ export default function RegisterScreen() {
         </View>
 
         <View style={styles.content}>
-          <Text style={styles.title}>CREA TU{"\n"}CUENTA.</Text>
-          <Text style={styles.subtitle}>
-            Empezá a compartir momentos únicos con tu pareja.
-          </Text>
+          <Text style={styles.title}>{t("register.title")}</Text>
+          <Text style={styles.subtitle}>{t("register.subtitle")}</Text>
 
-          {/* Email */}
-          <Text style={styles.label}>Email</Text>
+          <Text style={styles.label}>{t("register.email")}</Text>
           <Controller
             control={control}
             name="email"
             render={({ field: { onChange, onBlur, value } }) => (
               <TextInput
                 style={[styles.input, errors.email && styles.inputError]}
-                placeholder="tu@email.com"
+                placeholder={t("register.emailPlaceholder")}
                 placeholderTextColor={Colors.textMuted}
                 keyboardType="email-address"
                 autoCapitalize="none"
@@ -98,8 +101,9 @@ export default function RegisterScreen() {
             <Text style={styles.errorText}>{errors.email.message}</Text>
           )}
 
-          {/* Contraseña */}
-          <Text style={[styles.label, styles.labelSpaced]}>Contraseña</Text>
+          <Text style={[styles.label, styles.labelSpaced]}>
+            {t("register.password")}
+          </Text>
           <Controller
             control={control}
             name="password"
@@ -111,7 +115,7 @@ export default function RegisterScreen() {
                     styles.passwordInput,
                     errors.password && styles.inputError,
                   ]}
-                  placeholder="••••••••"
+                  placeholder={t("register.passwordPlaceholder")}
                   placeholderTextColor={Colors.textMuted}
                   secureTextEntry={!showPassword}
                   autoCapitalize="none"
@@ -138,9 +142,8 @@ export default function RegisterScreen() {
             <Text style={styles.errorText}>{errors.password.message}</Text>
           )}
 
-          {/* Confirmar contraseña */}
           <Text style={[styles.label, styles.labelSpaced]}>
-            Confirmar contraseña
+            {t("register.passwordConfirm")}
           </Text>
           <Controller
             control={control}
@@ -153,7 +156,7 @@ export default function RegisterScreen() {
                     styles.passwordInput,
                     errors.confirmPassword && styles.inputError,
                   ]}
-                  placeholder="••••••••"
+                  placeholder={t("register.passwordPlaceholder")}
                   placeholderTextColor={Colors.textMuted}
                   secureTextEntry={!showConfirmPassword}
                   autoCapitalize="none"
@@ -185,19 +188,23 @@ export default function RegisterScreen() {
           {apiError && (
             <Text style={[styles.errorText, styles.apiError]}>{apiError}</Text>
           )}
+
+          <Text style={styles.termsAndConditions}>
+            {t("register.termsAndConditions")}
+          </Text>
         </View>
       </ScrollView>
 
       <View style={[styles.ctaArea, { paddingBottom: insets.bottom + 24 }]}>
         <Button
-          label={isSubmitting ? "Creando cuenta..." : "Crear cuenta"}
+          label={isSubmitting ? t("register.submitting") : t("register.submit")}
           onPress={handleSubmit(onSubmit)}
           disabled={isSubmitting}
         />
 
         <View style={styles.divider}>
           <View style={styles.dividerLine} />
-          <Text style={styles.dividerText}>o</Text>
+          <Text style={styles.dividerText}>{t("register.or")}</Text>
           <View style={styles.dividerLine} />
         </View>
 
@@ -208,7 +215,7 @@ export default function RegisterScreen() {
           ]}
         >
           <AntDesign name="google" size={18} color="#1a1a1a" />
-          <Text style={styles.googleLabel}>Registrarse con Google</Text>
+          <Text style={styles.googleLabel}>{t("register.google")}</Text>
         </Pressable>
 
         <Pressable
@@ -216,16 +223,22 @@ export default function RegisterScreen() {
           onPress={() => router.replace("/(auth)/login")}
         >
           <Text style={styles.loginLinkText}>
-            ¿Ya tenés cuenta?{" "}
-            <Text style={styles.loginLinkAccent}>Iniciá sesión</Text>
+            {t("register.hasAccount")}
+            <Text style={styles.loginLinkAccent}>
+              {t("register.signInLink")}
+            </Text>
           </Text>
         </Pressable>
       </View>
     </View>
+    </KeyboardAvoidingView>
   );
 }
 
 const styles = StyleSheet.create({
+  keyboardAvoid: {
+    flex: 1,
+  },
   root: {
     flex: 1,
     backgroundColor: Colors.background,
@@ -251,6 +264,12 @@ const styles = StyleSheet.create({
     letterSpacing: -1.5,
     color: Colors.textPrimary,
     marginBottom: 12,
+  },
+  termsAndConditions: {
+    fontFamily: "Inter_400Regular",
+    fontSize: 12,
+    color: Colors.textSecondary,
+    marginTop: 16,
   },
   subtitle: {
     fontFamily: "Inter_400Regular",

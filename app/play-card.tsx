@@ -4,6 +4,7 @@ import { useLocalSearchParams, useRouter } from "expo-router";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { Toast } from "toastify-react-native";
 import { useQueryClient } from "@tanstack/react-query";
+import { useTranslation } from "react-i18next";
 
 import {
   Colors,
@@ -13,19 +14,6 @@ import {
 } from "../constants/colors";
 import { DeckCard, DeckResponse, apiPlayCard } from "../lib/api";
 import { SwipeToConfirm } from "../components/ui/SwipeToConfirm";
-
-const RARITY_LABEL: Record<string, string> = {
-  common: "COMÚN",
-  rare: "RARA",
-  epic: "ÉPICA",
-  legendary: "LEGENDARIA",
-};
-
-const CATEGORY_LABEL: Record<string, string> = {
-  date: "CITA",
-  action: "ACCIÓN",
-  home: "HOGAR",
-};
 
 const RARITY_MAP: Record<string, RarityKey> = {
   common: "comun",
@@ -52,6 +40,7 @@ export default function CardDetailSheet() {
   const insets = useSafeAreaInsets();
   const queryClient = useQueryClient();
   const playing = useRef(false);
+  const { t } = useTranslation("home");
 
   async function handleConfirm(cardId: string) {
     if (playing.current) return;
@@ -72,7 +61,7 @@ export default function CardDetailSheet() {
     } catch {
       // ignore — navigate back regardless
     }
-    Toast.success("¡Carta jugada!");
+    Toast.success(t("playCard.success"));
     router.back();
   }
 
@@ -87,7 +76,7 @@ export default function CardDetailSheet() {
     return (
       <View style={[styles.root, { paddingBottom: insets.bottom + 24 }]}>
         <View style={styles.handle} />
-        <Text style={styles.errorText}>No se pudo cargar la carta.</Text>
+        <Text style={styles.errorText}>{t("playCard.errorLoad")}</Text>
       </View>
     );
   }
@@ -103,11 +92,8 @@ export default function CardDetailSheet() {
       <View style={styles.handle} />
 
       <View style={styles.header}>
-        <Text style={styles.title}>Confirmar uso de la carta.</Text>
-        <Text style={styles.description}>
-          Al confirmar el uso, tu pareja recibira una notificacion sobre la
-          misma. Diviertanse.
-        </Text>
+        <Text style={styles.title}>{t("playCard.title")}</Text>
+        <Text style={styles.description}>{t("playCard.description")}</Text>
       </View>
 
       {/* Description */}
@@ -120,7 +106,7 @@ export default function CardDetailSheet() {
       <View style={styles.footer}>
         {isPlayed ? (
           <View style={styles.playedBanner}>
-            <Text style={styles.playedBannerText}>Ya jugaste esta carta ✓</Text>
+            <Text style={styles.playedBannerText}>{t("playCard.played")}</Text>
           </View>
         ) : (
           <SwipeToConfirm onConfirm={() => handleConfirm(card.id)} />

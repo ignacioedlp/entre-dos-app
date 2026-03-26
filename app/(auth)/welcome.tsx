@@ -13,6 +13,7 @@ import Animated, {
   withTiming,
   Easing,
 } from "react-native-reanimated";
+import { useTranslation } from "react-i18next";
 import { LogoWithName } from "../../components/ui/Logo";
 import { Button } from "../../components/ui/Button";
 import { GameCard, GameCardData } from "../../components/cards/GameCard";
@@ -22,8 +23,8 @@ const { width: W, height: H } = Dimensions.get("window");
 
 interface CardLayout extends GameCardData {
   rotation: number;
-  left: number; // absolute px
-  top: number; // absolute px
+  left: number;
+  top: number;
   width: number;
 }
 
@@ -67,7 +68,6 @@ function AnimatedCard({ card, index }: { card: CardLayout; index: number }) {
 }
 
 const PREVIEW_CARDS: CardLayout[] = [
-  // Amber — Legendaria, upper-left, tilted left
   {
     rarity: "legendaria",
     label: "LEGENDARIA",
@@ -78,7 +78,6 @@ const PREVIEW_CARDS: CardLayout[] = [
     top: H * 0.15,
     width: W * 0.54,
   },
-  // Pink — Pasión, upper-right, tilted right
   {
     rarity: "pasion",
     label: "PASIÓN",
@@ -89,7 +88,6 @@ const PREVIEW_CARDS: CardLayout[] = [
     top: H * 0.1,
     width: W * 0.52,
   },
-  // White — Común, lower-left, slight tilt
   {
     rarity: "comun",
     label: "COMÚN",
@@ -100,7 +98,6 @@ const PREVIEW_CARDS: CardLayout[] = [
     top: H * 0.5,
     width: W * 0.5,
   },
-  // Blue — Rara, lower-right, tilted right
   {
     rarity: "rara",
     label: "RARA",
@@ -116,34 +113,31 @@ const PREVIEW_CARDS: CardLayout[] = [
 export default function WelcomeScreen() {
   const router = useRouter();
   const insets = useSafeAreaInsets();
+  const { t } = useTranslation("auth");
 
   return (
     <SafeAreaView style={styles.root}>
-      {/* ── Scattered card previews ────────────────────────────── */}
       {PREVIEW_CARDS.map((card, i) => (
         <AnimatedCard key={i} card={card} index={i} />
       ))}
 
-      {/* ── Bottom vignette so CTA area is legible ────────────── */}
       <LinearGradient
         colors={["transparent", Colors.background]}
         style={[styles.vignette]}
         pointerEvents="none"
       />
 
-      {/* ── Logo top-left ─────────────────────────────────────── */}
       <View style={[styles.logoArea, { paddingTop: insets.top + 30 }]}>
         <LogoWithName size="lg" />
       </View>
 
-      {/* ── CTA button bottom ─────────────────────────────────── */}
       <View style={[styles.ctaArea, { paddingBottom: insets.bottom + 24 }]}>
         <Button
-          label="Iniciar sesión"
+          label={t("welcome.signIn")}
           onPress={() => router.push("/(auth)/login")}
         />
         <Button
-          label="Crear cuenta"
+          label={t("welcome.register")}
           variant="ghost"
           onPress={() => router.push("/(auth)/register")}
         />

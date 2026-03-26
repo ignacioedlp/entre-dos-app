@@ -12,6 +12,7 @@ import {
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useRouter } from "expo-router";
 import { useQuery } from "@tanstack/react-query";
+import { useTranslation } from "react-i18next";
 import Animated, {
   useSharedValue,
   withSpring,
@@ -46,6 +47,7 @@ export default function HomeScreen() {
   const insets = useSafeAreaInsets();
   const router = useRouter();
   const { user } = useAuth();
+  const { t } = useTranslation("home");
 
   const { data, isLoading } = useQuery({
     queryKey: ["deck"],
@@ -132,7 +134,7 @@ export default function HomeScreen() {
   return (
     <View style={[styles.root, { paddingTop: insets.top + 20 }]}>
       <View style={styles.header}>
-        <Text style={styles.greeting}>HORA DE DIVERTIRSE.</Text>
+        <Text style={styles.greeting}>{t("screen.greeting")}</Text>
         <Pressable onPress={() => router.push("/notifications")}>
           <Ionicons
             name="notifications-outline"
@@ -152,11 +154,8 @@ export default function HomeScreen() {
           {showNeverDealt ? (
             <View style={styles.empty}>
               <Text style={styles.emoji}>🃏</Text>
-              <Text style={styles.emptyTitle}>Tus cartas llegan el lunes</Text>
-              <Text style={styles.emptyBody}>
-                Vinculá tu pareja y el próximo lunes a las 00:00 recibirán sus 7
-                cartas.
-              </Text>
+              <Text style={styles.emptyTitle}>{t("screen.emptyTitle")}</Text>
+              <Text style={styles.emptyBody}>{t("screen.emptyDescription")}</Text>
             </View>
           ) : showAllPlayed ? (
             <AllPlayedState />
@@ -165,7 +164,7 @@ export default function HomeScreen() {
               {partnerLastPlay && <PartnerLastPlay play={partnerLastPlay} />}
               <View style={styles.container}>
                 <View style={styles.sectionHeader}>
-                  <Text style={styles.sectionTitle}>TU BARAJA</Text>
+                  <Text style={styles.sectionTitle}>{t("screen.deckTitle")}</Text>
                 </View>
                 <View style={styles.divider} />
               </View>
@@ -186,10 +185,7 @@ export default function HomeScreen() {
               </GestureDetector>
 
               <View style={styles.hint}>
-                <Text style={styles.hintText}>
-                  Desliza para ver tus cartas y cuando quieras usarla deslizala
-                  hacia abajo.
-                </Text>
+                <Text style={styles.hintText}>{t("screen.deckHint")}</Text>
                 <View style={styles.chevrons}>
                   <Ionicons
                     name="chevron-down"

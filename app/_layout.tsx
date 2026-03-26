@@ -97,9 +97,13 @@ export default function RootLayout() {
                   sheetAllowedDetents: [0.5],
                   sheetInitialDetentIndex: 0,
                   sheetGrabberVisible: true,
+                  sheetCornerRadius: 16,
                 }}
               />
-              <Stack.Screen name="notifications" options={{ headerShown: false }} />
+              <Stack.Screen
+                name="notifications"
+                options={{ headerShown: false }}
+              />
             </Stack>
             <ToastManager
               config={toastConfig}

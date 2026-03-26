@@ -1,5 +1,6 @@
 import moment from "moment";
 import { View, Text, StyleSheet } from "react-native";
+import { useTranslation } from "react-i18next";
 
 import { CardHistoryItem } from "../../lib/api";
 import {
@@ -14,19 +15,6 @@ const RARITY_MAP: Record<string, RarityKey> = {
   rare: "rara",
   epic: "epica",
   legendary: "legendaria",
-};
-
-const CATEGORY_LABEL: Record<string, string> = {
-  date: "CITA",
-  action: "ACCIÓN",
-  home: "HOGAR",
-};
-
-const RARITY_LABEL: Record<string, string> = {
-  common: "COMÚN",
-  rare: "RARA",
-  epic: "ÉPICA",
-  legendary: "LEGENDARIA",
 };
 
 interface WeekTimelineProps {
@@ -81,16 +69,25 @@ function TimelineEntry({
   isLast: boolean;
   currentUserId: string;
 }) {
+  const { t } = useTranslation(["home", "common"]);
   const rarity = RARITY_MAP[play.rarity] ?? "comun";
   const dotColor = rarityColor[rarity];
   const dotGlow = rarityGlow[rarity];
   const isMine = play.userId === currentUserId;
-  const playerLabel = isMine ? "Tú" : (play.userName ?? "Pareja");
+  const playerLabel = isMine
+    ? t("home:weekTimeline.you")
+    : (play.userName ?? t("home:weekTimeline.partner"));
   const timeStr = moment(play.playedAt).format("MMM D · HH:mm");
+
+  const categoryLabel = t(`common:category.${play.category}`, {
+    defaultValue: play.category.toUpperCase(),
+  });
+  const rarityLabel = t(`common:rarity.${play.rarity}`, {
+    defaultValue: play.rarity.toUpperCase(),
+  });
 
   return (
     <View style={styles.row}>
-      {/* Left: dot + vertical line */}
       <View style={styles.leftCol}>
         <View
           style={[
@@ -108,9 +105,7 @@ function TimelineEntry({
         {!isLast && <View style={styles.lineSegment} />}
       </View>
 
-      {/* Right: content */}
       <View style={[styles.rightCol, isLast ? styles.rightColLast : null]}>
-        {/* Row 1: time + who */}
         <View style={styles.metaRow}>
           <Text style={styles.timeText}>{timeStr}</Text>
           <Text style={styles.metaSep}> · </Text>
@@ -119,26 +114,21 @@ function TimelineEntry({
           </Text>
         </View>
 
-        {/* Row 2: badges */}
         <View style={styles.badgeRow}>
           <View style={styles.badge}>
-            <Text style={styles.badgeText}>
-              {CATEGORY_LABEL[play.category] ?? play.category.toUpperCase()}
-            </Text>
+            <Text style={styles.badgeText}>{categoryLabel}</Text>
           </View>
           <View style={[styles.badge, { borderColor: dotColor + "55" }]}>
             <Text style={[styles.badgeText, { color: dotColor }]}>
-              {RARITY_LABEL[play.rarity] ?? play.rarity.toUpperCase()}
+              {rarityLabel}
             </Text>
           </View>
         </View>
 
-        {/* Row 3: title */}
         <Text style={styles.cardTitle} numberOfLines={2}>
           {play.title}
         </Text>
 
-        {/* Row 4: note (optional) */}
         {play.description ? (
           <Text style={styles.noteText} numberOfLines={3}>
             "{play.description}"
@@ -154,19 +144,19 @@ export function WeekTimeline({
   isLoading,
   currentUserId,
 }: WeekTimelineProps) {
+  const { t } = useTranslation("home");
+
   return (
     <View style={styles.container}>
-      {/* Section header */}
       <View style={styles.sectionHeader}>
-        <Text style={styles.sectionTitle}>ESTA SEMANA</Text>
+        <Text style={styles.sectionTitle}>{t("weekTimeline.title")}</Text>
         {!isLoading && plays.length > 0 && (
           <Text style={styles.sectionCount}>
-            {plays.length} {plays.length === 1 ? "jugada" : "jugadas"}
+            {t("weekTimeline.played", { count: plays.length })}
           </Text>
         )}
       </View>
 
-      {/* Divider */}
       <View style={styles.divider} />
 
       {isLoading ? (
@@ -176,9 +166,7 @@ export function WeekTimeline({
           <SkeletonRow />
         </>
       ) : plays.length === 0 ? (
-        <Text style={styles.emptyText}>
-          Aún no jugaron ninguna carta esta semana.
-        </Text>
+        <Text style={styles.emptyText}>{t("weekTimeline.empty")}</Text>
       ) : (
         plays.map((play, i) => (
           <TimelineEntry
@@ -229,7 +217,6 @@ const styles = StyleSheet.create({
     textAlign: "center",
     paddingVertical: 24,
   },
-  // Timeline row
   row: {
     flexDirection: "row",
   },
@@ -258,7 +245,6 @@ const styles = StyleSheet.create({
   rightColLast: {
     paddingBottom: 0,
   },
-  // Meta row (time + who)
   metaRow: {
     flexDirection: "row",
     alignItems: "center",
@@ -283,7 +269,6 @@ const styles = StyleSheet.create({
   playerTextMine: {
     color: Colors.accent,
   },
-  // Badges
   badgeRow: {
     flexDirection: "row",
     gap: 6,
@@ -303,7 +288,6 @@ const styles = StyleSheet.create({
     textTransform: "uppercase",
     color: Colors.textMuted,
   },
-  // Card title
   cardTitle: {
     fontFamily: "Inter_900Black",
     fontSize: 15,
@@ -313,7 +297,6 @@ const styles = StyleSheet.create({
     lineHeight: 19,
     marginTop: 2,
   },
-  // Note
   noteText: {
     fontFamily: "Inter_400Regular",
     fontSize: 13,

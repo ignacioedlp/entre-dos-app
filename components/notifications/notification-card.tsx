@@ -1,5 +1,6 @@
 import React from "react";
 import { View, Text, Pressable, StyleSheet } from "react-native";
+import { useTranslation } from "react-i18next";
 import { Colors } from "@/constants/colors";
 
 export interface NotificationItem {
@@ -12,6 +13,7 @@ export interface NotificationItem {
   read?: boolean;
   urgent?: boolean;
   actions?: string[];
+  data?: any;
 }
 
 const CATEGORY_COLORS: Record<string, string> = {
@@ -27,24 +29,23 @@ export function NotificationCard({
   onPress?: () => void;
 }) {
   const isUnread = item.read === false;
-  const categoryColor =
-    CATEGORY_COLORS[item.categoryKey ?? item.category] ?? Colors.textMuted;
+  const { t } = useTranslation("notifications");
+  const categoryColor = CATEGORY_COLORS[item.category] ?? Colors.textMuted;
+  const categoryLabel = t(`category.${item.category}`, {
+    defaultValue: item.category.toUpperCase(),
+  });
 
   return (
     <Pressable
       onPress={onPress}
-      style={({ pressed }) => [
-        styles.card,
-        isUnread && styles.cardUnread,
-        pressed && styles.cardPressed,
-      ]}
+      style={({ pressed }) => [styles.card, pressed && styles.cardPressed]}
     >
       {isUnread && <View style={styles.unreadDot} />}
 
       <View style={styles.topRow}>
         <View style={[styles.categoryPill, { borderColor: categoryColor }]}>
           <Text style={[styles.categoryText, { color: categoryColor }]}>
-            {item.categoryKey?.toUpperCase() ?? item.category.toUpperCase()}
+            {categoryLabel}
           </Text>
         </View>
         <Text style={styles.time}>{item.time}</Text>
@@ -62,24 +63,19 @@ export function NotificationCard({
 
 const styles = StyleSheet.create({
   card: {
-    backgroundColor: Colors.surface,
-    borderRadius: 12,
-    padding: 16,
+    paddingVertical: 16,
     marginHorizontal: 24,
     marginBottom: 10,
-    borderWidth: 1,
-    borderColor: Colors.border,
+    borderBottomWidth: 1,
+    borderBottomColor: Colors.border,
   },
-  cardUnread: {
-    backgroundColor: Colors.surfaceAlt,
-    borderColor: "rgba(255,59,92,0.2)",
-  },
+
   cardPressed: {
     opacity: 0.75,
   },
   unreadDot: {
     position: "absolute",
-    top: 16,
+    bottom: 16,
     right: 16,
     width: 7,
     height: 7,
@@ -91,7 +87,6 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "space-between",
     marginBottom: 8,
-    paddingRight: 16,
   },
   categoryPill: {
     borderWidth: 1,

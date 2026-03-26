@@ -7,6 +7,7 @@ import {
 } from "@/lib/notifications";
 import { storage } from "@/lib/storage";
 import { registerPushToken, unregisterPushNotifications } from "@/lib/api";
+import i18n from "@/i18n";
 
 const NOTIFICATIONS_ENABLED_KEY = "notifications_enabled";
 const NOTIFICATIONS_PROMPTED_KEY = "notifications_prompted";
@@ -30,14 +31,16 @@ export function useNotifications() {
     }
 
     if (finalStatus !== "granted") {
-      // On iOS, once denied the OS won't re-prompt — direct user to Settings
       if (Platform.OS === "ios") {
         Alert.alert(
-          "Notifications Disabled",
-          "To receive notifications, please enable them in your device Settings.",
+          i18n.t("notifications:alert.disabledTitle"),
+          i18n.t("notifications:alert.disabledMessage"),
           [
-            { text: "Cancel", style: "cancel" },
-            { text: "Open Settings", onPress: () => Linking.openSettings() },
+            { text: i18n.t("notifications:alert.cancel"), style: "cancel" },
+            {
+              text: i18n.t("notifications:alert.openSettings"),
+              onPress: () => Linking.openSettings(),
+            },
           ],
         );
       }

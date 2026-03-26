@@ -1,0 +1,46 @@
+{
+  "screen": {
+    "greeting": "HORA DE DIVERTIRSE.",
+    "emptyTitle": "Tus cartas llegan el lunes",
+    "emptyDescription": "Vinculá tu pareja y el próximo lunes a las 00:00 recibirán sus 7 cartas.",
+    "deckTitle": "TU BARAJA",
+    "deckHint": "Desliza para ver tus cartas y cuando quieras usarla deslizala hacia abajo."
+  },
+  "playCard": {
+    "title": "Confirmar uso de la carta.",
+    "description": "Al confirmar el uso, tu pareja recibirá una notificación sobre la misma. Diviértanse.",
+    "played": "Ya jugaste esta carta ✓",
+    "success": "¡Carta jugada!",
+    "errorLoad": "No se pudo cargar la carta."
+  },
+  "weekTimeline": {
+    "title": "ESTA SEMANA",
+    "played_one": "{{count}} jugada",
+    "played_other": "{{count}} jugadas",
+    "empty": "Aún no jugaron ninguna carta esta semana.",
+    "you": "Tú",
+    "partner": "Pareja"
+  },
+  "partnerLastPlay": {
+    "partner": "Tu pareja",
+    "now": "ahora",
+    "minutesAgo": "hace {{count}}m",
+    "hoursAgo": "hace {{count}}h",
+    "daysAgo": "hace {{count}}d"
+  },
+  "allPlayed": {
+    "title": "¡Jugaste todas sus cartas!",
+    "body": "Las próximas cartas llegan el lunes.",
+    "countdown": "PRÓXIMAS CARTAS EN"
+  },
+  "swipeToConfirm": {
+    "label": "CONFIRMAR"
+  },
+  "packs": {
+    "title": "PACKS DISPONIBLES.",
+    "subtitle": "Agrega más tarjetas a tu mazo semanal para tener mejores experiencias.",
+    "free": "GRATIS",
+    "premium": "PREMIUM",
+    "buy": "COMPRAR PACK"
+  }
+}

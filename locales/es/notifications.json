@@ -1,0 +1,28 @@
+{
+  "title": "NOTIFICACIONES.",
+  "empty": "Sin notificaciones",
+  "emptyDescription": "Aquí aparecerán tus actividades y novedades.",
+  "readAll": "Leer todo",
+  "buckets": {
+    "today": "Hoy",
+    "yesterday": "Ayer",
+    "earlier": "Anteriores"
+  },
+  "setup": {
+    "title": "Activá las notificaciones",
+    "body": "Enterate cuando tu pareja juega una carta y no te pierdas nada de lo que pasa.",
+    "enable": "Activar",
+    "later": "Ahora no"
+  },
+  "category": {
+    "played": "Jugada",
+    "system": "Sistema",
+    "deck_reset": "Mazo renovado"
+  },
+  "alert": {
+    "disabledTitle": "Notificaciones desactivadas",
+    "disabledMessage": "Para recibir notificaciones, activálas en la Configuración de tu dispositivo.",
+    "cancel": "Cancelar",
+    "openSettings": "Abrir configuración"
+  }
+}

@@ -3,44 +3,51 @@ import { useState } from "react";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useRouter } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
+import { useTranslation } from "react-i18next";
 
 import { Colors } from "@/constants/colors";
 import { Button } from "@/components/ui/Button";
 import { useAuth } from "@/context/AuthContext";
-
-const MENU_ITEMS = [
-  {
-    label: "NOTIFICACIONES",
-    route: "/settings/notifications",
-    icon: "notifications-outline",
-  },
-  {
-    label: "MI RELACION",
-    route: "/settings/relationship",
-    icon: "heart-outline",
-  },
-  {
-    label: "TERMINOS Y CONDICIONES",
-    route: "/settings/terms",
-    icon: "document-text-outline",
-  },
-  {
-    label: "POLITICAS DE PRIVACIDAD",
-    route: "/settings/privacy",
-    icon: "shield-checkmark-outline",
-  },
-  {
-    label: "PREGUSTAS FRECUENTES",
-    route: "/settings/faq",
-    icon: "help-circle-outline",
-  },
-] as const;
 
 export default function SettingsScreen() {
   const insets = useSafeAreaInsets();
   const router = useRouter();
   const { logout } = useAuth();
   const [logoutVisible, setLogoutVisible] = useState(false);
+  const { t } = useTranslation("settings");
+
+  const MENU_ITEMS = [
+    {
+      label: t("menu.notifications"),
+      route: "/settings/notifications",
+      icon: "notifications-outline",
+    },
+    {
+      label: t("menu.language"),
+      route: "/settings/language",
+      icon: "language-outline",
+    },
+    {
+      label: t("menu.relationship"),
+      route: "/settings/relationship",
+      icon: "heart-outline",
+    },
+    {
+      label: t("menu.terms"),
+      route: "/settings/terms",
+      icon: "document-text-outline",
+    },
+    {
+      label: t("menu.privacy"),
+      route: "/settings/privacy",
+      icon: "shield-checkmark-outline",
+    },
+    {
+      label: t("menu.faq"),
+      route: "/settings/faq",
+      icon: "help-circle-outline",
+    },
+  ] as const;
 
   return (
     <View style={[styles.root, { paddingTop: insets.top + 20 }]}>
@@ -48,14 +55,14 @@ export default function SettingsScreen() {
         <Pressable onPress={() => router.back()} style={styles.backBtn}>
           <Ionicons name="arrow-back" size={22} color={Colors.background} />
         </Pressable>
-        <Text style={styles.headerTitle}>CONFIGURACION.</Text>
+        <Text style={styles.headerTitle}>{t("title")}</Text>
       </View>
 
       <View style={styles.content}>
         <View>
           {MENU_ITEMS.map((item) => (
             <Pressable
-              key={item.label}
+              key={item.route}
               style={styles.row}
               onPress={() => router.push(item.route as any)}
             >
@@ -67,7 +74,7 @@ export default function SettingsScreen() {
 
         <View style={[styles.footer, { paddingBottom: insets.bottom + 16 }]}>
           <Button
-            label="Cerrar sesion"
+            label={t("signOut")}
             onPress={() => setLogoutVisible(true)}
             variant="accent"
           />
@@ -78,6 +85,7 @@ export default function SettingsScreen() {
         visible={logoutVisible}
         transparent
         animationType="fade"
+        presentationStyle="overFullScreen"
         statusBarTranslucent
         onRequestClose={() => setLogoutVisible(false)}
       >
@@ -91,15 +99,20 @@ export default function SettingsScreen() {
               />
             </View>
 
-            <Text style={styles.modalTitle}>Cerrar sesión</Text>
-            <Text style={styles.modalBody}>
-              ¿Estás seguro de que querés cerrar sesión?
-            </Text>
+            <Text style={styles.modalTitle}>{t("signOutConfirmTitle")}</Text>
+            <Text style={styles.modalBody}>{t("signOutConfirmMessage")}</Text>
 
             <View style={styles.actions}>
-              <Button label="Cerrar sesión" onPress={logout} variant="accent" />
               <Button
-                label="Cancelar"
+                label={t("signOut")}
+                onPress={() => {
+                  logout();
+                  router.replace("/(auth)/welcome");
+                }}
+                variant="accent"
+              />
+              <Button
+                label={t("cancel", { ns: "common" })}
                 onPress={() => setLogoutVisible(false)}
                 variant="ghost"
               />

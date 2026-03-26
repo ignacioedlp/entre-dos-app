@@ -11,6 +11,7 @@ import Animated, {
 } from "react-native-reanimated";
 import { LinearGradient } from "expo-linear-gradient";
 import { Ionicons } from "@expo/vector-icons";
+import { useTranslation } from "react-i18next";
 
 import {
   RarityKey,
@@ -31,21 +32,6 @@ const RARITY_MAP: Record<string, RarityKey> = {
   legendary: "legendaria",
 };
 
-const CATEGORY_LABEL: Record<string, string> = {
-  date: "CITA",
-  action: "ACCIÓN",
-  home: "HOGAR",
-};
-
-function timeAgo(iso: string): string {
-  const mins = Math.floor((Date.now() - new Date(iso).getTime()) / 60000);
-  if (mins < 1) return "ahora";
-  if (mins < 60) return `hace ${mins}m`;
-  const hours = Math.floor(mins / 60);
-  if (hours < 24) return `hace ${hours}h`;
-  return `hace ${Math.floor(hours / 24)}d`;
-}
-
 interface PartnerLastPlayProps {
   play: CardHistoryItem;
 }
@@ -55,6 +41,16 @@ export function PartnerLastPlay({ play }: PartnerLastPlayProps) {
   const bg = rarityColor[rarity];
   const fg = rarityTextColor[rarity];
   const glow = rarityGlow[rarity];
+  const { t } = useTranslation(["home", "common"]);
+
+  function timeAgo(iso: string): string {
+    const mins = Math.floor((Date.now() - new Date(iso).getTime()) / 60000);
+    if (mins < 1) return t("home:partnerLastPlay.now");
+    if (mins < 60) return t("home:partnerLastPlay.minutesAgo", { count: mins });
+    const hours = Math.floor(mins / 60);
+    if (hours < 24) return t("home:partnerLastPlay.hoursAgo", { count: hours });
+    return t("home:partnerLastPlay.daysAgo", { count: Math.floor(hours / 24) });
+  }
 
   const sheenX = useSharedValue(-SHEEN_W);
   const heartScale = useSharedValue(1);
@@ -94,6 +90,10 @@ export function PartnerLastPlay({ play }: PartnerLastPlayProps) {
     transform: [{ translateX: sheenX.value }, { rotate: "12deg" }],
   }));
 
+  const categoryLabel = t(`common:category.${play.category}`, {
+    defaultValue: play.category.toUpperCase(),
+  });
+
   return (
     <View
       style={[
@@ -108,7 +108,6 @@ export function PartnerLastPlay({ play }: PartnerLastPlayProps) {
         },
       ]}
     >
-      {/* Diagonal base glare */}
       <LinearGradient
         colors={["rgba(255,255,255,0.18)", "transparent"]}
         start={{ x: 0, y: 0 }}
@@ -117,7 +116,6 @@ export function PartnerLastPlay({ play }: PartnerLastPlayProps) {
         pointerEvents="none"
       />
 
-      {/* Holographic sheen sweep */}
       <Animated.View
         style={[styles.sheenStrip, sheenStyle]}
         pointerEvents="none"
@@ -132,9 +130,7 @@ export function PartnerLastPlay({ play }: PartnerLastPlayProps) {
 
       <View style={styles.inner}>
         <View style={styles.top}>
-          <Text style={[styles.label, { color: fg }]}>
-            {CATEGORY_LABEL[play.category] ?? play.category.toUpperCase()}
-          </Text>
+          <Text style={[styles.label, { color: fg }]}>{categoryLabel}</Text>
           <Text style={[styles.title, { color: fg }]} numberOfLines={2}>
             {play.title}
           </Text>
@@ -145,7 +141,7 @@ export function PartnerLastPlay({ play }: PartnerLastPlayProps) {
 
         <View style={[styles.footer, { borderTopColor: `${fg}30` }]}>
           <Text style={[styles.playerName, { color: fg }]}>
-            {play.userName ?? "Tu pareja"}
+            {play.userName ?? t("home:partnerLastPlay.partner")}
           </Text>
           <Text style={[styles.footerSep, { color: fg }]}> · </Text>
           <Text style={[styles.footerTime, { color: fg }]}>

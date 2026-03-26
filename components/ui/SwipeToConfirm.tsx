@@ -1,4 +1,4 @@
-import { View, Text, StyleSheet } from "react-native";
+import { View, StyleSheet } from "react-native";
 import { Gesture, GestureDetector } from "react-native-gesture-handler";
 import Animated, {
   useSharedValue,
@@ -7,6 +7,7 @@ import Animated, {
   interpolate,
   runOnJS,
 } from "react-native-reanimated";
+import { useTranslation } from "react-i18next";
 import { Colors } from "../../constants/colors";
 import { Ionicons } from "@expo/vector-icons";
 
@@ -19,13 +20,13 @@ interface SwipeToConfirmProps {
   label?: string;
 }
 
-export function SwipeToConfirm({
-  onConfirm,
-  label = "CONFIRMAR",
-}: SwipeToConfirmProps) {
+export function SwipeToConfirm({ onConfirm, label }: SwipeToConfirmProps) {
   const translateX = useSharedValue(0);
   const trackWidth = useSharedValue(0);
   const confirmed = useSharedValue(false);
+  const { t } = useTranslation("home");
+
+  const resolvedLabel = label ?? t("swipeToConfirm.label");
 
   const gesture = Gesture.Pan()
     .onUpdate((e) => {
@@ -61,7 +62,7 @@ export function SwipeToConfirm({
         trackWidth.value = e.nativeEvent.layout.width;
       }}
     >
-      <Animated.Text style={[styles.label, labelStyle]}>{label}</Animated.Text>
+      <Animated.Text style={[styles.label, labelStyle]}>{resolvedLabel}</Animated.Text>
 
       <GestureDetector gesture={gesture}>
         <Animated.View style={[styles.thumb, thumbStyle]}>

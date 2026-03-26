@@ -1,0 +1,165 @@
+{
+  "title": "CONFIGURACIÓN.",
+  "signOut": "Cerrar sesión",
+  "signOutConfirmTitle": "Cerrar sesión",
+  "signOutConfirmMessage": "¿Estás seguro de que querés cerrar sesión?",
+  "menu": {
+    "notifications": "NOTIFICACIONES",
+    "language": "IDIOMA",
+    "relationship": "MI RELACIÓN",
+    "terms": "TÉRMINOS Y CONDICIONES",
+    "privacy": "POLÍTICAS DE PRIVACIDAD",
+    "faq": "PREGUNTAS FRECUENTES"
+  },
+  "notifications": {
+    "title": "NOTIFICACIONES.",
+    "toggleLabel": "Notificaciones",
+    "toggleDescription": "Mantente actualizado con la actividad del juego y los anuncios."
+  },
+  "language": {
+    "title": "IDIOMA."
+  },
+  "profile": {
+    "title": "MI PERFIL.",
+    "displayName": "Nombre",
+    "namePlaceholder": "Ingresá tu nombre",
+    "edit": "Editar",
+    "save": "Guardar",
+    "cancel": "Cancelar",
+    "nameUpdated": "¡Nombre actualizado!",
+    "cardsPlayed": "Cartas Jugadas",
+    "noCardsYet": "Aún no jugaste cartas"
+  },
+  "relationship": {
+    "title": "MI RELACIÓN.",
+    "togetherSince": "Juntos desde {{date}}",
+    "anniversary": "Aniversario",
+    "notSet": "Sin fecha",
+    "setDate": "Establecer fecha",
+    "edit": "Editar",
+    "save": "Guardar",
+    "cancel": "Cancelar",
+    "remove": "Eliminar fecha",
+    "saved": "¡Aniversario guardado!",
+    "removed": "Aniversario eliminado",
+    "errorInvalidDate": "Ingresá una fecha válida",
+    "errorFutureDate": "La fecha no puede ser en el futuro",
+    "errorRequired": "Completá todos los campos",
+    "day": "DD",
+    "month": "MM",
+    "year": "AAAA"
+  },
+  "terms": {
+    "title": "TÉRMINOS Y CONDICIONES.",
+    "lastUpdated": "Última actualización: Marzo 2026",
+    "items": [
+      {
+        "title": "1. Aceptación de los Términos",
+        "body": "Al descargar, instalar o usar Entre Dos (\"la App\"), aceptás estar sujeto a estos Términos y Condiciones. Si no estás de acuerdo, por favor no uses la App."
+      },
+      {
+        "title": "2. Descripción del Servicio",
+        "body": "Entre Dos es un juego de cartas diseñado para parejas. La App provee mazos de cartas digitales con actividades, preguntas y propuestas pensadas para fortalecer las relaciones."
+      },
+      {
+        "title": "3. Elegibilidad",
+        "body": "Debés tener al menos 18 años para usar la App. Al usarla, declarás y garantizás que cumplís con este requisito de edad."
+      },
+      {
+        "title": "4. Cuentas de Usuario",
+        "body": "Sos responsable de mantener la confidencialidad de tus credenciales. Aceptás la responsabilidad por todas las actividades que ocurran bajo tu cuenta."
+      },
+      {
+        "title": "5. Uso Aceptable",
+        "body": "Aceptás no hacer un mal uso de la App, incluyendo pero no limitado a: intentar obtener acceso no autorizado, interferir con la funcionalidad de la App, o usarla para cualquier propósito ilegal."
+      },
+      {
+        "title": "6. Propiedad Intelectual",
+        "body": "Todo el contenido, diseño, gráficos y otros materiales dentro de la App son propiedad de Entre Dos y están protegidos por las leyes de propiedad intelectual aplicables. No podés reproducir, distribuir ni crear obras derivadas sin consentimiento previo por escrito."
+      },
+      {
+        "title": "7. Limitación de Responsabilidad",
+        "body": "La App se proporciona \"tal cual\". Entre Dos no será responsable por daños indirectos, incidentales, especiales o consecuentes que surjan del uso de la App."
+      },
+      {
+        "title": "8. Cambios en los Términos",
+        "body": "Nos reservamos el derecho de modificar estos Términos en cualquier momento. El uso continuado de la App después de los cambios constituye la aceptación de los Términos actualizados."
+      },
+      {
+        "title": "9. Contacto",
+        "body": "Si tenés preguntas sobre estos Términos, podés contactarnos en support@entredos.app."
+      }
+    ]
+  },
+  "privacy": {
+    "title": "POLÍTICAS DE PRIVACIDAD.",
+    "lastUpdated": "Última actualización: Marzo 2026",
+    "items": [
+      {
+        "title": "1. Información que recopilamos",
+        "body": "Recopilamos la información que proporcionás al crear tu cuenta, como tu nombre, dirección de correo electrónico y fecha de aniversario. También recopilamos datos de uso para mejorar tu experiencia en la aplicación."
+      },
+      {
+        "title": "2. Uso de la información",
+        "body": "Utilizamos tu información para: operar y mantener la aplicación, personalizar tu experiencia, enviarte notificaciones relacionadas con el juego y mejorar nuestros servicios."
+      },
+      {
+        "title": "3. Almacenamiento y seguridad",
+        "body": "Tu información se almacena de forma segura en servidores protegidos. Implementamos medidas de seguridad técnicas y organizativas para proteger tus datos personales contra accesos no autorizados."
+      },
+      {
+        "title": "4. Compartir información",
+        "body": "No vendemos, intercambiamos ni transferimos tu información personal a terceros. Solo compartimos datos con proveedores de servicios necesarios para el funcionamiento de la aplicación."
+      },
+      {
+        "title": "5. Tus derechos",
+        "body": "Tenés derecho a acceder, corregir o eliminar tu información personal en cualquier momento. Podés solicitar una copia de tus datos o pedir que se eliminen contactándonos directamente."
+      },
+      {
+        "title": "6. Cookies y tecnologías similares",
+        "body": "Utilizamos tecnologías de seguimiento para mejorar la funcionalidad de la aplicación y analizar patrones de uso. Podés gestionar estas preferencias desde la configuración de tu dispositivo."
+      },
+      {
+        "title": "7. Menores de edad",
+        "body": "Entre Dos no está dirigida a menores de 18 años. No recopilamos intencionalmente información de menores. Si descubrimos que hemos recopilado datos de un menor, los eliminaremos de inmediato."
+      },
+      {
+        "title": "8. Cambios en esta política",
+        "body": "Nos reservamos el derecho de actualizar esta política en cualquier momento. Te notificaremos sobre cambios significativos a través de la aplicación o por correo electrónico."
+      },
+      {
+        "title": "9. Contacto",
+        "body": "Si tenés preguntas sobre esta política de privacidad, podés contactarnos en support@entredos.app."
+      }
+    ]
+  },
+  "faq": {
+    "title": "PREGUNTAS FRECUENTES.",
+    "items": [
+      {
+        "question": "¿Qué es Entre Dos?",
+        "answer": "Entre Dos es un juego de cartas diseñado para parejas. Cada carta contiene actividades, preguntas o propuestas para ayudarte a conectar con tu pareja."
+      },
+      {
+        "question": "¿Cómo juego una carta?",
+        "answer": "Abrí una carta de tu mazo y deslizá para confirmar. Una vez jugada, la carta se marcará como completada y se agregará a tu historial."
+      },
+      {
+        "question": "¿Puedo volver a jugar una carta?",
+        "answer": "Actualmente, cada carta solo se puede jugar una vez. Se agregan cartas nuevas a tu mazo regularmente, así que siempre hay algo nuevo para explorar."
+      },
+      {
+        "question": "¿Cómo cambio el idioma?",
+        "answer": "Andá a Configuración > Idioma y seleccioná tu idioma preferido. La app soporta inglés y español."
+      },
+      {
+        "question": "¿Cómo funcionan las notificaciones?",
+        "answer": "Podés activar o desactivar las notificaciones en Configuración > Notificaciones. Cuando están activadas, vas a recibir recordatorios sobre cartas nuevas y actividad del juego."
+      },
+      {
+        "question": "¿Cómo elimino mi cuenta?",
+        "answer": "Contactanos en support@entredos.app para solicitar la eliminación de tu cuenta. Procesaremos tu solicitud dentro de los 30 días."
+      }
+    ]
+  }
+}

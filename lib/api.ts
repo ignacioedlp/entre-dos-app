@@ -35,8 +35,11 @@ export interface CoupleStatus {
   couple?: {
     coupleId: string;
     userAId: string;
+    userADisplayName: string | null;
     userBId: string;
+    userBDisplayName: string | null;
     linkedAt: string;
+    anniversary: string | null;
   };
 }
 
@@ -50,8 +53,8 @@ export async function apiLogin(email: string, password: string): Promise<AuthRes
   return res.data;
 }
 
-export async function apiRegister(email: string, password: string, passwordConfirm: string): Promise<AuthResponse> {
-  const res = await api.post<AuthResponse>('/auth/register', { email, password, passwordConfirm });
+export async function apiRegister(email: string, password: string, passwordConfirm: string, locale?: string): Promise<AuthResponse> {
+  const res = await api.post<AuthResponse>('/auth/register', { email, password, passwordConfirm, locale });
   return res.data;
 }
 
@@ -63,6 +66,14 @@ export async function apiGetCoupleStatus(): Promise<CoupleStatus> {
 export async function apiLinkCouple(code: string): Promise<LinkCoupleResponse> {
   const res = await api.post<LinkCoupleResponse>('/couples/link', { code });
   return res.data;
+}
+
+export async function apiUpdateCoupleAnniversary(anniversary: string | null): Promise<CoupleStatus> {
+  const res = await api.patch<CoupleStatus>('/couples/anniversary', { anniversary });
+  return {
+    linked: true,
+    couple: res.data.couple,
+  };
 }
 
 export interface DeckCard {
@@ -170,4 +181,23 @@ export async function registerPushToken(token: string): Promise<void> {
 
 export async function unregisterPushNotifications(): Promise<void> {
   await api.delete('/push/unregister');
+}
+
+export async function apiUpdateLocale(locale: 'es' | 'en'): Promise<ProfileData> {
+  const res = await api.put<{ profile: ProfileData }>('/profiles/me', { locale });
+  return res.data.profile;
+}
+
+export async function apiUpdateDisplayName(displayName: string): Promise<ProfileData> {
+  const res = await api.put<{ profile: ProfileData }>('/profiles/me', { displayName });
+  return res.data.profile;
+}
+
+export async function apiCompleteOnboarding(displayName: string, locale: 'es' | 'en'): Promise<ProfileData> {
+  const res = await api.put<{ profile: ProfileData }>('/profiles/me', {
+    displayName,
+    locale,
+    onboardingCompleted: true,
+  });
+  return res.data.profile;
 }

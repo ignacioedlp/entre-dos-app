@@ -1,4 +1,11 @@
-import { View, Text, StyleSheet, TouchableOpacity, Dimensions } from "react-native";
+import {
+  View,
+  Text,
+  StyleSheet,
+  TouchableOpacity,
+  Dimensions,
+} from "react-native";
+import { useTranslation } from "react-i18next";
 
 import { Pack } from "../../lib/api";
 
@@ -51,14 +58,6 @@ export const PACK_THEMES: {
   },
 ];
 
-function formatPrice(priceUsd: number): string {
-  if (priceUsd === 0) return "GRATIS";
-  return `$${priceUsd.toLocaleString("en-US", {
-    minimumFractionDigits: 2,
-    maximumFractionDigits: 2,
-  })} USD`;
-}
-
 interface PackCardProps {
   pack: Pack;
   theme: (typeof PACK_THEMES)[number];
@@ -67,13 +66,18 @@ interface PackCardProps {
 
 export function PackCard({ pack, theme, half }: PackCardProps) {
   const cardWidth = half ? HALF_CARD : SCREEN_WIDTH - CARD_PADDING * 2;
+  const { t } = useTranslation("home");
+
+  function formatPrice(isBase: boolean): string {
+    return isBase ? t("packs.free") : t("packs.premium");
+  }
 
   return (
     <View
       style={[styles.card, { backgroundColor: theme.bg, width: cardWidth }]}
     >
       <Text style={[styles.priceLabel, { color: theme.subText }]}>
-        {formatPrice(pack.priceUsd)}
+        {formatPrice(pack.isBase)}
       </Text>
       <Text style={[styles.packName, { color: theme.text }]}>
         {pack.name.toUpperCase()}
@@ -94,7 +98,7 @@ export function PackCard({ pack, theme, half }: PackCardProps) {
           activeOpacity={0.85}
         >
           <Text style={[styles.buyButtonText, { color: theme.btnText }]}>
-            COMPRAR PACK
+            {t("packs.buy")}
           </Text>
         </TouchableOpacity>
       )}

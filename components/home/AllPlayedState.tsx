@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { View, Text, StyleSheet } from "react-native";
 import moment from "moment";
+import { useTranslation } from "react-i18next";
 
 import { Colors } from "../../constants/colors";
 
@@ -27,6 +28,7 @@ function formatCountdown(target: moment.Moment): string {
 export function AllPlayedState() {
   const nextMonday = getNextMondayUTC();
   const [countdown, setCountdown] = useState(() => formatCountdown(nextMonday));
+  const { t } = useTranslation("home");
 
   useEffect(() => {
     const id = setInterval(() => {
@@ -38,10 +40,10 @@ export function AllPlayedState() {
   return (
     <View style={styles.empty}>
       <Text style={styles.emoji}>🎉</Text>
-      <Text style={styles.emptyTitle}>Jugaste todas sus cartas!</Text>
-      <Text style={styles.emptyBody}>Las próximas cartas llegan el lunes.</Text>
+      <Text style={styles.emptyTitle}>{t("allPlayed.title")}</Text>
+      <Text style={styles.emptyBody}>{t("allPlayed.body")}</Text>
       <View style={styles.countdownBox}>
-        <Text style={styles.countdownLabel}>PRÓXIMAS CARTAS EN</Text>
+        <Text style={styles.countdownLabel}>{t("allPlayed.countdown")}</Text>
         <Text style={styles.countdownValue}>{countdown}</Text>
       </View>
     </View>

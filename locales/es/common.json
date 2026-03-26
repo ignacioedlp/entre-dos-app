@@ -1,0 +1,24 @@
+{
+  "viewAll": "VER TODO",
+  "skip": "Saltar",
+  "confirm": "Confirmar",
+  "continue": "Continuar",
+  "cancel": "Cancelar",
+  "back": "Volver",
+  "loading": "Cargando...",
+  "signOut": "Cerrar sesión",
+  "settings": "Configuración",
+  "close": "Cerrar",
+  "category": {
+    "date": "Cita",
+    "action": "Acción",
+    "home": "Hogar"
+  },
+  "rarity": {
+    "common": "Común",
+    "rare": "Rara",
+    "epic": "Épica",
+    "legendary": "Legendaria",
+    "passion": "Pasión"
+  }
+}

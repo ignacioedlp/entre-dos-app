@@ -2,6 +2,7 @@ import { NotificationItem } from "@/components/notifications/notification-card";
 import { ApiNotification, fetchNotifications, markAllNotificationsRead, markNotificationRead } from "@/lib/api";
 import moment from "moment";
 import { useCallback, useEffect, useState } from "react";
+import i18n from "@/i18n";
 
 function parseApiDate(dateStr: string): Date {
   return moment.utc(dateStr).toDate();
@@ -24,8 +25,7 @@ function formatTime(dateStr: string, t?: TFunction): string {
   });
 
   if (notifDateStr === todayStr) return hhmm;
-  // if (notifDateStr === yesterdayStr) return t("yesterdayTime", { time: hhmm });
-  if (notifDateStr === yesterdayStr) return "Yesterday";
+  if (notifDateStr === yesterdayStr) return i18n.t("notifications:buckets.yesterday");
   return date.toLocaleDateString();
 }
 
@@ -68,14 +68,13 @@ export function useNotificationList(): UseNotificationListResult {
     for (const n of data) {
       const bucket = getBucket(n.createdAt);
       buckets[bucket].push({
-        id: String(n.id),
-        // category: t(`category_${n.category}`),
+        id: n.id,
         category: n.category,
-        categoryKey: n.category.toUpperCase(),
         title: n.title,
         message: n.body,
         time: formatTime(n.createdAt),
         read: n.readAt !== null,
+        data: n.data,
       });
     }
 

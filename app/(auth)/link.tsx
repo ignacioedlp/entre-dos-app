@@ -12,6 +12,7 @@ import {
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { router } from "expo-router";
+import { useTranslation } from "react-i18next";
 import { Logo } from "../../components/ui/Logo";
 import { Button } from "../../components/ui/Button";
 import { Colors } from "../../constants/colors";
@@ -26,6 +27,7 @@ export default function WaitingScreen() {
   const inputRef = useRef<TextInput>(null);
   const { user, updateProfile } = useAuth();
   const coupleCode = user?.coupleCode ?? "------";
+  const { t } = useTranslation("auth");
 
   const { data: statusData } = useQuery({
     queryKey: ["couple-status"],
@@ -37,7 +39,7 @@ export default function WaitingScreen() {
   useEffect(() => {
     if (statusData?.linked && statusData.couple) {
       updateProfile({ ...user!, coupleId: statusData.couple.coupleId });
-      router.replace("/(app)/");
+      router.replace("/(auth)/onboarding");
     }
   }, [statusData]);
 
@@ -45,10 +47,10 @@ export default function WaitingScreen() {
     mutationFn: (linkCode: string) => apiLinkCouple(linkCode),
     onSuccess: (data) => {
       updateProfile({ ...user!, coupleId: data.coupleId });
-      router.replace("/(app)/");
+      router.replace("/(auth)/onboarding");
     },
     onError: () => {
-      setJoinError("Código inválido. Verificá e intentá nuevamente.");
+      setJoinError(t("link.errorInvalidCode"));
       setCode("");
       setTimeout(() => inputRef.current?.focus(), 150);
     },
@@ -57,7 +59,7 @@ export default function WaitingScreen() {
   const handleShare = async () => {
     try {
       await Share.share({
-        message: `Unite a mi pareja en Entre Dos con el código ${coupleCode}\nentredos://join/${coupleCode}`,
+        message: t("link.shareMessage", { coupleCode }) + `\nentredos://join/${coupleCode}`,
       });
     } catch (_) {}
   };
@@ -69,8 +71,7 @@ export default function WaitingScreen() {
   };
 
   const handleCodeChange = (text: string) => {
-    const alphanumeric = text;
-    setCode(alphanumeric);
+    setCode(text);
   };
 
   const switchToJoin = () => {
@@ -94,12 +95,9 @@ export default function WaitingScreen() {
           </View>
 
           <View style={styles.content}>
-            <Text style={styles.title}>Ingresá{"\n"}el código</Text>
-            <Text style={styles.subtitle}>
-              Escribí el código de 6 dígitos de tu pareja.
-            </Text>
+            <Text style={styles.title}>{t("link.joinTitle")}</Text>
+            <Text style={styles.subtitle}>{t("link.joinSubtitle")}</Text>
 
-            {/* Hidden real input */}
             <TextInput
               ref={inputRef}
               style={styles.hiddenInput}
@@ -107,11 +105,9 @@ export default function WaitingScreen() {
               onChangeText={handleCodeChange}
               maxLength={6}
               autoFocus
-              // mayuscula activa siempre
               autoCapitalize="characters"
             />
 
-            {/* Visual digit boxes */}
             <TouchableWithoutFeedback onPress={() => inputRef.current?.focus()}>
             <View style={styles.digitRow}>
               {Array.from({ length: 6 }).map((_, i) => (
@@ -133,12 +129,12 @@ export default function WaitingScreen() {
 
           <View style={[styles.ctaArea, { paddingBottom: insets.bottom + 24 }]}>
             <Button
-              label={linkMutation.isPending ? "Conectando..." : "Conectar"}
+              label={linkMutation.isPending ? t("link.connecting") : t("link.connect")}
               onPress={handleJoin}
               disabled={code.length < 6 || linkMutation.isPending}
             />
             <Button
-              label="Volver"
+              label={t("link.back")}
               variant="ghost"
               onPress={switchToShare}
               style={styles.secondaryBtn}
@@ -157,7 +153,7 @@ export default function WaitingScreen() {
 
       <View style={styles.content}>
         <View style={styles.spinnerWrapper}>
-          <Text style={styles.title}>Esperando{"\n"}tu pareja</Text>
+          <Text style={styles.title}>{t("link.shareTitle")}</Text>
           <ActivityIndicator
             size="large"
             color={Colors.accent}
@@ -165,9 +161,7 @@ export default function WaitingScreen() {
           />
         </View>
 
-        <Text style={styles.subtitle}>
-          Compartí este código para que se pueda unir.
-        </Text>
+        <Text style={styles.subtitle}>{t("link.shareSubtitle")}</Text>
 
         <View style={styles.codeBox}>
           <Text style={styles.code}>{coupleCode}</Text>
@@ -175,9 +169,9 @@ export default function WaitingScreen() {
       </View>
 
       <View style={[styles.ctaArea, { paddingBottom: insets.bottom + 24 }]}>
-        <Button label="Compartir enlace" onPress={handleShare} />
+        <Button label={t("link.shareLink")} onPress={handleShare} />
         <Button
-          label="Tengo un código"
+          label={t("link.haveCode")}
           variant="ghost"
           onPress={switchToJoin}
           style={styles.secondaryBtn}
@@ -215,7 +209,6 @@ const styles = StyleSheet.create({
     color: Colors.textSecondary,
     marginBottom: 40,
   },
-  // Share mode
   codeBox: {
     backgroundColor: Colors.surface,
     borderRadius: 20,
@@ -231,7 +224,6 @@ const styles = StyleSheet.create({
     color: Colors.textPrimary,
     textTransform: "uppercase",
   },
-  // Join mode
   hiddenInput: {
     position: "absolute",
     width: 1,
@@ -271,14 +263,11 @@ const styles = StyleSheet.create({
     color: Colors.pasion,
     marginTop: 12,
   },
-  // CTA
   ctaArea: {
     paddingTop: 16,
     gap: 12,
   },
-  secondaryBtn: {
-    // gap already handled by ctaArea
-  },
+  secondaryBtn: {},
   spinnerWrapper: {
     flexDirection: "row",
     alignItems: "center",
