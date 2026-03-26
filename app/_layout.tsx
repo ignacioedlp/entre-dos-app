@@ -19,6 +19,8 @@ import {
   WarnToast,
   InfoToast,
 } from "../components/ui/CustomToast";
+import * as Notifications from "expo-notifications";
+import { NotificationSetup } from "@/components/notifications/notification-setup";
 
 const toastConfig = {
   success: (props: any) => <SuccessToast {...props} />,
@@ -30,6 +32,16 @@ const toastConfig = {
 SplashScreen.preventAutoHideAsync();
 
 const queryClient = new QueryClient();
+
+Notifications.setNotificationHandler({
+  handleNotification: async () => ({
+    shouldShowAlert: true,
+    shouldPlaySound: true,
+    shouldSetBadge: true,
+    shouldShowBanner: true,
+    shouldShowList: true,
+  }),
+});
 
 export default function RootLayout() {
   const [fontsLoaded, fontError] = useFonts({
@@ -44,6 +56,24 @@ export default function RootLayout() {
     }
   }, [fontsLoaded, fontError]);
 
+  // Notification listeners (foreground receive + tap response)
+  useEffect(() => {
+    const receivedSub = Notifications.addNotificationReceivedListener(
+      (_notification) => {
+        // Notification received while app is in foreground — handler above manages display
+      },
+    );
+    const responseSub = Notifications.addNotificationResponseReceivedListener(
+      (_response) => {
+        // User tapped a notification — add navigation logic here when needed
+      },
+    );
+    return () => {
+      receivedSub.remove();
+      responseSub.remove();
+    };
+  }, []);
+
   if (!fontsLoaded && !fontError) {
     return null;
   }
@@ -53,6 +83,7 @@ export default function RootLayout() {
       <SafeAreaProvider>
         <QueryClientProvider client={queryClient}>
           <AuthProvider>
+            <NotificationSetup />
             <StatusBar style="light" />
             <Stack screenOptions={{ headerShown: false }}>
               <Stack.Screen name="index" />
@@ -68,6 +99,7 @@ export default function RootLayout() {
                   sheetGrabberVisible: true,
                 }}
               />
+              <Stack.Screen name="notifications" options={{ headerShown: false }} />
             </Stack>
             <ToastManager
               config={toastConfig}

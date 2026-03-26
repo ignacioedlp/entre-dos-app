@@ -6,6 +6,8 @@ import {
   Dimensions,
   ActivityIndicator,
   ScrollView,
+  TouchableOpacity,
+  Pressable,
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useRouter } from "expo-router";
@@ -20,12 +22,18 @@ import { Gesture, GestureDetector } from "react-native-gesture-handler";
 import { Ionicons } from "@expo/vector-icons";
 
 import { WeekTimeline } from "../../components/cards/WeekTimeline";
-import { CylinderCard, CARD_HEIGHT, CARD_WIDTH, ANGLE_PER_CARD } from "../../components/carousel/CylinderCard";
+import {
+  CylinderCard,
+  CARD_HEIGHT,
+  CARD_WIDTH,
+  ANGLE_PER_CARD,
+} from "../../components/carousel/CylinderCard";
 import { PartnerLastPlay } from "../../components/cards/PartnerLastPlay";
 import { AllPlayedState } from "../../components/home/AllPlayedState";
 import { Colors } from "../../constants/colors";
 import { useAuth } from "../../context/AuthContext";
 import { apiGetDeck, apiGetHistory, DeckCard } from "../../lib/api";
+import { useNotificationList } from "../../hooks/use-notification-list";
 
 const { width: SCREEN_WIDTH } = Dimensions.get("window");
 
@@ -48,6 +56,8 @@ export default function HomeScreen() {
     queryKey: ["deck-history"],
     queryFn: apiGetHistory,
   });
+
+  const { hasUnread } = useNotificationList();
 
   const allCards = data?.cards ?? [];
   const cards = allCards.filter((c) => c.status !== "played");
@@ -123,11 +133,14 @@ export default function HomeScreen() {
     <View style={[styles.root, { paddingTop: insets.top + 20 }]}>
       <View style={styles.header}>
         <Text style={styles.greeting}>HORA DE DIVERTIRSE.</Text>
-        <Ionicons
-          name="notifications-outline"
-          size={24}
-          color={Colors.textPrimary}
-        />
+        <Pressable onPress={() => router.push("/notifications")}>
+          <Ionicons
+            name="notifications-outline"
+            size={24}
+            color={Colors.textPrimary}
+          />
+          {hasUnread && <View style={styles.badge} />}
+        </Pressable>
       </View>
 
       {isLoading ? (
@@ -316,5 +329,14 @@ const styles = StyleSheet.create({
   },
   chevrons: {
     alignItems: "center",
+  },
+  badge: {
+    position: "absolute",
+    top: 0,
+    right: 0,
+    width: 8,
+    height: 8,
+    borderRadius: 4,
+    backgroundColor: Colors.pasion,
   },
 });

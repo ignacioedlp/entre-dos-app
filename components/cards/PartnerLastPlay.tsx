@@ -12,7 +12,12 @@ import Animated, {
 import { LinearGradient } from "expo-linear-gradient";
 import { Ionicons } from "@expo/vector-icons";
 
-import { RarityKey, rarityColor, rarityGlow, rarityTextColor } from "../../constants/colors";
+import {
+  RarityKey,
+  rarityColor,
+  rarityGlow,
+  rarityTextColor,
+} from "../../constants/colors";
 import { CardHistoryItem } from "../../lib/api";
 
 const { width: SCREEN_WIDTH } = Dimensions.get("window");
@@ -132,6 +137,9 @@ export function PartnerLastPlay({ play }: PartnerLastPlayProps) {
           </Text>
           <Text style={[styles.title, { color: fg }]} numberOfLines={2}>
             {play.title}
+          </Text>
+          <Text style={[styles.label, { color: fg }]} numberOfLines={3}>
+            {play.description}
           </Text>
         </View>
 

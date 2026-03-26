@@ -12,7 +12,7 @@ export interface ProfileData {
   coupleId: string | null;
   coupleCode: string;
   locale: 'es' | 'en';
-  expoPushToken: string | null;
+  pushNotifications: boolean;
 }
 
 export function getToken(): string | null {

@@ -1,8 +1,8 @@
 import axios from 'axios';
 import { clearAll, getToken, ProfileData } from './storage';
 
-const api = axios.create({
-  baseURL: 'https://discrete-interest-giant-environments.trycloudflare.com/api',
+export const api = axios.create({
+  baseURL: process.env.EXPO_PUBLIC_API_URL ?? 'https://discrete-interest-giant-environments.trycloudflare.com/api',
   timeout: 10_000,
   headers: { 'Content-Type': 'application/json' },
 });
@@ -133,4 +133,41 @@ export interface PacksResponse {
 export async function apiGetPacks(): Promise<PacksResponse> {
   const res = await api.get<PacksResponse>('/packs');
   return res.data;
+}
+
+// Notifications
+export interface ApiNotification {
+  id: string;
+  title: string;
+  body: string;
+  category: "played" | "system";
+  createdAt: string;
+  readAt: string | null;
+  data: Record<string, unknown>;
+}
+
+export interface NotificationsResponse {
+  notifications: ApiNotification[];
+}
+
+export async function fetchNotifications(): Promise<NotificationsResponse> {
+  const response = await api.get<NotificationsResponse>('/notifications/');
+  return response.data;
+}
+
+export async function markNotificationRead(notificationId: string): Promise<ApiNotification> {
+  const response = await api.patch<ApiNotification>(`/notifications/${notificationId}/read`);
+  return response.data;
+}
+
+export async function markAllNotificationsRead(): Promise<void> {
+  await api.patch('/notifications/read-all');
+}
+
+export async function registerPushToken(token: string): Promise<void> {
+  await api.post('/push/register', { expoPushToken: token });
+}
+
+export async function unregisterPushNotifications(): Promise<void> {
+  await api.delete('/push/unregister');
 }
