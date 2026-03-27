@@ -46,5 +46,24 @@
     "subscribed": "Tenés acceso completo",
     "restoreSuccess": "¡Compras restauradas exitosamente!",
     "restoreError": "No se pudieron restaurar las compras. Intentalo de nuevo."
+  },
+  "paywall": {
+    "title": "DESBLOQUEA PASSION",
+    "subtitle": "Llevá tu relación al siguiente nivel con contenido exclusivo para vos y tu pareja.",
+    "feature1": "Acceso a todos los packs premium",
+    "feature2": "Nuevas cartas cada semana",
+    "feature3": "Compartido con tu pareja",
+    "monthly": "Mensual",
+    "annual": "Anual",
+    "bestValue": "MEJOR PRECIO",
+    "savePercent": "Ahorrás {{percent}}%",
+    "subscribe": "SUSCRIBIRSE",
+    "restore": "Restaurar compras",
+    "terms": "Términos",
+    "privacy": "Privacidad",
+    "perMonth": "/mes",
+    "loading": "Cargando planes...",
+    "error": "No se pudieron cargar los planes",
+    "retry": "Reintentar"
   }
 }

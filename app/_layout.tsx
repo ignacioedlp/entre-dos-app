@@ -103,6 +103,17 @@ export default function RootLayout() {
                   }}
                 />
                 <Stack.Screen
+                  name="paywall"
+                  options={{
+                    presentation: "formSheet",
+                    headerShown: false,
+                    sheetAllowedDetents: [0.85],
+                    sheetInitialDetentIndex: 0,
+                    sheetGrabberVisible: true,
+                    sheetCornerRadius: 16,
+                  }}
+                />
+                <Stack.Screen
                   name="notifications"
                   options={{ headerShown: false }}
                 />

@@ -46,5 +46,24 @@
     "subscribed": "You have full access",
     "restoreSuccess": "Purchases restored successfully!",
     "restoreError": "Could not restore purchases. Please try again."
+  },
+  "paywall": {
+    "title": "UNLOCK PASSION",
+    "subtitle": "Take your relationship to the next level with exclusive content for you and your partner.",
+    "feature1": "Access to all premium packs",
+    "feature2": "New cards every week",
+    "feature3": "Shared with your partner",
+    "monthly": "Monthly",
+    "annual": "Annual",
+    "bestValue": "BEST VALUE",
+    "savePercent": "Save {{percent}}%",
+    "subscribe": "SUBSCRIBE",
+    "restore": "Restore purchases",
+    "terms": "Terms",
+    "privacy": "Privacy",
+    "perMonth": "/month",
+    "loading": "Loading plans...",
+    "error": "Could not load plans",
+    "retry": "Try again"
   }
 }

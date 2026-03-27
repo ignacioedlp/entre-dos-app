@@ -11,7 +11,8 @@ import Purchases, {
   LOG_LEVEL,
   CustomerInfo,
 } from "react-native-purchases";
-import RevenueCatUI, { PAYWALL_RESULT } from "react-native-purchases-ui";
+import RevenueCatUI from "react-native-purchases-ui";
+import { router } from "expo-router";
 import { useAuth } from "./AuthContext";
 
 const ENTITLEMENT_ID = "Passion";
@@ -33,8 +34,8 @@ interface RevenueCatContextValue {
   entitlementData: EntitlementData | null;
   customerInfo: CustomerInfo | null;
   loading: boolean;
-  presentPaywall: () => Promise<PAYWALL_RESULT>;
-  presentPaywallIfNeeded: () => Promise<PAYWALL_RESULT>;
+  presentPaywall: () => void;
+  presentPaywallIfNeeded: () => void;
   presentCustomerCenter: () => Promise<void>;
   restorePurchases: () => Promise<CustomerInfo>;
 }
@@ -138,16 +139,14 @@ export function RevenueCatProvider({ children }: { children: ReactNode }) {
     };
   }, [user]);
 
-  const presentPaywall = useCallback(async (): Promise<PAYWALL_RESULT> => {
-    return RevenueCatUI.presentPaywall();
+  const presentPaywall = useCallback(() => {
+    router.push("/paywall");
   }, []);
 
-  const presentPaywallIfNeeded =
-    useCallback(async (): Promise<PAYWALL_RESULT> => {
-      return RevenueCatUI.presentPaywallIfNeeded({
-        requiredEntitlementIdentifier: ENTITLEMENT_ID,
-      });
-    }, []);
+  const presentPaywallIfNeeded = useCallback(() => {
+    if (checkEntitlement(customerInfo)) return;
+    router.push("/paywall");
+  }, [customerInfo]);
 
   const presentCustomerCenter = useCallback(async (): Promise<void> => {
     await RevenueCatUI.presentCustomerCenter();
