@@ -38,6 +38,8 @@ export interface CoupleStatus {
     userADisplayName: string | null;
     userBId: string;
     userBDisplayName: string | null;
+    userAImageUrl: string | null;
+    userBImageUrl: string | null;
     linkedAt: string;
     anniversary: string | null;
   };
@@ -58,6 +60,11 @@ export async function apiRegister(email: string, password: string, passwordConfi
   return res.data;
 }
 
+export async function apiGoogleAuth(idToken: string, locale: string): Promise<AuthResponse> {
+  const res = await api.post<AuthResponse>('/auth/google', { idToken, locale });
+  return res.data;
+}
+
 export async function apiGetCoupleStatus(): Promise<CoupleStatus> {
   const res = await api.get<CoupleStatus>('/couples/status');
   return res.data;
@@ -66,6 +73,10 @@ export async function apiGetCoupleStatus(): Promise<CoupleStatus> {
 export async function apiLinkCouple(code: string): Promise<LinkCoupleResponse> {
   const res = await api.post<LinkCoupleResponse>('/couples/link', { code });
   return res.data;
+}
+
+export async function apiUnlinkCouple(): Promise<void> {
+  await api.delete('/couples/link');
 }
 
 export async function apiUpdateCoupleAnniversary(anniversary: string | null): Promise<CoupleStatus> {
@@ -185,6 +196,21 @@ export async function unregisterPushNotifications(): Promise<void> {
 
 export async function apiUpdateLocale(locale: 'es' | 'en'): Promise<ProfileData> {
   const res = await api.put<{ profile: ProfileData }>('/profiles/me', { locale });
+  return res.data.profile;
+}
+
+export interface AvatarUploadUrlResponse {
+  uploadUrl: string;
+  publicUrl: string;
+}
+
+export async function apiGetAvatarUploadUrl(): Promise<AvatarUploadUrlResponse> {
+  const res = await api.post<AvatarUploadUrlResponse>('/profiles/avatar/upload-url');
+  return res.data;
+}
+
+export async function apiUpdateAvatarUrl(avatarUrl: string): Promise<ProfileData> {
+  const res = await api.put<{ profile: ProfileData }>('/profiles/me', { avatarUrl });
   return res.data.profile;
 }
 

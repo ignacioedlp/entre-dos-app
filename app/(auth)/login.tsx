@@ -17,7 +17,8 @@ export default function LoginScreen() {
   const router = useRouter();
   const [showPassword, setShowPassword] = useState(false);
   const [apiError, setApiError] = useState<string | null>(null);
-  const { login } = useAuth();
+  const [googleLoading, setGoogleLoading] = useState(false);
+  const { login, googleLogin } = useAuth();
   const { t } = useTranslation("auth");
 
   const schema = z.object({
@@ -32,11 +33,29 @@ export default function LoginScreen() {
     formState: { errors, isSubmitting },
   } = useForm<FormData>({ resolver: zodResolver(schema) });
 
+  const handleGoogleLogin = async () => {
+    try {
+      setApiError(null);
+      setGoogleLoading(true);
+      const profile = await googleLogin();
+      if (!profile.coupleId) router.replace("/(auth)/link");
+      else if (!profile.onboardingCompleted) router.replace("/(auth)/onboarding");
+      else router.replace("/(app)/");
+    } catch (err) {
+      console.error("Google login error:", err);
+      setApiError(t("login.errorGoogle"));
+    } finally {
+      setGoogleLoading(false);
+    }
+  };
+
   const onSubmit = async (data: FormData) => {
     try {
       setApiError(null);
       const profile = await login(data.email, data.password);
-      router.replace(profile.coupleId ? "/(app)/" : "/(auth)/link");
+      if (!profile.coupleId) router.replace("/(auth)/link");
+      else if (!profile.onboardingCompleted) router.replace("/(auth)/onboarding");
+      else router.replace("/(app)/");
     } catch {
       setApiError(t("login.errorInvalid"));
     }
@@ -138,9 +157,13 @@ export default function LoginScreen() {
             styles.googleButton,
             pressed && styles.googleButtonPressed,
           ]}
+          onPress={handleGoogleLogin}
+          disabled={googleLoading || isSubmitting}
         >
-          <AntDesign name="google" size={18} color="currentColor" />
-          <Text style={styles.googleLabel}>{t("login.google")}</Text>
+          <AntDesign name="google" size={18} color="#1a1a1a" />
+          <Text style={styles.googleLabel}>
+            {googleLoading ? t("login.submitting") : t("login.google")}
+          </Text>
         </Pressable>
 
         <Pressable

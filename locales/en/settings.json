@@ -28,7 +28,10 @@
     "cancel": "Cancel",
     "nameUpdated": "Name updated!",
     "cardsPlayed": "Cards Played",
-    "noCardsYet": "No cards played yet"
+    "noCardsYet": "No cards played yet",
+    "changePhoto": "Change Photo",
+    "camera": "Camera",
+    "gallery": "Gallery"
   },
   "relationship": {
     "title": "MY RELATIONSHIP.",
@@ -47,7 +50,11 @@
     "errorRequired": "Please fill in all fields",
     "day": "DD",
     "month": "MM",
-    "year": "YYYY"
+    "year": "YYYY",
+    "unlink": "Cancel link",
+    "unlinkConfirmTitle": "Cancel link",
+    "unlinkConfirmMessage": "Are you sure you want to unlink from your partner? This action cannot be undone.",
+    "unlinkConfirm": "Cancel link"
   },
   "terms": {
     "title": "TERMS & CONDITIONS.",

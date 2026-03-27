@@ -38,7 +38,8 @@
         {
           "color": "#FF3B5C"
         }
-      ]
+      ],
+      "@react-native-google-signin/google-signin"
     ],
     "extra": {
       "router": {},

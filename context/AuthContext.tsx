@@ -6,7 +6,8 @@ import {
   useEffect,
 } from "react";
 import * as Localization from "expo-localization";
-import { apiLogin, apiRegister } from "../lib/api";
+import { GoogleSignin } from "@react-native-google-signin/google-signin";
+import { apiLogin, apiRegister, apiGoogleAuth } from "../lib/api";
 import {
   clearAll,
   getProfile,
@@ -17,6 +18,12 @@ import {
 } from "../lib/storage";
 import i18n from "@/i18n";
 
+GoogleSignin.configure({
+  webClientId: process.env.EXPO_PUBLIC_GOOGLE_WEB_CLIENT_ID,
+  iosClientId: process.env.EXPO_PUBLIC_GOOGLE_IOS_CLIENT_ID,
+  profileImageSize: 120,
+});
+
 interface AuthState {
   user: ProfileData | null;
   token: string | null;
@@ -24,6 +31,7 @@ interface AuthState {
 
 interface AuthContextValue extends AuthState {
   login: (email: string, password: string) => Promise<ProfileData>;
+  googleLogin: () => Promise<ProfileData>;
   register: (
     email: string,
     password: string,
@@ -74,6 +82,21 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     setState({ user: profile, token: accessToken });
   }
 
+  async function googleLogin(): Promise<ProfileData> {
+    await GoogleSignin.hasPlayServices();
+    const response = await GoogleSignin.signIn();
+    const idToken = response.data?.idToken;
+    if (!idToken) throw new Error("No Google ID token received");
+    const deviceLang = Localization.getLocales()[0]?.languageCode ?? "es";
+    const locale = deviceLang === "en" ? "en" : "es";
+    const { accessToken, profile } = await apiGoogleAuth(idToken, locale);
+    setToken(accessToken);
+    setProfile(profile);
+    setState({ user: profile, token: accessToken });
+    i18n.changeLanguage(profile.locale);
+    return profile;
+  }
+
   function logout(): void {
     clearAll();
     setState({ user: null, token: null });
@@ -86,7 +109,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   return (
     <AuthContext.Provider
-      value={{ ...state, login, register, logout, updateProfile }}
+      value={{ ...state, login, googleLogin, register, logout, updateProfile }}
     >
       {children}
     </AuthContext.Provider>

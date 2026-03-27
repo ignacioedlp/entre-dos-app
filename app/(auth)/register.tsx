@@ -27,7 +27,8 @@ export default function RegisterScreen() {
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [apiError, setApiError] = useState<string | null>(null);
-  const { register } = useAuth();
+  const [googleLoading, setGoogleLoading] = useState(false);
+  const { register, googleLogin } = useAuth();
   const { t } = useTranslation("auth");
 
   const schema = z
@@ -48,6 +49,21 @@ export default function RegisterScreen() {
     handleSubmit,
     formState: { errors, isSubmitting },
   } = useForm<FormData>({ resolver: zodResolver(schema) });
+
+  const handleGoogleLogin = async () => {
+    try {
+      setApiError(null);
+      setGoogleLoading(true);
+      const profile = await googleLogin();
+      if (!profile.coupleId) router.replace("/(auth)/link");
+      else if (!profile.onboardingCompleted) router.replace("/(auth)/onboarding");
+      else router.replace("/(app)/");
+    } catch {
+      setApiError(t("register.errorGeneric"));
+    } finally {
+      setGoogleLoading(false);
+    }
+  };
 
   const onSubmit = async (data: FormData) => {
     try {
@@ -213,9 +229,13 @@ export default function RegisterScreen() {
             styles.googleButton,
             pressed && styles.googleButtonPressed,
           ]}
+          onPress={handleGoogleLogin}
+          disabled={googleLoading || isSubmitting}
         >
           <AntDesign name="google" size={18} color="#1a1a1a" />
-          <Text style={styles.googleLabel}>{t("register.google")}</Text>
+          <Text style={styles.googleLabel}>
+            {googleLoading ? t("register.submitting") : t("register.google")}
+          </Text>
         </Pressable>
 
         <Pressable

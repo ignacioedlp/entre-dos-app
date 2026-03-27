@@ -28,7 +28,10 @@
     "cancel": "Cancelar",
     "nameUpdated": "¡Nombre actualizado!",
     "cardsPlayed": "Cartas Jugadas",
-    "noCardsYet": "Aún no jugaste cartas"
+    "noCardsYet": "Aún no jugaste cartas",
+    "changePhoto": "Cambiar Foto",
+    "camera": "Cámara",
+    "gallery": "Galería"
   },
   "relationship": {
     "title": "MI RELACIÓN.",
@@ -47,7 +50,11 @@
     "errorRequired": "Completá todos los campos",
     "day": "DD",
     "month": "MM",
-    "year": "AAAA"
+    "year": "AAAA",
+    "unlink": "Cancelar vínculo",
+    "unlinkConfirmTitle": "Cancelar vínculo",
+    "unlinkConfirmMessage": "¿Estás seguro de que querés cancelar el vínculo con tu pareja? Esta acción no se puede deshacer.",
+    "unlinkConfirm": "Cancelar vínculo"
   },
   "terms": {
     "title": "TÉRMINOS Y CONDICIONES.",

@@ -6,6 +6,10 @@ import {
   TextInput,
   ScrollView,
   ActivityIndicator,
+  Image,
+  ActionSheetIOS,
+  Platform,
+  Alert,
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { Colors } from "@/constants/colors";
@@ -13,10 +17,11 @@ import { Ionicons } from "@expo/vector-icons";
 import { router } from "expo-router";
 import { useTranslation } from "react-i18next";
 import { useState } from "react";
-import { useMutation, useQuery } from "@tanstack/react-query";
+import { useMutation } from "@tanstack/react-query";
 
 import { useAuth } from "@/context/AuthContext";
-import { apiUpdateDisplayName, apiGetHistory } from "@/lib/api";
+import { apiUpdateDisplayName } from "@/lib/api";
+import { useAvatarUpload } from "@/hooks/useAvatarUpload";
 
 export default function ProfileScreen() {
   const insets = useSafeAreaInsets();
@@ -25,6 +30,35 @@ export default function ProfileScreen() {
 
   const [editing, setEditing] = useState(false);
   const [nameValue, setNameValue] = useState("");
+
+  const {
+    pickFromGallery,
+    pickFromCamera,
+    isPending: avatarPending,
+  } = useAvatarUpload();
+
+  function showAvatarOptions() {
+    const options = [
+      t("profile.camera"),
+      t("profile.gallery"),
+      t("profile.cancel"),
+    ];
+    if (Platform.OS === "ios") {
+      ActionSheetIOS.showActionSheetWithOptions(
+        { options, cancelButtonIndex: 2 },
+        (index) => {
+          if (index === 0) pickFromCamera();
+          else if (index === 1) pickFromGallery();
+        },
+      );
+    } else {
+      Alert.alert(t("profile.changePhoto"), undefined, [
+        { text: t("profile.camera"), onPress: pickFromCamera },
+        { text: t("profile.gallery"), onPress: pickFromGallery },
+        { text: t("profile.cancel"), style: "cancel" },
+      ]);
+    }
+  }
 
   const mutation = useMutation({
     mutationFn: apiUpdateDisplayName,
@@ -66,26 +100,40 @@ export default function ProfileScreen() {
         </Pressable>
       </View>
 
-      {/* Display Name Section */}
-      <View style={styles.section}>
-        <Text style={styles.sectionLabel}>{t("profile.displayName")}</Text>
-
-        {!editing ? (
-          <View style={styles.card}>
-            <View style={styles.nameRow}>
-              <Ionicons name="person" size={22} color={Colors.accent} />
-              <Text style={styles.nameText} numberOfLines={1}>
-                {user?.displayName || t("profile.namePlaceholder")}
-              </Text>
+      {/* Avatar + Name Section */}
+      <View style={styles.avatarSection}>
+        <Pressable onPress={showAvatarOptions} disabled={avatarPending}>
+          <View style={styles.avatarContainer}>
+            {user?.avatarUrl ? (
+              <Image source={{ uri: user.avatarUrl }} style={styles.avatar} />
+            ) : (
+              <View style={[styles.avatar, styles.avatarPlaceholder]}>
+                <Ionicons name="person" size={48} color={Colors.textMuted} />
+              </View>
+            )}
+            {avatarPending && (
+              <View style={styles.avatarOverlay}>
+                <ActivityIndicator color="#fff" />
+              </View>
+            )}
+            <View style={styles.cameraButton}>
+              <Ionicons name="camera" size={16} color="#fff" />
             </View>
-            <Pressable onPress={startEditing} style={styles.editBtn}>
-              <Ionicons name="pencil" size={18} color={Colors.textSecondary} />
-            </Pressable>
           </View>
+        </Pressable>
+
+        {/* Name below avatar */}
+        {!editing ? (
+          <Pressable onPress={startEditing} style={styles.nameUnderAvatar}>
+            <Text style={styles.nameText} numberOfLines={1}>
+              {user?.displayName || t("profile.namePlaceholder")}
+            </Text>
+            <Ionicons name="pencil" size={16} color={Colors.textSecondary} />
+          </Pressable>
         ) : (
-          <View style={styles.editContainer}>
+          <View style={styles.editContainerInline}>
             <TextInput
-              style={styles.nameInput}
+              style={styles.nameInputInline}
               value={nameValue}
               onChangeText={setNameValue}
               placeholder={t("profile.namePlaceholder")}
@@ -94,27 +142,28 @@ export default function ProfileScreen() {
               maxLength={30}
               returnKeyType="done"
               onSubmitEditing={handleSave}
+              textAlign="center"
             />
-
-            <Pressable
-              onPress={handleSave}
-              disabled={mutation.isPending || !nameValue.trim()}
-              style={({ pressed }) => [
-                styles.saveBtn,
-                pressed && { opacity: 0.8 },
-                (mutation.isPending || !nameValue.trim()) && { opacity: 0.5 },
-              ]}
-            >
-              {mutation.isPending ? (
-                <ActivityIndicator color="#fff" size="small" />
-              ) : (
-                <Text style={styles.saveBtnText}>{t("profile.save")}</Text>
-              )}
-            </Pressable>
-
-            <Pressable onPress={cancelEditing} style={styles.cancelBtn}>
-              <Text style={styles.cancelBtnText}>{t("profile.cancel")}</Text>
-            </Pressable>
+            <View style={styles.editActions}>
+              <Pressable
+                onPress={handleSave}
+                disabled={mutation.isPending || !nameValue.trim()}
+                style={({ pressed }) => [
+                  styles.saveBtn,
+                  pressed && { opacity: 0.8 },
+                  (mutation.isPending || !nameValue.trim()) && { opacity: 0.5 },
+                ]}
+              >
+                {mutation.isPending ? (
+                  <ActivityIndicator color="#fff" size="small" />
+                ) : (
+                  <Text style={styles.saveBtnText}>{t("profile.save")}</Text>
+                )}
+              </Pressable>
+              <Pressable onPress={cancelEditing} style={styles.cancelBtn}>
+                <Text style={styles.cancelBtnText}>{t("profile.cancel")}</Text>
+              </Pressable>
+            </View>
           </View>
         )}
       </View>
@@ -141,78 +190,93 @@ const styles = StyleSheet.create({
     color: Colors.textPrimary,
   },
 
-  // Sections
-  section: {
-    paddingHorizontal: 24,
+  // Avatar
+  avatarSection: {
+    alignItems: "center",
     marginBottom: 32,
+    gap: 12,
   },
-  sectionLabel: {
-    fontFamily: "Inter_700Bold",
-    fontSize: 13,
-    letterSpacing: 1,
-    color: Colors.textMuted,
-    textTransform: "uppercase",
-    marginBottom: 16,
+  avatarContainer: {
+    position: "relative",
   },
-
-  // Card
-  card: {
+  avatar: {
+    width: 120,
+    height: 120,
+    borderRadius: 60,
+  },
+  avatarPlaceholder: {
     backgroundColor: Colors.surface,
-    borderRadius: 16,
     borderWidth: 1,
     borderColor: Colors.border,
-    padding: 20,
-    flexDirection: "row",
     alignItems: "center",
-    justifyContent: "space-between",
+    justifyContent: "center",
+  },
+  avatarOverlay: {
+    position: "absolute",
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    borderRadius: 60,
+    backgroundColor: "rgba(0,0,0,0.4)",
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  cameraButton: {
+    position: "absolute",
+    bottom: 0,
+    right: 0,
+    width: 36,
+    height: 36,
+    borderRadius: 18,
+    backgroundColor: Colors.accent,
+    alignItems: "center",
+    justifyContent: "center",
+    borderWidth: 3,
+    borderColor: Colors.background,
   },
 
-  // Name display
-  nameRow: {
+  // Name under avatar
+  nameUnderAvatar: {
     flexDirection: "row",
     alignItems: "center",
-    gap: 12,
+    gap: 8,
   },
   nameText: {
     fontFamily: "Inter_700Bold",
-    fontSize: 18,
+    fontSize: 20,
     color: Colors.textPrimary,
-    flexShrink: 1,
-  },
-  editBtn: {
-    flexDirection: "row",
-    alignItems: "center",
-  },
-  editBtnText: {
-    fontFamily: "Inter_400Regular",
-    fontSize: 14,
-    color: Colors.textSecondary,
   },
 
-  // Edit mode
-  editContainer: {
-    backgroundColor: Colors.surface,
-    borderRadius: 16,
-    borderWidth: 1,
-    borderColor: Colors.border,
-    padding: 20,
-    gap: 16,
+  // Edit mode inline
+  editContainerInline: {
+    alignItems: "center",
+    gap: 12,
+    width: "100%",
+    paddingHorizontal: 24,
   },
-  nameInput: {
-    backgroundColor: Colors.surfaceAlt,
+  nameInputInline: {
+    backgroundColor: Colors.surface,
     borderRadius: 12,
     borderWidth: 1,
     borderColor: Colors.border,
-    paddingVertical: 14,
+    paddingVertical: 12,
     paddingHorizontal: 16,
     fontFamily: "Inter_700Bold",
     fontSize: 18,
     color: Colors.textPrimary,
+    width: "100%",
+  },
+  editActions: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 12,
   },
   saveBtn: {
     backgroundColor: Colors.accent,
     borderRadius: 14,
-    paddingVertical: 16,
+    paddingVertical: 12,
+    paddingHorizontal: 16,
     alignItems: "center",
     justifyContent: "center",
   },
