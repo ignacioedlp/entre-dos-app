@@ -157,6 +157,22 @@ export async function apiGetPacks(): Promise<PacksResponse> {
   return res.data;
 }
 
+// Subscriptions / Entitlements
+export interface EntitlementsResponse {
+  premium: boolean;
+  source: "own" | "shared_from_partner" | null;
+  ownerUserId: string | null;
+  plan: string | null;
+  status: string | null;
+  expiresAt: string | null;
+  entitlement: string | null;
+}
+
+export async function apiGetEntitlements(): Promise<EntitlementsResponse> {
+  const res = await api.get<EntitlementsResponse>('/subscriptions/entitlements');
+  return res.data;
+}
+
 // Notifications
 export interface ApiNotification {
   id: string;

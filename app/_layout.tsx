@@ -12,6 +12,7 @@ import {
 } from "@expo-google-fonts/inter";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { AuthProvider } from "../context/AuthContext";
+import { RevenueCatProvider } from "../context/RevenueCatContext";
 import ToastManager from "toastify-react-native";
 import {
   SuccessToast,
@@ -83,35 +84,37 @@ export default function RootLayout() {
       <SafeAreaProvider>
         <QueryClientProvider client={queryClient}>
           <AuthProvider>
-            <NotificationSetup />
-            <StatusBar style="light" />
-            <Stack screenOptions={{ headerShown: false }}>
-              <Stack.Screen name="index" />
-              <Stack.Screen name="(auth)" />
-              <Stack.Screen name="(app)" />
-              <Stack.Screen
-                name="play-card"
-                options={{
-                  presentation: "formSheet",
-                  headerShown: false,
-                  sheetAllowedDetents: [0.5],
-                  sheetInitialDetentIndex: 0,
-                  sheetGrabberVisible: true,
-                  sheetCornerRadius: 16,
-                }}
+            <RevenueCatProvider>
+              <NotificationSetup />
+              <StatusBar style="light" />
+              <Stack screenOptions={{ headerShown: false }}>
+                <Stack.Screen name="index" />
+                <Stack.Screen name="(auth)" />
+                <Stack.Screen name="(app)" />
+                <Stack.Screen
+                  name="play-card"
+                  options={{
+                    presentation: "formSheet",
+                    headerShown: false,
+                    sheetAllowedDetents: [0.5],
+                    sheetInitialDetentIndex: 0,
+                    sheetGrabberVisible: true,
+                    sheetCornerRadius: 16,
+                  }}
+                />
+                <Stack.Screen
+                  name="notifications"
+                  options={{ headerShown: false }}
+                />
+              </Stack>
+              <ToastManager
+                config={toastConfig}
+                showProgressBar
+                animationStyle="fade"
+                position="top"
+                topOffset={56}
               />
-              <Stack.Screen
-                name="notifications"
-                options={{ headerShown: false }}
-              />
-            </Stack>
-            <ToastManager
-              config={toastConfig}
-              showProgressBar
-              animationStyle="fade"
-              position="top"
-              topOffset={56}
-            />
+            </RevenueCatProvider>
           </AuthProvider>
         </QueryClientProvider>
       </SafeAreaProvider>

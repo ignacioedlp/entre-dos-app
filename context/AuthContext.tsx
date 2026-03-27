@@ -19,7 +19,8 @@ import {
 import i18n from "@/i18n";
 
 GoogleSignin.configure({
-  webClientId: process.env.EXPO_PUBLIC_GOOGLE_WEB_CLIENT_ID,
+  webClientId:
+    "1007940732524-lkq5m72li1ebelckff1v6bmj2s8nmbte.apps.googleusercontent.com",
   iosClientId: process.env.EXPO_PUBLIC_GOOGLE_IOS_CLIENT_ID,
   profileImageSize: 120,
 });

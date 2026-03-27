@@ -41,6 +41,10 @@
     "subtitle": "Agrega más tarjetas a tu mazo semanal para tener mejores experiencias.",
     "free": "GRATIS",
     "premium": "PREMIUM",
-    "buy": "COMPRAR PACK"
+    "buy": "COMPRAR PACK",
+    "subscribe": "SUSCRIBIRSE",
+    "subscribed": "Tenés acceso completo",
+    "restoreSuccess": "¡Compras restauradas exitosamente!",
+    "restoreError": "No se pudieron restaurar las compras. Intentalo de nuevo."
   }
 }

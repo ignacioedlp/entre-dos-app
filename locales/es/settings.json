@@ -9,7 +9,9 @@
     "relationship": "MI RELACIÓN",
     "terms": "TÉRMINOS Y CONDICIONES",
     "privacy": "POLÍTICAS DE PRIVACIDAD",
-    "faq": "PREGUNTAS FRECUENTES"
+    "faq": "PREGUNTAS FRECUENTES",
+    "subscription": "GESTIONAR SUSCRIPCIÓN",
+    "restorePurchases": "RESTAURAR COMPRAS"
   },
   "notifications": {
     "title": "NOTIFICACIONES.",

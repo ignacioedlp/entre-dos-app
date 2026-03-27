@@ -41,6 +41,10 @@
     "subtitle": "Add more cards to your weekly deck for better experiences.",
     "free": "FREE",
     "premium": "PREMIUM",
-    "buy": "BUY PACK"
+    "buy": "BUY PACK",
+    "subscribe": "SUBSCRIBE",
+    "subscribed": "You have full access",
+    "restoreSuccess": "Purchases restored successfully!",
+    "restoreError": "Could not restore purchases. Please try again."
   }
 }

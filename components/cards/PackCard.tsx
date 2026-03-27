@@ -8,6 +8,7 @@ import {
 import { useTranslation } from "react-i18next";
 
 import { Pack } from "../../lib/api";
+import { useRevenueCat } from "../../context/RevenueCatContext";
 
 const { width: SCREEN_WIDTH } = Dimensions.get("window");
 const CARD_GAP = 12;
@@ -62,14 +63,20 @@ interface PackCardProps {
   pack: Pack;
   theme: (typeof PACK_THEMES)[number];
   half?: boolean;
+  isPremium?: boolean;
 }
 
-export function PackCard({ pack, theme, half }: PackCardProps) {
+export function PackCard({ pack, theme, half, isPremium }: PackCardProps) {
   const cardWidth = half ? HALF_CARD : SCREEN_WIDTH - CARD_PADDING * 2;
   const { t } = useTranslation("home");
+  const { presentPaywallIfNeeded } = useRevenueCat();
 
   function formatPrice(isBase: boolean): string {
     return isBase ? t("packs.free") : t("packs.premium");
+  }
+
+  async function handleSubscribe() {
+    await presentPaywallIfNeeded();
   }
 
   return (
@@ -92,13 +99,14 @@ export function PackCard({ pack, theme, half }: PackCardProps) {
         "{pack.description}"
       </Text>
 
-      {!pack.owned && !pack.isBase && (
+      {!pack.isBase && !isPremium && (
         <TouchableOpacity
           style={[styles.buyButton, { backgroundColor: theme.btnBg }]}
           activeOpacity={0.85}
+          onPress={handleSubscribe}
         >
           <Text style={[styles.buyButtonText, { color: theme.btnText }]}>
-            {t("packs.buy")}
+            {t("packs.subscribe")}
           </Text>
         </TouchableOpacity>
       )}

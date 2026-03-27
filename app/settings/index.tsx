@@ -8,15 +8,33 @@ import { useTranslation } from "react-i18next";
 import { Colors } from "@/constants/colors";
 import { Button } from "@/components/ui/Button";
 import { useAuth } from "@/context/AuthContext";
+import { useRevenueCat } from "@/context/RevenueCatContext";
+import { Toast } from "toastify-react-native";
 
 export default function SettingsScreen() {
   const insets = useSafeAreaInsets();
   const router = useRouter();
   const { logout } = useAuth();
+  const { isPurchaser, entitlementData, presentCustomerCenter, restorePurchases } =
+    useRevenueCat();
   const [logoutVisible, setLogoutVisible] = useState(false);
   const { t } = useTranslation("settings");
 
-  const MENU_ITEMS = [
+  async function handleRestore() {
+    try {
+      await restorePurchases();
+      Toast.success(t("restoreSuccess", { ns: "home", defaultValue: "Purchases restored!" }));
+    } catch {
+      Toast.error(t("restoreError", { ns: "home", defaultValue: "Could not restore purchases." }));
+    }
+  }
+
+  const MENU_ITEMS: {
+    label: string;
+    icon: string;
+    route?: string;
+    onPress?: () => void;
+  }[] = [
     {
       label: t("menu.notifications"),
       route: "/settings/notifications",
@@ -32,6 +50,23 @@ export default function SettingsScreen() {
       route: "/settings/relationship",
       icon: "heart-outline",
     },
+    ...(isPurchaser
+      ? [
+          {
+            label: t("menu.subscription"),
+            icon: "card-outline",
+            onPress: () => presentCustomerCenter(),
+          },
+        ]
+      : !entitlementData?.premium
+      ? [
+          {
+            label: t("menu.restorePurchases"),
+            icon: "refresh-outline",
+            onPress: handleRestore,
+          },
+        ]
+      : []),
     {
       label: t("menu.terms"),
       route: "/settings/terms",
@@ -47,7 +82,7 @@ export default function SettingsScreen() {
       route: "/settings/faq",
       icon: "help-circle-outline",
     },
-  ] as const;
+  ];
 
   return (
     <View style={[styles.root, { paddingTop: insets.top + 20 }]}>
@@ -64,9 +99,13 @@ export default function SettingsScreen() {
             <Pressable
               key={item.route}
               style={styles.row}
-              onPress={() => router.push(item.route as any)}
+              onPress={() =>
+                item.onPress
+                  ? item.onPress()
+                  : router.push(item.route as any)
+              }
             >
-              <Ionicons name={item.icon} size={20} color={Colors.textMuted} />
+              <Ionicons name={item.icon as any} size={20} color={Colors.textMuted} />
               <Text style={styles.rowLabel}>{item.label}</Text>
             </Pressable>
           ))}
