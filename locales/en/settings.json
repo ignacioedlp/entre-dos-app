@@ -3,6 +3,11 @@
   "signOut": "Sign Out",
   "signOutConfirmTitle": "Sign Out",
   "signOutConfirmMessage": "Are you sure you want to sign out?",
+  "deleteAccount": "DELETE ACCOUNT",
+  "deleteAccountConfirmTitle": "Delete account",
+  "deleteAccountConfirmMessage": "Your account will be deleted in 7 days. If you have an active subscription, it will be cancelled. You can undo this by signing in before that date.",
+  "deleteAccountSuccess": "Request submitted. Your account will be deleted in 7 days.",
+  "deleteAccountError": "Could not process the request. Please try again.",
   "menu": {
     "notifications": "NOTIFICATIONS",
     "language": "LANGUAGE",
@@ -167,7 +172,7 @@
       },
       {
         "question": "How do I delete my account?",
-        "answer": "Please contact us at support@entredos.app to request account deletion. We will process your request within 30 days."
+        "answer": "Go to Settings > Delete Account. Your account will be deleted in 7 days and you can cancel the request by signing in before that date."
       }
     ]
   }

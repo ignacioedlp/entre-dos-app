@@ -72,9 +72,13 @@ export default function WaitingScreen() {
 
   const handleCodeChange = (text: string) => {
     setCode(text);
+    if (text.length === 6) {
+      setJoinError(null);
+      linkMutation.mutate(text);
+    }
   };
 
-  const switchToJoin = () => {
+const switchToJoin = () => {
     setMode("join");
     setTimeout(() => inputRef.current?.focus(), 100);
   };

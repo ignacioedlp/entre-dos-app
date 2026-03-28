@@ -23,6 +23,16 @@ import {
 } from "../lib/storage";
 import i18n from "@/i18n";
 
+export class DeletionPendingError extends Error {
+  deletionScheduledFor: string;
+  idToken?: string;
+  constructor(deletionScheduledFor: string, idToken?: string) {
+    super("ACCOUNT_DELETION_PENDING");
+    this.deletionScheduledFor = deletionScheduledFor;
+    this.idToken = idToken;
+  }
+}
+
 GoogleSignin.configure({
   webClientId: process.env.EXPO_PUBLIC_GOOGLE_WEB_CLIENT_ID,
   iosClientId: process.env.EXPO_PUBLIC_GOOGLE_IOS_CLIENT_ID,
@@ -62,12 +72,20 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, [state.user]);
 
   async function login(email: string, password: string): Promise<ProfileData> {
-    const { accessToken, profile } = await apiLogin(email, password);
-    setToken(accessToken);
-    setProfile(profile);
-    setState({ user: profile, token: accessToken });
-    i18n.changeLanguage(profile.locale);
-    return profile;
+    try {
+      const { accessToken, profile } = await apiLogin(email, password);
+      setToken(accessToken);
+      setProfile(profile);
+      setState({ user: profile, token: accessToken });
+      i18n.changeLanguage(profile.locale);
+      return profile;
+    } catch (err: any) {
+      const code = err?.response?.data?.code;
+      if (code === "ACCOUNT_DELETION_PENDING") {
+        throw new DeletionPendingError(err.response.data.deletionScheduledFor ?? "");
+      }
+      throw err;
+    }
   }
 
   async function register(
@@ -95,12 +113,20 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     if (!idToken) throw new Error("No Google ID token received");
     const deviceLang = Localization.getLocales()[0]?.languageCode ?? "es";
     const locale = deviceLang === "en" ? "en" : "es";
-    const { accessToken, profile } = await apiGoogleAuth(idToken, locale);
-    setToken(accessToken);
-    setProfile(profile);
-    setState({ user: profile, token: accessToken });
-    i18n.changeLanguage(profile.locale);
-    return profile;
+    try {
+      const { accessToken, profile } = await apiGoogleAuth(idToken, locale);
+      setToken(accessToken);
+      setProfile(profile);
+      setState({ user: profile, token: accessToken });
+      i18n.changeLanguage(profile.locale);
+      return profile;
+    } catch (err: any) {
+      const code = err?.response?.data?.code;
+      if (code === "ACCOUNT_DELETION_PENDING") {
+        throw new DeletionPendingError(err.response.data.deletionScheduledFor ?? "", idToken);
+      }
+      throw err;
+    }
   }
 
   async function resetPassword(

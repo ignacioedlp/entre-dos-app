@@ -10,6 +10,7 @@ import { Button } from "@/components/ui/Button";
 import { useAuth } from "@/context/AuthContext";
 import { useRevenueCat } from "@/context/RevenueCatContext";
 import { Toast } from "toastify-react-native";
+import { apiDeleteAccount } from "@/lib/api";
 
 export default function SettingsScreen() {
   const insets = useSafeAreaInsets();
@@ -22,6 +23,8 @@ export default function SettingsScreen() {
     restorePurchases,
   } = useRevenueCat();
   const [logoutVisible, setLogoutVisible] = useState(false);
+  const [deleteVisible, setDeleteVisible] = useState(false);
+  const [deleteLoading, setDeleteLoading] = useState(false);
   const { t } = useTranslation("settings");
 
   async function handleRestore() {
@@ -133,6 +136,12 @@ export default function SettingsScreen() {
             onPress={() => setLogoutVisible(true)}
             variant="accent"
           />
+          <Pressable
+            onPress={() => setDeleteVisible(true)}
+            style={styles.deleteAccountBtn}
+          >
+            <Text style={styles.deleteAccountLabel}>{t("deleteAccount")}</Text>
+          </Pressable>
         </View>
       </View>
 
@@ -170,6 +179,53 @@ export default function SettingsScreen() {
                 label={t("cancel", { ns: "common" })}
                 onPress={() => setLogoutVisible(false)}
                 variant="ghost"
+              />
+            </View>
+          </View>
+        </View>
+      </Modal>
+
+      <Modal
+        visible={deleteVisible}
+        transparent
+        animationType="fade"
+        presentationStyle="overFullScreen"
+        statusBarTranslucent
+        onRequestClose={() => setDeleteVisible(false)}
+      >
+        <View style={styles.backdrop}>
+          <View style={styles.card}>
+            <View style={[styles.iconWrap, styles.deleteIconWrap]}>
+              <Ionicons name="trash-outline" size={28} color={Colors.pasion} />
+            </View>
+
+            <Text style={styles.modalTitle}>{t("deleteAccountConfirmTitle")}</Text>
+            <Text style={styles.modalBody}>{t("deleteAccountConfirmMessage")}</Text>
+
+            <View style={styles.actions}>
+              <Button
+                label={t("deleteAccount")}
+                onPress={async () => {
+                  setDeleteLoading(true);
+                  try {
+                    await apiDeleteAccount();
+                    Toast.success(t("deleteAccountSuccess"));
+                    logout();
+                    router.replace("/(auth)/welcome");
+                  } catch {
+                    Toast.error(t("deleteAccountError", { defaultValue: "Error" }));
+                    setDeleteLoading(false);
+                    setDeleteVisible(false);
+                  }
+                }}
+                variant="accent"
+                disabled={deleteLoading}
+              />
+              <Button
+                label={t("cancel", { ns: "common" })}
+                onPress={() => setDeleteVisible(false)}
+                variant="ghost"
+                disabled={deleteLoading}
               />
             </View>
           </View>
@@ -271,5 +327,20 @@ const styles = StyleSheet.create({
   actions: {
     width: "100%",
     gap: 10,
+  },
+  deleteAccountBtn: {
+    alignItems: "center",
+    paddingVertical: 12,
+    marginTop: 4,
+  },
+  deleteAccountLabel: {
+    fontFamily: "Inter_700Bold",
+    fontSize: 12,
+    letterSpacing: 0.8,
+    color: Colors.pasion,
+    opacity: 0.7,
+  },
+  deleteIconWrap: {
+    backgroundColor: "rgba(255,59,92,0.12)",
   },
 });

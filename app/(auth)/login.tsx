@@ -1,16 +1,19 @@
-import { View, Text, TextInput, StyleSheet, Pressable } from "react-native";
+import { View, Text, TextInput, StyleSheet, Pressable, Modal } from "react-native";
 import { useState } from "react";
 import { useForm, Controller } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { AntDesign, Feather } from "@expo/vector-icons";
+import { AntDesign, Feather, Ionicons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
 import { useTranslation } from "react-i18next";
 import { Logo } from "../../components/ui/Logo";
 import { Button } from "../../components/ui/Button";
 import { Colors } from "../../constants/colors";
-import { useAuth } from "../../context/AuthContext";
+import { useAuth, DeletionPendingError } from "../../context/AuthContext";
+import { apiCancelDeletion } from "../../lib/api";
+import { setToken, setProfile } from "../../lib/storage";
+import i18n from "@/i18n";
 
 export default function LoginScreen() {
   const insets = useSafeAreaInsets();
@@ -18,7 +21,9 @@ export default function LoginScreen() {
   const [showPassword, setShowPassword] = useState(false);
   const [apiError, setApiError] = useState<string | null>(null);
   const [googleLoading, setGoogleLoading] = useState(false);
-  const { login, googleLogin } = useAuth();
+  const [deletionPending, setDeletionPending] = useState<{ scheduledFor: string; credentials: { email: string; password: string } | { idToken: string } } | null>(null);
+  const [cancellingDeletion, setCancellingDeletion] = useState(false);
+  const { login, googleLogin, updateProfile } = useAuth();
   const { t } = useTranslation("auth");
 
   const schema = z.object({
@@ -33,17 +38,25 @@ export default function LoginScreen() {
     formState: { errors, isSubmitting },
   } = useForm<FormData>({ resolver: zodResolver(schema) });
 
+  const navigateAfterLogin = (profile: { coupleId?: string | null; onboardingCompleted?: boolean }) => {
+    if (!profile.coupleId) router.replace("/(auth)/link");
+    else if (!profile.onboardingCompleted) router.replace("/(auth)/onboarding");
+    else router.replace("/(app)/");
+  };
+
   const handleGoogleLogin = async () => {
     try {
       setApiError(null);
       setGoogleLoading(true);
       const profile = await googleLogin();
-      if (!profile.coupleId) router.replace("/(auth)/link");
-      else if (!profile.onboardingCompleted) router.replace("/(auth)/onboarding");
-      else router.replace("/(app)/");
+      navigateAfterLogin(profile);
     } catch (err) {
-      console.error("Google login error:", err);
-      setApiError(t("login.errorGoogle"));
+      if (err instanceof DeletionPendingError && err.idToken) {
+        setDeletionPending({ scheduledFor: err.deletionScheduledFor, credentials: { idToken: err.idToken } });
+      } else {
+        console.error("Google login error:", err);
+        setApiError(t("login.errorGoogle"));
+      }
     } finally {
       setGoogleLoading(false);
     }
@@ -53,11 +66,32 @@ export default function LoginScreen() {
     try {
       setApiError(null);
       const profile = await login(data.email, data.password);
-      if (!profile.coupleId) router.replace("/(auth)/link");
-      else if (!profile.onboardingCompleted) router.replace("/(auth)/onboarding");
-      else router.replace("/(app)/");
+      navigateAfterLogin(profile);
+    } catch (err) {
+      if (err instanceof DeletionPendingError) {
+        setDeletionPending({ scheduledFor: err.deletionScheduledFor, credentials: { email: data.email, password: data.password } });
+      } else {
+        setApiError(t("login.errorInvalid"));
+      }
+    }
+  };
+
+  const handleCancelDeletion = async () => {
+    if (!deletionPending) return;
+    setCancellingDeletion(true);
+    try {
+      const { accessToken, profile } = await apiCancelDeletion(deletionPending.credentials);
+      setToken(accessToken);
+      setProfile(profile);
+      updateProfile(profile);
+      i18n.changeLanguage(profile.locale);
+      setDeletionPending(null);
+      navigateAfterLogin(profile);
     } catch {
+      setDeletionPending(null);
       setApiError(t("login.errorInvalid"));
+    } finally {
+      setCancellingDeletion(false);
     }
   };
 
@@ -179,6 +213,41 @@ export default function LoginScreen() {
           </Text>
         </Pressable>
       </View>
+
+      <Modal
+        visible={!!deletionPending}
+        transparent
+        animationType="fade"
+        presentationStyle="overFullScreen"
+        statusBarTranslucent
+        onRequestClose={() => setDeletionPending(null)}
+      >
+        <View style={styles.backdrop}>
+          <View style={styles.card}>
+            <View style={styles.iconWrap}>
+              <Ionicons name="warning-outline" size={28} color={Colors.pasion} />
+            </View>
+            <Text style={styles.modalTitle}>{t("login.deletionPendingTitle")}</Text>
+            <Text style={styles.modalBody}>
+              {t("login.deletionPendingMessage", { date: deletionPending?.scheduledFor })}
+            </Text>
+            <View style={styles.modalActions}>
+              <Button
+                label={t("login.cancelDeletion")}
+                onPress={handleCancelDeletion}
+                variant="accent"
+                disabled={cancellingDeletion}
+              />
+              <Button
+                label={t("cancel", { ns: "common" })}
+                onPress={() => setDeletionPending(null)}
+                variant="ghost"
+                disabled={cancellingDeletion}
+              />
+            </View>
+          </View>
+        </View>
+      </Modal>
     </View>
   );
 }
@@ -311,5 +380,50 @@ const styles = StyleSheet.create({
     fontFamily: "Inter_700Bold",
     color: Colors.accent,
     textDecorationLine: "underline",
+  },
+  backdrop: {
+    flex: 1,
+    backgroundColor: "rgba(0,0,0,0.7)",
+    justifyContent: "flex-end",
+    paddingHorizontal: 16,
+    paddingBottom: 32,
+  },
+  card: {
+    backgroundColor: Colors.surface,
+    borderRadius: 20,
+    padding: 28,
+    borderWidth: 1,
+    borderColor: Colors.border,
+    alignItems: "center",
+  },
+  iconWrap: {
+    width: 56,
+    height: 56,
+    borderRadius: 28,
+    backgroundColor: "rgba(255,59,92,0.12)",
+    alignItems: "center",
+    justifyContent: "center",
+    marginBottom: 20,
+  },
+  modalTitle: {
+    fontFamily: "Inter_900Black",
+    fontSize: 20,
+    letterSpacing: -0.3,
+    color: Colors.textPrimary,
+    textAlign: "center",
+    marginBottom: 10,
+  },
+  modalBody: {
+    fontFamily: "Inter_400Regular",
+    fontSize: 14,
+    lineHeight: 21,
+    color: Colors.textSecondary,
+    textAlign: "center",
+    marginBottom: 28,
+    maxWidth: 280,
+  },
+  modalActions: {
+    width: "100%",
+    gap: 10,
   },
 });

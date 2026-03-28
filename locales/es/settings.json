@@ -3,6 +3,11 @@
   "signOut": "Cerrar sesión",
   "signOutConfirmTitle": "Cerrar sesión",
   "signOutConfirmMessage": "¿Estás seguro de que querés cerrar sesión?",
+  "deleteAccount": "ELIMINAR CUENTA",
+  "deleteAccountConfirmTitle": "Eliminar cuenta",
+  "deleteAccountConfirmMessage": "Tu cuenta será eliminada en 7 días. Si tenés una suscripción activa, se cancelará. Esta acción puede deshacerse iniciando sesión antes de ese plazo.",
+  "deleteAccountSuccess": "Solicitud enviada. Tu cuenta se eliminará en 7 días.",
+  "deleteAccountError": "No se pudo procesar la solicitud. Intentá de nuevo.",
   "menu": {
     "notifications": "NOTIFICACIONES",
     "language": "IDIOMA",
@@ -167,7 +172,7 @@
       },
       {
         "question": "¿Cómo elimino mi cuenta?",
-        "answer": "Contactanos en support@entredos.app para solicitar la eliminación de tu cuenta. Procesaremos tu solicitud dentro de los 30 días."
+        "answer": "Andá a Configuración > Eliminar cuenta. Tu cuenta será eliminada en 7 días y podrás cancelar la solicitud iniciando sesión antes de ese plazo."
       }
     ]
   }

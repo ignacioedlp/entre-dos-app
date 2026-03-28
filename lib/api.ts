@@ -255,3 +255,18 @@ export async function apiCompleteOnboarding(displayName: string, locale: 'es' | 
   });
   return res.data.profile;
 }
+
+export interface DeleteAccountResponse {
+  message: string;
+  deletionScheduledFor: string;
+}
+
+export async function apiDeleteAccount(): Promise<DeleteAccountResponse> {
+  const res = await api.post<DeleteAccountResponse>('/auth/delete-account');
+  return res.data;
+}
+
+export async function apiCancelDeletion(credentials: { email: string; password: string } | { idToken: string }): Promise<AuthResponse> {
+  const res = await api.post<AuthResponse>('/auth/cancel-deletion', credentials);
+  return res.data;
+}
