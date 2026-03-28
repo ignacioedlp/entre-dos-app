@@ -41,7 +41,12 @@ interface CylinderCardProps {
   dragY: Animated.SharedValue<number>;
 }
 
-export function CylinderCard({ card, index, rotation, dragY }: CylinderCardProps) {
+export function CylinderCard({
+  card,
+  index,
+  rotation,
+  dragY,
+}: CylinderCardProps) {
   const rarity = RARITY_MAP[card.rarity] ?? "comun";
   const glow = rarityGlow[rarity];
   const { t } = useTranslation("common");
@@ -107,6 +112,7 @@ export function CylinderCard({ card, index, rotation, dragY }: CylinderCardProps
           label: categoryLabel,
           title: card.title,
           description: card.description,
+          packIcon: card.packIcon,
         }}
         width={CARD_WIDTH}
       />

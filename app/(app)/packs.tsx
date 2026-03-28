@@ -9,7 +9,7 @@ import {
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useQuery } from "@tanstack/react-query";
 
-import { PackCard, PACK_THEMES } from "../../components/cards/PackCard";
+import { PackCard } from "../../components/cards/PackCard";
 import { Colors } from "../../constants/colors";
 import { apiGetPacks, apiGetEntitlements } from "../../lib/api";
 import { useTranslation } from "react-i18next";
@@ -68,35 +68,16 @@ export default function PacksScreen() {
           {/* First two packs side by side */}
           {packs.length >= 2 && (
             <View style={styles.row}>
-              <PackCard
-                pack={packs[0]}
-                theme={PACK_THEMES[0 % PACK_THEMES.length]}
-                half
-                isPremium={isPremium}
-              />
-              <PackCard
-                pack={packs[1]}
-                theme={PACK_THEMES[1 % PACK_THEMES.length]}
-                half
-                isPremium={isPremium}
-              />
+              <PackCard pack={packs[0]} half isPremium={isPremium} />
+              <PackCard pack={packs[1]} half isPremium={isPremium} />
             </View>
           )}
           {packs.length === 1 && (
-            <PackCard
-              pack={packs[0]}
-              theme={PACK_THEMES[0 % PACK_THEMES.length]}
-              isPremium={isPremium}
-            />
+            <PackCard pack={packs[0]} isPremium={isPremium} />
           )}
           {/* Remaining packs full width */}
-          {packs.slice(2).map((pack, i) => (
-            <PackCard
-              key={pack.id}
-              pack={pack}
-              theme={PACK_THEMES[(i + 2) % PACK_THEMES.length]}
-              isPremium={isPremium}
-            />
+          {packs.slice(2).map((pack) => (
+            <PackCard key={pack.id} pack={pack} isPremium={isPremium} />
           ))}
         </ScrollView>
       )}

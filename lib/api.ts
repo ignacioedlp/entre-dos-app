@@ -108,6 +108,7 @@ export interface DeckCard {
   description: string;
   category: 'date' | 'action' | 'home';
   rarity: 'common' | 'rare' | 'epic' | 'legendary';
+  packIcon?: string;
 }
 
 export interface DeckResponse {
@@ -151,7 +152,8 @@ export interface Pack {
   slug: string;
   isBase: boolean;
   priceUsd: number;
-  color: string;
+  color?: string;
+  icon?: string;
   name: string;
   subtitle: string;
   description: string;
