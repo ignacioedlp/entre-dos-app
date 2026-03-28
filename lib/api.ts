@@ -65,6 +65,16 @@ export async function apiGoogleAuth(idToken: string, locale: string): Promise<Au
   return res.data;
 }
 
+export async function apiForgotPassword(email: string): Promise<{ message: string }> {
+  const res = await api.post<{ message: string }>('/auth/forgot-password', { email });
+  return res.data;
+}
+
+export async function apiResetPassword(token: string, password: string): Promise<AuthResponse> {
+  const res = await api.post<AuthResponse>('/auth/reset-password', { token, password });
+  return res.data;
+}
+
 export async function apiGetCoupleStatus(): Promise<CoupleStatus> {
   const res = await api.get<CoupleStatus>('/couples/status');
   return res.data;

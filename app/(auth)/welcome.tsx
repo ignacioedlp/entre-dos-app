@@ -67,58 +67,37 @@ function AnimatedCard({ card, index }: { card: CardLayout; index: number }) {
   );
 }
 
-const PREVIEW_CARDS: CardLayout[] = [
-  {
-    rarity: "legendaria",
-    label: "LEGENDARIA",
-    title: "MASAJE\n10 MINUTOS",
-    description: "Relajación y conexión táctil.",
-    rotation: -12,
-    left: W * -0.06,
-    top: H * 0.15,
-    width: W * 0.54,
-  },
-  {
-    rarity: "pasion",
-    label: "PASIÓN",
-    title: "PREGUNTA\nPROHIBIDA",
-    description: "Una pregunta que no se debe hacer.",
-    rotation: 14,
-    left: W * 0.44,
-    top: H * 0.1,
-    width: W * 0.52,
-  },
-  {
-    rarity: "comun",
-    label: "COMÚN",
-    title: "CENA SIN\nCELULARES",
-    description: "Disfrutar de la compañía sin distracciones.",
-    rotation: -8,
-    left: W * 0.0,
-    top: H * 0.5,
-    width: W * 0.5,
-  },
-  {
-    rarity: "rara",
-    label: "RARA",
-    title: "PLAYLIST\nHISTORIA",
-    description: "Crear juntos una playlist de Spotify.",
-    rotation: 10,
-    left: W * 0.46,
-    top: H * 0.45,
-    width: W * 0.52,
-  },
+type PreviewCardLayout = Omit<CardLayout, "label" | "title" | "description"> & {
+  key: string;
+  rarity: string;
+};
+
+const PREVIEW_CARDS_LAYOUT: PreviewCardLayout[] = [
+  { key: "legendary", rarity: "legendaria", rotation: -12, left: W * -0.06, top: H * 0.15, width: W * 0.54 },
+  { key: "passion", rarity: "pasion", rotation: 14, left: W * 0.44, top: H * 0.1, width: W * 0.52 },
+  { key: "common", rarity: "comun", rotation: -8, left: W * 0.0, top: H * 0.5, width: W * 0.5 },
+  { key: "rare", rarity: "rara", rotation: 10, left: W * 0.46, top: H * 0.45, width: W * 0.52 },
 ];
 
 export default function WelcomeScreen() {
   const router = useRouter();
   const insets = useSafeAreaInsets();
   const { t } = useTranslation("auth");
+  const { t: tCommon } = useTranslation("common");
 
   return (
     <SafeAreaView style={styles.root}>
-      {PREVIEW_CARDS.map((card, i) => (
-        <AnimatedCard key={i} card={card} index={i} />
+      {PREVIEW_CARDS_LAYOUT.map((layout, i) => (
+        <AnimatedCard
+          key={i}
+          card={{
+            ...layout,
+            label: tCommon(`rarity.${layout.key}`).toUpperCase(),
+            title: t(`welcome.previewCards.${layout.key}.title`),
+            description: t(`welcome.previewCards.${layout.key}.description`),
+          }}
+          index={i}
+        />
       ))}
 
       <LinearGradient

@@ -15,17 +15,31 @@ export default function SettingsScreen() {
   const insets = useSafeAreaInsets();
   const router = useRouter();
   const { logout } = useAuth();
-  const { isPurchaser, entitlementData, presentCustomerCenter, restorePurchases } =
-    useRevenueCat();
+  const {
+    isPurchaser,
+    entitlementData,
+    presentCustomerCenter,
+    restorePurchases,
+  } = useRevenueCat();
   const [logoutVisible, setLogoutVisible] = useState(false);
   const { t } = useTranslation("settings");
 
   async function handleRestore() {
     try {
       await restorePurchases();
-      Toast.success(t("restoreSuccess", { ns: "home", defaultValue: "Purchases restored!" }));
+      Toast.success(
+        t("restoreSuccess", {
+          ns: "home",
+          defaultValue: "Purchases restored!",
+        }),
+      );
     } catch {
-      Toast.error(t("restoreError", { ns: "home", defaultValue: "Could not restore purchases." }));
+      Toast.error(
+        t("restoreError", {
+          ns: "home",
+          defaultValue: "Could not restore purchases.",
+        }),
+      );
     }
   }
 
@@ -59,14 +73,14 @@ export default function SettingsScreen() {
           },
         ]
       : !entitlementData?.premium
-      ? [
-          {
-            label: t("menu.restorePurchases"),
-            icon: "refresh-outline",
-            onPress: handleRestore,
-          },
-        ]
-      : []),
+        ? [
+            {
+              label: t("menu.restorePurchases"),
+              icon: "refresh-outline",
+              onPress: handleRestore,
+            },
+          ]
+        : []),
     {
       label: t("menu.terms"),
       route: "/settings/terms",
@@ -95,17 +109,19 @@ export default function SettingsScreen() {
 
       <View style={styles.content}>
         <View>
-          {MENU_ITEMS.map((item) => (
+          {MENU_ITEMS.map((item, index) => (
             <Pressable
-              key={item.route}
+              key={index}
               style={styles.row}
               onPress={() =>
-                item.onPress
-                  ? item.onPress()
-                  : router.push(item.route as any)
+                item.onPress ? item.onPress() : router.push(item.route as any)
               }
             >
-              <Ionicons name={item.icon as any} size={20} color={Colors.textMuted} />
+              <Ionicons
+                name={item.icon as any}
+                size={20}
+                color={Colors.textMuted}
+              />
               <Text style={styles.rowLabel}>{item.label}</Text>
             </Pressable>
           ))}

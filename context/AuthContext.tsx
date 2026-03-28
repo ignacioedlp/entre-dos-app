@@ -7,7 +7,12 @@ import {
 } from "react";
 import * as Localization from "expo-localization";
 import { GoogleSignin } from "@react-native-google-signin/google-signin";
-import { apiLogin, apiRegister, apiGoogleAuth } from "../lib/api";
+import {
+  apiLogin,
+  apiRegister,
+  apiGoogleAuth,
+  apiResetPassword,
+} from "../lib/api";
 import {
   clearAll,
   getProfile,
@@ -19,8 +24,7 @@ import {
 import i18n from "@/i18n";
 
 GoogleSignin.configure({
-  webClientId:
-    "1007940732524-lkq5m72li1ebelckff1v6bmj2s8nmbte.apps.googleusercontent.com",
+  webClientId: process.env.EXPO_PUBLIC_GOOGLE_WEB_CLIENT_ID,
   iosClientId: process.env.EXPO_PUBLIC_GOOGLE_IOS_CLIENT_ID,
   profileImageSize: 120,
 });
@@ -38,6 +42,7 @@ interface AuthContextValue extends AuthState {
     password: string,
     passwordConfirm: string,
   ) => Promise<void>;
+  resetPassword: (token: string, password: string) => Promise<ProfileData>;
   logout: () => void;
   updateProfile: (profile: ProfileData) => void;
 }
@@ -98,6 +103,18 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     return profile;
   }
 
+  async function resetPassword(
+    token: string,
+    password: string,
+  ): Promise<ProfileData> {
+    const { accessToken, profile } = await apiResetPassword(token, password);
+    setToken(accessToken);
+    setProfile(profile);
+    setState({ user: profile, token: accessToken });
+    i18n.changeLanguage(profile.locale);
+    return profile;
+  }
+
   function logout(): void {
     clearAll();
     setState({ user: null, token: null });
@@ -110,7 +127,15 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   return (
     <AuthContext.Provider
-      value={{ ...state, login, googleLogin, register, logout, updateProfile }}
+      value={{
+        ...state,
+        login,
+        googleLogin,
+        register,
+        resetPassword,
+        logout,
+        updateProfile,
+      }}
     >
       {children}
     </AuthContext.Provider>
