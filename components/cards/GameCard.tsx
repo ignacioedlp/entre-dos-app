@@ -34,7 +34,6 @@ export function GameCard({
   const h = width * (4 / 3);
   const iconSize = Math.round(width * 0.6);
   const iconColor = rarityTextColor[card.rarity] + "33";
-  console.log(card);
 
   return (
     <Animated.View

@@ -54,7 +54,6 @@ export default function LoginScreen() {
       if (err instanceof DeletionPendingError && err.idToken) {
         setDeletionPending({ scheduledFor: err.deletionScheduledFor, credentials: { idToken: err.idToken } });
       } else {
-        console.error("Google login error:", err);
         setApiError(t("login.errorGoogle"));
       }
     } finally {
