@@ -1,15 +1,9 @@
-import React from "react";
-import {
-  View,
-  Text,
-  StyleSheet,
-  TouchableOpacity,
-  Animated,
-} from "react-native";
-import { Ionicons } from "@expo/vector-icons";
-import { Colors } from "../../constants/colors";
+import React from 'react';
+import { View, Text, StyleSheet, TouchableOpacity, Animated } from 'react-native';
+import { Ionicons } from '@expo/vector-icons';
+import { Colors } from '../../constants/colors';
 
-const SUCCESS_COLOR = "#4ade80";
+const SUCCESS_COLOR = '#4ade80';
 const ERROR_COLOR = Colors.accent; // #FF3B5C
 const WARN_COLOR = Colors.legendaria; // #f59e0b
 const INFO_COLOR = Colors.rara; // #38bdf8
@@ -48,7 +42,7 @@ const ToastCard = ({
       style={[styles.container, { backgroundColor: accentColor, shadowColor: accentColor }]}
     >
       {/* Icon */}
-      <View style={[styles.iconWrap, { backgroundColor: "rgba(0,0,0,0.15)" }]}>
+      <View style={[styles.iconWrap, { backgroundColor: 'rgba(0,0,0,0.15)' }]}>
         <Ionicons name={iconName} size={20} color="#fff" />
       </View>
 
@@ -81,11 +75,11 @@ const ToastCard = ({
           <Animated.View
             style={[
               styles.progressBar,
-              { backgroundColor: "rgba(0,0,0,0.25)" },
+              { backgroundColor: 'rgba(0,0,0,0.25)' },
               {
                 width: barWidth.interpolate({
                   inputRange: [0, 100],
-                  outputRange: ["0%", "100%"],
+                  outputRange: ['0%', '100%'],
                 }),
               },
             ]}
@@ -97,11 +91,7 @@ const ToastCard = ({
 };
 
 export const SuccessToast = (props: ToastProps) => (
-  <ToastCard
-    {...props}
-    accentColor={SUCCESS_COLOR}
-    iconName="checkmark-circle"
-  />
+  <ToastCard {...props} accentColor={SUCCESS_COLOR} iconName="checkmark-circle" />
 );
 
 export const ErrorToast = (props: ToastProps) => (
@@ -113,19 +103,15 @@ export const WarnToast = (props: ToastProps) => (
 );
 
 export const InfoToast = (props: ToastProps) => (
-  <ToastCard
-    {...props}
-    accentColor={INFO_COLOR}
-    iconName="information-circle"
-  />
+  <ToastCard {...props} accentColor={INFO_COLOR} iconName="information-circle" />
 );
 
 const styles = StyleSheet.create({
   container: {
-    width: "90%",
+    width: '90%',
     borderRadius: 14,
-    flexDirection: "row",
-    alignItems: "center",
+    flexDirection: 'row',
+    alignItems: 'center',
     paddingVertical: 14,
     paddingHorizontal: 14,
     gap: 12,
@@ -133,14 +119,14 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.45,
     shadowRadius: 16,
     elevation: 10,
-    overflow: "hidden",
+    overflow: 'hidden',
   },
   iconWrap: {
     width: 36,
     height: 36,
     borderRadius: 10,
-    alignItems: "center",
-    justifyContent: "center",
+    alignItems: 'center',
+    justifyContent: 'center',
     flexShrink: 0,
   },
   textWrap: {
@@ -148,15 +134,15 @@ const styles = StyleSheet.create({
     gap: 2,
   },
   title: {
-    fontFamily: "Inter_700Bold",
+    fontFamily: 'Inter_700Bold',
     fontSize: 14,
-    color: "#fff",
+    color: '#fff',
     letterSpacing: 0.1,
   },
   subtitle: {
-    fontFamily: "Inter_400Regular",
+    fontFamily: 'Inter_400Regular',
     fontSize: 12,
-    color: "rgba(255,255,255,0.8)",
+    color: 'rgba(255,255,255,0.8)',
     lineHeight: 18,
   },
   closeBtn: {
@@ -164,16 +150,16 @@ const styles = StyleSheet.create({
     flexShrink: 0,
   },
   progressTrack: {
-    position: "absolute",
+    position: 'absolute',
     bottom: 0,
     left: 0,
     right: 0,
     height: 3,
-    backgroundColor: "rgba(255,255,255,0.2)",
-    overflow: "hidden",
+    backgroundColor: 'rgba(255,255,255,0.2)',
+    overflow: 'hidden',
   },
   progressBar: {
-    height: "100%",
+    height: '100%',
     borderRadius: 2,
   },
 });

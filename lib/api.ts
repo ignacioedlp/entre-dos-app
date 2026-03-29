@@ -2,7 +2,9 @@ import axios from 'axios';
 import { clearAll, getToken, ProfileData } from './storage';
 
 export const api = axios.create({
-  baseURL: process.env.EXPO_PUBLIC_API_URL ?? 'https://discrete-interest-giant-environments.trycloudflare.com/api',
+  baseURL:
+    process.env.EXPO_PUBLIC_API_URL ??
+    'https://discrete-interest-giant-environments.trycloudflare.com/api',
   timeout: 10_000,
   headers: { 'Content-Type': 'application/json' },
 });
@@ -55,8 +57,18 @@ export async function apiLogin(email: string, password: string): Promise<AuthRes
   return res.data;
 }
 
-export async function apiRegister(email: string, password: string, passwordConfirm: string, locale?: string): Promise<AuthResponse> {
-  const res = await api.post<AuthResponse>('/auth/register', { email, password, passwordConfirm, locale });
+export async function apiRegister(
+  email: string,
+  password: string,
+  passwordConfirm: string,
+  locale?: string
+): Promise<AuthResponse> {
+  const res = await api.post<AuthResponse>('/auth/register', {
+    email,
+    password,
+    passwordConfirm,
+    locale,
+  });
   return res.data;
 }
 
@@ -89,7 +101,9 @@ export async function apiUnlinkCouple(): Promise<void> {
   await api.delete('/couples/link');
 }
 
-export async function apiUpdateCoupleAnniversary(anniversary: string | null): Promise<CoupleStatus> {
+export async function apiUpdateCoupleAnniversary(
+  anniversary: string | null
+): Promise<CoupleStatus> {
   const res = await api.patch<CoupleStatus>('/couples/anniversary', { anniversary });
   return {
     linked: true,
@@ -172,7 +186,7 @@ export async function apiGetPacks(): Promise<PacksResponse> {
 // Subscriptions / Entitlements
 export interface EntitlementsResponse {
   premium: boolean;
-  source: "own" | "shared_from_partner" | null;
+  source: 'own' | 'shared_from_partner' | null;
   ownerUserId: string | null;
   plan: string | null;
   status: string | null;
@@ -190,7 +204,7 @@ export interface ApiNotification {
   id: string;
   title: string;
   body: string;
-  category: "played" | "system";
+  category: 'played' | 'system';
   createdAt: string;
   readAt: string | null;
   data: Record<string, unknown>;
@@ -247,7 +261,10 @@ export async function apiUpdateDisplayName(displayName: string): Promise<Profile
   return res.data.profile;
 }
 
-export async function apiCompleteOnboarding(displayName: string, locale: 'es' | 'en'): Promise<ProfileData> {
+export async function apiCompleteOnboarding(
+  displayName: string,
+  locale: 'es' | 'en'
+): Promise<ProfileData> {
   const res = await api.put<{ profile: ProfileData }>('/profiles/me', {
     displayName,
     locale,
@@ -266,7 +283,9 @@ export async function apiDeleteAccount(): Promise<DeleteAccountResponse> {
   return res.data;
 }
 
-export async function apiCancelDeletion(credentials: { email: string; password: string } | { idToken: string }): Promise<AuthResponse> {
+export async function apiCancelDeletion(
+  credentials: { email: string; password: string } | { idToken: string }
+): Promise<AuthResponse> {
   const res = await api.post<AuthResponse>('/auth/cancel-deletion', credentials);
   return res.data;
 }

@@ -1,17 +1,17 @@
-import { useState } from "react";
-import { View, Text, StyleSheet, ScrollView, Pressable } from "react-native";
-import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { Ionicons } from "@expo/vector-icons";
-import { useTranslation } from "react-i18next";
+import { useState } from 'react';
+import { View, Text, StyleSheet, ScrollView, Pressable } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { Ionicons } from '@expo/vector-icons';
+import { useTranslation } from 'react-i18next';
 
-import { Colors } from "@/constants/colors";
+import { Colors } from '@/constants/colors';
 
 export default function FaqScreen() {
   const insets = useSafeAreaInsets();
-  const { t } = useTranslation("settings");
+  const { t } = useTranslation('settings');
   const [openIndex, setOpenIndex] = useState<number | null>(null);
 
-  const items = t("faq.items", { returnObjects: true }) as {
+  const items = t('faq.items', { returnObjects: true }) as {
     question: string;
     answer: string;
   }[];
@@ -25,26 +25,19 @@ export default function FaqScreen() {
       <View style={styles.handle} />
 
       <ScrollView
-        contentContainerStyle={[
-          styles.scrollContent,
-          { paddingBottom: insets.bottom + 24 },
-        ]}
+        contentContainerStyle={[styles.scrollContent, { paddingBottom: insets.bottom + 24 }]}
         showsVerticalScrollIndicator={false}
       >
-        <Text style={styles.title}>{t("faq.title")}</Text>
+        <Text style={styles.title}>{t('faq.title')}</Text>
 
         {items.map((item, index) => {
           const isOpen = openIndex === index;
           return (
-            <Pressable
-              key={index}
-              onPress={() => toggle(index)}
-              style={styles.item}
-            >
+            <Pressable key={index} onPress={() => toggle(index)} style={styles.item}>
               <View style={styles.questionRow}>
                 <Text style={styles.question}>{item.question}</Text>
                 <Ionicons
-                  name={isOpen ? "chevron-up" : "chevron-down"}
+                  name={isOpen ? 'chevron-up' : 'chevron-down'}
                   size={18}
                   color={Colors.textMuted}
                 />
@@ -69,14 +62,14 @@ const styles = StyleSheet.create({
     height: 4,
     borderRadius: 2,
     backgroundColor: Colors.border,
-    alignSelf: "center",
+    alignSelf: 'center',
     marginBottom: 20,
   },
   scrollContent: {
     paddingHorizontal: 24,
   },
   title: {
-    fontFamily: "Inter_900Black",
+    fontFamily: 'Inter_900Black',
     fontSize: 24,
     letterSpacing: -0.5,
     color: Colors.textPrimary,
@@ -88,19 +81,19 @@ const styles = StyleSheet.create({
     paddingVertical: 16,
   },
   questionRow: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "space-between",
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
     gap: 12,
   },
   question: {
     flex: 1,
-    fontFamily: "Inter_700Bold",
+    fontFamily: 'Inter_700Bold',
     fontSize: 14,
     color: Colors.textPrimary,
   },
   answer: {
-    fontFamily: "Inter_400Regular",
+    fontFamily: 'Inter_400Regular',
     fontSize: 13,
     lineHeight: 20,
     color: Colors.textSecondary,

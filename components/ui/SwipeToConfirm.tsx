@@ -1,15 +1,15 @@
-import { View, StyleSheet } from "react-native";
-import { Gesture, GestureDetector } from "react-native-gesture-handler";
+import { View, StyleSheet } from 'react-native';
+import { Gesture, GestureDetector } from 'react-native-gesture-handler';
 import Animated, {
   useSharedValue,
   useAnimatedStyle,
   withSpring,
   interpolate,
   runOnJS,
-} from "react-native-reanimated";
-import { useTranslation } from "react-i18next";
-import { Colors } from "../../constants/colors";
-import { Ionicons } from "@expo/vector-icons";
+} from 'react-native-reanimated';
+import { useTranslation } from 'react-i18next';
+import { Colors } from '../../constants/colors';
+import { Ionicons } from '@expo/vector-icons';
 
 const TRACK_HEIGHT = 64;
 const THUMB_SIZE = 52;
@@ -24,9 +24,9 @@ export function SwipeToConfirm({ onConfirm, label }: SwipeToConfirmProps) {
   const translateX = useSharedValue(0);
   const trackWidth = useSharedValue(0);
   const confirmed = useSharedValue(false);
-  const { t } = useTranslation("home");
+  const { t } = useTranslation('home');
 
-  const resolvedLabel = label ?? t("swipeToConfirm.label");
+  const resolvedLabel = label ?? t('swipeToConfirm.label');
 
   const gesture = Gesture.Pan()
     .onUpdate((e) => {
@@ -79,13 +79,13 @@ const styles = StyleSheet.create({
     backgroundColor: Colors.surfaceAlt,
     borderRadius: TRACK_HEIGHT / 2,
     padding: PADDING,
-    justifyContent: "center",
-    overflow: "hidden",
+    justifyContent: 'center',
+    overflow: 'hidden',
   },
   label: {
-    position: "absolute",
+    position: 'absolute',
     right: 120,
-    fontFamily: "Inter_700Bold",
+    fontFamily: 'Inter_700Bold',
     fontSize: 13,
     letterSpacing: 2,
     color: Colors.textMuted,
@@ -95,9 +95,9 @@ const styles = StyleSheet.create({
     height: THUMB_SIZE,
     borderRadius: THUMB_SIZE / 2,
     backgroundColor: Colors.textPrimary,
-    alignItems: "center",
-    justifyContent: "center",
-    shadowColor: "#000",
+    alignItems: 'center',
+    justifyContent: 'center',
+    shadowColor: '#000',
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.4,
     shadowRadius: 6,

@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState } from 'react';
 import {
   View,
   Text,
@@ -8,28 +8,25 @@ import {
   TouchableWithoutFeedback,
   Pressable,
   ActivityIndicator,
-} from "react-native";
-import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { router } from "expo-router";
-import { useTranslation } from "react-i18next";
-import { Svg, G, Path, Defs, ClipPath } from "react-native-svg";
-import { Ionicons } from "@expo/vector-icons";
-import Animated, {
-  FadeInDown,
-  FadeInUp,
-} from "react-native-reanimated";
+} from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { router } from 'expo-router';
+import { useTranslation } from 'react-i18next';
+import { Svg, G, Path, Defs, ClipPath } from 'react-native-svg';
+import { Ionicons } from '@expo/vector-icons';
+import Animated, { FadeInDown, FadeInUp } from 'react-native-reanimated';
 
-import { Logo } from "../../components/ui/Logo";
-import { Button } from "../../components/ui/Button";
-import { Colors } from "../../constants/colors";
-import { useAuth } from "../../context/AuthContext";
-import { apiCompleteOnboarding } from "@/lib/api";
-import i18n from "@/i18n";
+import { Logo } from '../../components/ui/Logo';
+import { Button } from '../../components/ui/Button';
+import { Colors } from '../../constants/colors';
+import { useAuth } from '../../context/AuthContext';
+import { apiCompleteOnboarding } from '@/lib/api';
+import i18n from '@/i18n';
 
 const LANGUAGES = [
   {
-    locale: "es" as const,
-    label: "Español",
+    locale: 'es' as const,
+    label: 'Español',
     flag: (
       <Svg width={28} height={28} fill="none" viewBox="0 0 24 24">
         <G clipPath="url(#AR_svg__a)">
@@ -55,8 +52,8 @@ const LANGUAGES = [
     ),
   },
   {
-    locale: "en" as const,
-    label: "English",
+    locale: 'en' as const,
+    label: 'English',
     flag: (
       <Svg width={28} height={28} fill="none" viewBox="0 0 24 24">
         <G clipPath="url(#US_svg__a)">
@@ -84,19 +81,19 @@ const LANGUAGES = [
 ];
 
 const STEPS = [
-  { icon: "calendar-outline" as const, key: "Step1" },
-  { icon: "swap-vertical-outline" as const, key: "Step2" },
-  { icon: "heart-outline" as const, key: "Step3" },
+  { icon: 'calendar-outline' as const, key: 'Step1' },
+  { icon: 'swap-vertical-outline' as const, key: 'Step2' },
+  { icon: 'heart-outline' as const, key: 'Step3' },
 ];
 
 export default function OnboardingScreen() {
   const insets = useSafeAreaInsets();
   const { user, updateProfile } = useAuth();
-  const { t } = useTranslation("auth");
+  const { t } = useTranslation('auth');
 
   const [step, setStep] = useState(0);
-  const [displayName, setDisplayName] = useState(user?.displayName ?? "");
-  const [locale, setLocale] = useState<"es" | "en">(user?.locale ?? "es");
+  const [displayName, setDisplayName] = useState(user?.displayName ?? '');
+  const [locale, setLocale] = useState<'es' | 'en'>(user?.locale ?? 'es');
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -111,9 +108,9 @@ export default function OnboardingScreen() {
       const updated = await apiCompleteOnboarding(displayName.trim(), locale);
       updateProfile(updated);
       i18n.changeLanguage(locale);
-      router.replace("/(app)/");
+      router.replace('/(app)/');
     } catch {
-      setError("Something went wrong. Please try again.");
+      setError('Something went wrong. Please try again.');
     } finally {
       setSubmitting(false);
     }
@@ -126,32 +123,22 @@ export default function OnboardingScreen() {
           <Logo size="sm" />
           <View style={styles.dots}>
             {[0, 1, 2].map((i) => (
-              <View
-                key={i}
-                style={[styles.dot, i === step && styles.dotActive]}
-              />
+              <View key={i} style={[styles.dot, i === step && styles.dotActive]} />
             ))}
           </View>
         </View>
 
         <View style={styles.content}>
           {step === 0 && (
-            <Animated.View
-              entering={FadeInDown.duration(400)}
-              style={styles.stepContainer}
-            >
-              <Text style={styles.title}>
-                {t("onboarding.nameTitle")}
-              </Text>
-              <Text style={styles.subtitle}>
-                {t("onboarding.nameSubtitle")}
-              </Text>
+            <Animated.View entering={FadeInDown.duration(400)} style={styles.stepContainer}>
+              <Text style={styles.title}>{t('onboarding.nameTitle')}</Text>
+              <Text style={styles.subtitle}>{t('onboarding.nameSubtitle')}</Text>
 
               <TextInput
                 style={styles.input}
                 value={displayName}
                 onChangeText={setDisplayName}
-                placeholder={t("onboarding.namePlaceholder")}
+                placeholder={t('onboarding.namePlaceholder')}
                 placeholderTextColor={Colors.textMuted}
                 autoFocus
                 maxLength={30}
@@ -164,16 +151,9 @@ export default function OnboardingScreen() {
           )}
 
           {step === 1 && (
-            <Animated.View
-              entering={FadeInDown.duration(400)}
-              style={styles.stepContainer}
-            >
-              <Text style={styles.title}>
-                {t("onboarding.languageTitle")}
-              </Text>
-              <Text style={styles.subtitle}>
-                {t("onboarding.languageSubtitle")}
-              </Text>
+            <Animated.View entering={FadeInDown.duration(400)} style={styles.stepContainer}>
+              <Text style={styles.title}>{t('onboarding.languageTitle')}</Text>
+              <Text style={styles.subtitle}>{t('onboarding.languageSubtitle')}</Text>
 
               <View style={styles.languageList}>
                 {LANGUAGES.map((lang) => {
@@ -182,19 +162,12 @@ export default function OnboardingScreen() {
                     <Pressable
                       key={lang.locale}
                       onPress={() => setLocale(lang.locale)}
-                      style={[
-                        styles.languageRow,
-                        isSelected && styles.languageRowSelected,
-                      ]}
+                      style={[styles.languageRow, isSelected && styles.languageRowSelected]}
                     >
                       {lang.flag}
                       <Text style={styles.languageLabel}>{lang.label}</Text>
                       {isSelected && (
-                        <Ionicons
-                          name="checkmark-circle"
-                          size={22}
-                          color={Colors.accent}
-                        />
+                        <Ionicons name="checkmark-circle" size={22} color={Colors.accent} />
                       )}
                     </Pressable>
                   );
@@ -204,13 +177,8 @@ export default function OnboardingScreen() {
           )}
 
           {step === 2 && (
-            <Animated.View
-              entering={FadeInDown.duration(400)}
-              style={styles.stepContainer}
-            >
-              <Text style={styles.title}>
-                {t("onboarding.explainTitle")}
-              </Text>
+            <Animated.View entering={FadeInDown.duration(400)} style={styles.stepContainer}>
+              <Text style={styles.title}>{t('onboarding.explainTitle')}</Text>
 
               <View style={styles.explainList}>
                 {STEPS.map((s, idx) => (
@@ -220,11 +188,7 @@ export default function OnboardingScreen() {
                     style={styles.explainItem}
                   >
                     <View style={styles.explainIcon}>
-                      <Ionicons
-                        name={s.icon}
-                        size={24}
-                        color={Colors.accent}
-                      />
+                      <Ionicons name={s.icon} size={24} color={Colors.accent} />
                     </View>
                     <View style={styles.explainText}>
                       <Text style={styles.explainItemTitle}>
@@ -246,17 +210,13 @@ export default function OnboardingScreen() {
         <View style={[styles.ctaArea, { paddingBottom: insets.bottom + 24 }]}>
           {step < 2 ? (
             <Button
-              label={t("onboarding.continue")}
+              label={t('onboarding.continue')}
               onPress={handleContinue}
               disabled={step === 0 && !displayName.trim()}
             />
           ) : (
             <Button
-              label={
-                submitting
-                  ? t("onboarding.completing")
-                  : t("onboarding.letsGo")
-              }
+              label={submitting ? t('onboarding.completing') : t('onboarding.letsGo')}
               onPress={handleComplete}
               disabled={submitting}
             />
@@ -280,13 +240,13 @@ const styles = StyleSheet.create({
     paddingHorizontal: 24,
   },
   header: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "space-between",
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
     marginBottom: 48,
   },
   dots: {
-    flexDirection: "row",
+    flexDirection: 'row',
     gap: 8,
   },
   dot: {
@@ -306,16 +266,16 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   title: {
-    fontFamily: "Inter_900Black",
+    fontFamily: 'Inter_900Black',
     fontSize: 40,
     lineHeight: 40,
-    textTransform: "uppercase",
+    textTransform: 'uppercase',
     letterSpacing: -1.5,
     color: Colors.textPrimary,
     marginBottom: 12,
   },
   subtitle: {
-    fontFamily: "Inter_400Regular",
+    fontFamily: 'Inter_400Regular',
     fontSize: 16,
     lineHeight: 24,
     color: Colors.textSecondary,
@@ -328,7 +288,7 @@ const styles = StyleSheet.create({
     borderColor: Colors.border,
     paddingHorizontal: 20,
     paddingVertical: 18,
-    fontFamily: "Inter_400Regular",
+    fontFamily: 'Inter_400Regular',
     fontSize: 18,
     color: Colors.textPrimary,
   },
@@ -336,8 +296,8 @@ const styles = StyleSheet.create({
     gap: 12,
   },
   languageRow: {
-    flexDirection: "row",
-    alignItems: "center",
+    flexDirection: 'row',
+    alignItems: 'center',
     backgroundColor: Colors.surface,
     borderRadius: 16,
     borderWidth: 1,
@@ -356,7 +316,7 @@ const styles = StyleSheet.create({
   },
   languageLabel: {
     flex: 1,
-    fontFamily: "Inter_700Bold",
+    fontFamily: 'Inter_700Bold',
     fontSize: 17,
     color: Colors.textPrimary,
   },
@@ -365,9 +325,9 @@ const styles = StyleSheet.create({
     marginTop: 8,
   },
   explainItem: {
-    flexDirection: "row",
+    flexDirection: 'row',
     gap: 16,
-    alignItems: "flex-start",
+    alignItems: 'flex-start',
   },
   explainIcon: {
     width: 48,
@@ -376,26 +336,26 @@ const styles = StyleSheet.create({
     backgroundColor: Colors.surface,
     borderWidth: 1,
     borderColor: Colors.border,
-    alignItems: "center",
-    justifyContent: "center",
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   explainText: {
     flex: 1,
     gap: 4,
   },
   explainItemTitle: {
-    fontFamily: "Inter_700Bold",
+    fontFamily: 'Inter_700Bold',
     fontSize: 16,
     color: Colors.textPrimary,
   },
   explainItemBody: {
-    fontFamily: "Inter_400Regular",
+    fontFamily: 'Inter_400Regular',
     fontSize: 14,
     lineHeight: 20,
     color: Colors.textSecondary,
   },
   errorText: {
-    fontFamily: "Inter_400Regular",
+    fontFamily: 'Inter_400Regular',
     fontSize: 13,
     color: Colors.pasion,
     marginTop: 16,
@@ -405,8 +365,8 @@ const styles = StyleSheet.create({
   },
   loadingOverlay: {
     ...StyleSheet.absoluteFillObject,
-    backgroundColor: "rgba(10, 12, 16, 0.6)",
-    alignItems: "center",
-    justifyContent: "center",
+    backgroundColor: 'rgba(10, 12, 16, 0.6)',
+    alignItems: 'center',
+    justifyContent: 'center',
   },
 });

@@ -1,21 +1,21 @@
-import { View, Text, StyleSheet, Pressable } from "react-native";
-import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { useRouter } from "expo-router";
-import { Ionicons } from "@expo/vector-icons";
-import { useState } from "react";
-import { Svg, G, Path, Defs, ClipPath } from "react-native-svg";
+import { View, Text, StyleSheet, Pressable } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { useRouter } from 'expo-router';
+import { Ionicons } from '@expo/vector-icons';
+import { useState } from 'react';
+import { Svg, G, Path, Defs, ClipPath } from 'react-native-svg';
 
-import { useQueryClient } from "@tanstack/react-query";
-import { Colors } from "@/constants/colors";
-import { useAuth } from "@/context/AuthContext";
-import { apiUpdateLocale } from "@/lib/api";
-import i18n from "@/i18n";
-import { useTranslation } from "react-i18next";
+import { useQueryClient } from '@tanstack/react-query';
+import { Colors } from '@/constants/colors';
+import { useAuth } from '@/context/AuthContext';
+import { apiUpdateLocale } from '@/lib/api';
+import i18n from '@/i18n';
+import { useTranslation } from 'react-i18next';
 
 const LANGUAGES = [
   {
-    locale: "es",
-    label: "Español",
+    locale: 'es',
+    label: 'Español',
     flag: (
       <Svg width={24} height={24} fill="none" viewBox="0 0 24 24">
         <G clipPath="url(#AR_svg__a)">
@@ -41,8 +41,8 @@ const LANGUAGES = [
     ),
   },
   {
-    locale: "en",
-    label: "English",
+    locale: 'en',
+    label: 'English',
     flag: (
       <Svg width={24} height={24} fill="none" viewBox="0 0 24 24">
         <G clipPath="url(#US_svg__a)">
@@ -74,10 +74,10 @@ export default function LanguageScreen() {
   const router = useRouter();
   const { user, updateProfile } = useAuth();
   const [loading, setLoading] = useState(false);
-  const { t } = useTranslation("settings");
+  const { t } = useTranslation('settings');
   const queryClient = useQueryClient();
 
-  async function handleSelect(locale: "es" | "en") {
+  async function handleSelect(locale: 'es' | 'en') {
     if (loading || locale === user?.locale) return;
     setLoading(true);
     try {
@@ -98,7 +98,7 @@ export default function LanguageScreen() {
         <Pressable onPress={() => router.back()} style={styles.backBtn}>
           <Ionicons name="arrow-back" size={22} color={Colors.background} />
         </Pressable>
-        <Text style={styles.headerTitle}>{t("language.title")}</Text>
+        <Text style={styles.headerTitle}>{t('language.title')}</Text>
       </View>
 
       {LANGUAGES.map((lang, idx) => {
@@ -108,21 +108,11 @@ export default function LanguageScreen() {
             key={lang.locale}
             onPress={() => handleSelect(lang.locale)}
             disabled={loading}
-            style={[
-              styles.row,
-              idx === 0 && styles.rowFirst,
-              loading && styles.rowDisabled,
-            ]}
+            style={[styles.row, idx === 0 && styles.rowFirst, loading && styles.rowDisabled]}
           >
             {lang.flag}
             <Text style={styles.label}>{lang.label}</Text>
-            {isSelected && (
-              <Ionicons
-                name="checkmark-circle"
-                size={22}
-                color={Colors.accent}
-              />
-            )}
+            {isSelected && <Ionicons name="checkmark-circle" size={22} color={Colors.accent} />}
           </Pressable>
         );
       })}
@@ -136,8 +126,8 @@ const styles = StyleSheet.create({
     backgroundColor: Colors.background,
   },
   header: {
-    flexDirection: "row",
-    alignItems: "center",
+    flexDirection: 'row',
+    alignItems: 'center',
     paddingHorizontal: 20,
     gap: 20,
     paddingVertical: 14,
@@ -146,20 +136,20 @@ const styles = StyleSheet.create({
     width: 40,
     backgroundColor: Colors.textPrimary,
     height: 40,
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "center",
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
     borderRadius: 25,
   },
   headerTitle: {
-    fontFamily: "Inter_900Black",
+    fontFamily: 'Inter_900Black',
     fontSize: 28,
     letterSpacing: -0.5,
     color: Colors.textPrimary,
   },
   row: {
-    flexDirection: "row",
-    alignItems: "center",
+    flexDirection: 'row',
+    alignItems: 'center',
     paddingVertical: 14,
     paddingHorizontal: 16,
     borderTopWidth: 1,
@@ -178,7 +168,7 @@ const styles = StyleSheet.create({
   },
   label: {
     flex: 1,
-    fontFamily: "Inter_700Bold",
+    fontFamily: 'Inter_700Bold',
     fontSize: 16,
     color: Colors.textPrimary,
   },

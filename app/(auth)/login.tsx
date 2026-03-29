@@ -1,19 +1,19 @@
-import { View, Text, TextInput, StyleSheet, Pressable, Modal } from "react-native";
-import { useState } from "react";
-import { useForm, Controller } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { z } from "zod";
-import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { AntDesign, Feather, Ionicons } from "@expo/vector-icons";
-import { useRouter } from "expo-router";
-import { useTranslation } from "react-i18next";
-import { Logo } from "../../components/ui/Logo";
-import { Button } from "../../components/ui/Button";
-import { Colors } from "../../constants/colors";
-import { useAuth, DeletionPendingError } from "../../context/AuthContext";
-import { apiCancelDeletion } from "../../lib/api";
-import { setToken, setProfile } from "../../lib/storage";
-import i18n from "@/i18n";
+import { View, Text, TextInput, StyleSheet, Pressable, Modal } from 'react-native';
+import { useState } from 'react';
+import { useForm, Controller } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { z } from 'zod';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { AntDesign, Feather, Ionicons } from '@expo/vector-icons';
+import { useRouter } from 'expo-router';
+import { useTranslation } from 'react-i18next';
+import { Logo } from '../../components/ui/Logo';
+import { Button } from '../../components/ui/Button';
+import { Colors } from '../../constants/colors';
+import { useAuth, DeletionPendingError } from '../../context/AuthContext';
+import { apiCancelDeletion } from '../../lib/api';
+import { setToken, setProfile } from '../../lib/storage';
+import i18n from '@/i18n';
 
 export default function LoginScreen() {
   const insets = useSafeAreaInsets();
@@ -21,14 +21,17 @@ export default function LoginScreen() {
   const [showPassword, setShowPassword] = useState(false);
   const [apiError, setApiError] = useState<string | null>(null);
   const [googleLoading, setGoogleLoading] = useState(false);
-  const [deletionPending, setDeletionPending] = useState<{ scheduledFor: string; credentials: { email: string; password: string } | { idToken: string } } | null>(null);
+  const [deletionPending, setDeletionPending] = useState<{
+    scheduledFor: string;
+    credentials: { email: string; password: string } | { idToken: string };
+  } | null>(null);
   const [cancellingDeletion, setCancellingDeletion] = useState(false);
   const { login, googleLogin, updateProfile } = useAuth();
-  const { t } = useTranslation("auth");
+  const { t } = useTranslation('auth');
 
   const schema = z.object({
-    email: z.string().email(t("login.errorEmail")),
-    password: z.string().min(1, t("login.errorPassword")),
+    email: z.string().email(t('login.errorEmail')),
+    password: z.string().min(1, t('login.errorPassword')),
   });
   type FormData = z.infer<typeof schema>;
 
@@ -38,10 +41,13 @@ export default function LoginScreen() {
     formState: { errors, isSubmitting },
   } = useForm<FormData>({ resolver: zodResolver(schema) });
 
-  const navigateAfterLogin = (profile: { coupleId?: string | null; onboardingCompleted?: boolean }) => {
-    if (!profile.coupleId) router.replace("/(auth)/link");
-    else if (!profile.onboardingCompleted) router.replace("/(auth)/onboarding");
-    else router.replace("/(app)/");
+  const navigateAfterLogin = (profile: {
+    coupleId?: string | null;
+    onboardingCompleted?: boolean;
+  }) => {
+    if (!profile.coupleId) router.replace('/(auth)/link');
+    else if (!profile.onboardingCompleted) router.replace('/(auth)/onboarding');
+    else router.replace('/(app)/');
   };
 
   const handleGoogleLogin = async () => {
@@ -52,9 +58,12 @@ export default function LoginScreen() {
       navigateAfterLogin(profile);
     } catch (err) {
       if (err instanceof DeletionPendingError && err.idToken) {
-        setDeletionPending({ scheduledFor: err.deletionScheduledFor, credentials: { idToken: err.idToken } });
+        setDeletionPending({
+          scheduledFor: err.deletionScheduledFor,
+          credentials: { idToken: err.idToken },
+        });
       } else {
-        setApiError(t("login.errorGoogle"));
+        setApiError(t('login.errorGoogle'));
       }
     } finally {
       setGoogleLoading(false);
@@ -68,9 +77,12 @@ export default function LoginScreen() {
       navigateAfterLogin(profile);
     } catch (err) {
       if (err instanceof DeletionPendingError) {
-        setDeletionPending({ scheduledFor: err.deletionScheduledFor, credentials: { email: data.email, password: data.password } });
+        setDeletionPending({
+          scheduledFor: err.deletionScheduledFor,
+          credentials: { email: data.email, password: data.password },
+        });
       } else {
-        setApiError(t("login.errorInvalid"));
+        setApiError(t('login.errorInvalid'));
       }
     }
   };
@@ -88,7 +100,7 @@ export default function LoginScreen() {
       navigateAfterLogin(profile);
     } catch {
       setDeletionPending(null);
-      setApiError(t("login.errorInvalid"));
+      setApiError(t('login.errorInvalid'));
     } finally {
       setCancellingDeletion(false);
     }
@@ -101,17 +113,17 @@ export default function LoginScreen() {
       </View>
 
       <View style={styles.content}>
-        <Text style={styles.title}>{t("login.title")}</Text>
-        <Text style={styles.subtitle}>{t("login.subtitle")}</Text>
+        <Text style={styles.title}>{t('login.title')}</Text>
+        <Text style={styles.subtitle}>{t('login.subtitle')}</Text>
 
-        <Text style={styles.label}>{t("login.email")}</Text>
+        <Text style={styles.label}>{t('login.email')}</Text>
         <Controller
           control={control}
           name="email"
           render={({ field: { onChange, onBlur, value } }) => (
             <TextInput
               style={[styles.input, errors.email && styles.inputError]}
-              placeholder={t("login.emailPlaceholder")}
+              placeholder={t('login.emailPlaceholder')}
               placeholderTextColor={Colors.textMuted}
               keyboardType="email-address"
               autoCapitalize="none"
@@ -122,23 +134,17 @@ export default function LoginScreen() {
             />
           )}
         />
-        {errors.email && (
-          <Text style={styles.errorText}>{errors.email.message}</Text>
-        )}
+        {errors.email && <Text style={styles.errorText}>{errors.email.message}</Text>}
 
-        <Text style={[styles.label, styles.labelPassword]}>{t("login.password")}</Text>
+        <Text style={[styles.label, styles.labelPassword]}>{t('login.password')}</Text>
         <Controller
           control={control}
           name="password"
           render={({ field: { onChange, onBlur, value } }) => (
             <View style={styles.passwordWrapper}>
               <TextInput
-                style={[
-                  styles.input,
-                  styles.passwordInput,
-                  errors.password && styles.inputError,
-                ]}
-                placeholder={t("login.passwordPlaceholder")}
+                style={[styles.input, styles.passwordInput, errors.password && styles.inputError]}
+                placeholder={t('login.passwordPlaceholder')}
                 placeholderTextColor={Colors.textMuted}
                 secureTextEntry={!showPassword}
                 autoCapitalize="none"
@@ -153,7 +159,7 @@ export default function LoginScreen() {
                 hitSlop={8}
               >
                 <Feather
-                  name={showPassword ? "eye-off" : "eye"}
+                  name={showPassword ? 'eye-off' : 'eye'}
                   size={20}
                   color={Colors.textMuted}
                 />
@@ -161,15 +167,10 @@ export default function LoginScreen() {
             </View>
           )}
         />
-        {errors.password && (
-          <Text style={styles.errorText}>{errors.password.message}</Text>
-        )}
+        {errors.password && <Text style={styles.errorText}>{errors.password.message}</Text>}
 
-        <Pressable
-          style={styles.forgotLink}
-          onPress={() => router.push("/(auth)/forgot-password")}
-        >
-          <Text style={styles.forgotText}>{t("login.forgotPassword")}</Text>
+        <Pressable style={styles.forgotLink} onPress={() => router.push('/(auth)/forgot-password')}>
+          <Text style={styles.forgotText}>{t('login.forgotPassword')}</Text>
         </Pressable>
 
         {apiError && <Text style={styles.errorText}>{apiError}</Text>}
@@ -177,38 +178,32 @@ export default function LoginScreen() {
 
       <View style={[styles.ctaArea, { paddingBottom: insets.bottom + 24 }]}>
         <Button
-          label={isSubmitting ? t("login.submitting") : t("login.submit")}
+          label={isSubmitting ? t('login.submitting') : t('login.submit')}
           onPress={handleSubmit(onSubmit)}
           disabled={isSubmitting}
         />
 
         <View style={styles.divider}>
           <View style={styles.dividerLine} />
-          <Text style={styles.dividerText}>{t("login.or")}</Text>
+          <Text style={styles.dividerText}>{t('login.or')}</Text>
           <View style={styles.dividerLine} />
         </View>
 
         <Pressable
-          style={({ pressed }) => [
-            styles.googleButton,
-            pressed && styles.googleButtonPressed,
-          ]}
+          style={({ pressed }) => [styles.googleButton, pressed && styles.googleButtonPressed]}
           onPress={handleGoogleLogin}
           disabled={googleLoading || isSubmitting}
         >
           <AntDesign name="google" size={18} color="#1a1a1a" />
           <Text style={styles.googleLabel}>
-            {googleLoading ? t("login.submitting") : t("login.google")}
+            {googleLoading ? t('login.submitting') : t('login.google')}
           </Text>
         </Pressable>
 
-        <Pressable
-          style={styles.registerLink}
-          onPress={() => router.push("/(auth)/register")}
-        >
+        <Pressable style={styles.registerLink} onPress={() => router.push('/(auth)/register')}>
           <Text style={styles.registerLinkText}>
-            {t("login.noAccount")}
-            <Text style={styles.registerLinkAccent}>{t("login.registerLink")}</Text>
+            {t('login.noAccount')}
+            <Text style={styles.registerLinkAccent}>{t('login.registerLink')}</Text>
           </Text>
         </Pressable>
       </View>
@@ -226,19 +221,19 @@ export default function LoginScreen() {
             <View style={styles.iconWrap}>
               <Ionicons name="warning-outline" size={28} color={Colors.pasion} />
             </View>
-            <Text style={styles.modalTitle}>{t("login.deletionPendingTitle")}</Text>
+            <Text style={styles.modalTitle}>{t('login.deletionPendingTitle')}</Text>
             <Text style={styles.modalBody}>
-              {t("login.deletionPendingMessage", { date: deletionPending?.scheduledFor })}
+              {t('login.deletionPendingMessage', { date: deletionPending?.scheduledFor })}
             </Text>
             <View style={styles.modalActions}>
               <Button
-                label={t("login.cancelDeletion")}
+                label={t('login.cancelDeletion')}
                 onPress={handleCancelDeletion}
                 variant="accent"
                 disabled={cancellingDeletion}
               />
               <Button
-                label={t("cancel", { ns: "common" })}
+                label={t('cancel', { ns: 'common' })}
                 onPress={() => setDeletionPending(null)}
                 variant="ghost"
                 disabled={cancellingDeletion}
@@ -264,23 +259,23 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   title: {
-    fontFamily: "Inter_900Black",
+    fontFamily: 'Inter_900Black',
     fontSize: 40,
     lineHeight: 40,
-    textTransform: "uppercase",
+    textTransform: 'uppercase',
     letterSpacing: -1.5,
     color: Colors.textPrimary,
     marginBottom: 12,
   },
   subtitle: {
-    fontFamily: "Inter_400Regular",
+    fontFamily: 'Inter_400Regular',
     fontSize: 16,
     lineHeight: 24,
     color: Colors.textSecondary,
     marginBottom: 32,
   },
   label: {
-    fontFamily: "Inter_400Regular",
+    fontFamily: 'Inter_400Regular',
     fontSize: 14,
     color: Colors.textPrimary,
   },
@@ -290,40 +285,40 @@ const styles = StyleSheet.create({
   input: {
     paddingHorizontal: 18,
     paddingVertical: 16,
-    fontFamily: "Inter_400Regular",
+    fontFamily: 'Inter_400Regular',
     fontSize: 16,
     color: Colors.textPrimary,
     borderBottomWidth: 1,
-    borderColor: "#EDF1F3",
+    borderColor: '#EDF1F3',
   },
   inputError: {
     borderColor: Colors.pasion,
   },
   passwordWrapper: {
-    flexDirection: "row",
-    alignItems: "center",
+    flexDirection: 'row',
+    alignItems: 'center',
   },
   passwordInput: {
     flex: 1,
   },
   eyeButton: {
-    position: "absolute",
+    position: 'absolute',
     right: 4,
     paddingVertical: 16,
     paddingHorizontal: 8,
   },
   forgotLink: {
-    alignSelf: "flex-end",
+    alignSelf: 'flex-end',
     marginTop: 12,
   },
   forgotText: {
-    fontFamily: "Inter_400Regular",
+    fontFamily: 'Inter_400Regular',
     fontSize: 13,
     color: Colors.textSecondary,
-    textDecorationLine: "underline",
+    textDecorationLine: 'underline',
   },
   errorText: {
-    fontFamily: "Inter_400Regular",
+    fontFamily: 'Inter_400Regular',
     fontSize: 13,
     color: Colors.pasion,
     marginTop: 8,
@@ -333,8 +328,8 @@ const styles = StyleSheet.create({
     gap: 10,
   },
   divider: {
-    flexDirection: "row",
-    alignItems: "center",
+    flexDirection: 'row',
+    alignItems: 'center',
     gap: 12,
   },
   dividerLine: {
@@ -343,16 +338,16 @@ const styles = StyleSheet.create({
     backgroundColor: Colors.border,
   },
   dividerText: {
-    fontFamily: "Inter_400Regular",
+    fontFamily: 'Inter_400Regular',
     fontSize: 13,
     color: Colors.textMuted,
   },
   googleButton: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "center",
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
     gap: 10,
-    backgroundColor: "#ffffff",
+    backgroundColor: '#ffffff',
     borderRadius: 9999,
     paddingVertical: 16,
   },
@@ -361,29 +356,29 @@ const styles = StyleSheet.create({
     transform: [{ scale: 0.98 }],
   },
   googleLabel: {
-    fontFamily: "Inter_700Bold",
+    fontFamily: 'Inter_700Bold',
     fontSize: 16,
     letterSpacing: 0.3,
-    color: "#1a1a1a",
+    color: '#1a1a1a',
   },
   registerLink: {
-    alignSelf: "center",
+    alignSelf: 'center',
     paddingVertical: 8,
   },
   registerLinkText: {
-    fontFamily: "Inter_400Regular",
+    fontFamily: 'Inter_400Regular',
     fontSize: 14,
     color: Colors.textSecondary,
   },
   registerLinkAccent: {
-    fontFamily: "Inter_700Bold",
+    fontFamily: 'Inter_700Bold',
     color: Colors.accent,
-    textDecorationLine: "underline",
+    textDecorationLine: 'underline',
   },
   backdrop: {
     flex: 1,
-    backgroundColor: "rgba(0,0,0,0.7)",
-    justifyContent: "flex-end",
+    backgroundColor: 'rgba(0,0,0,0.7)',
+    justifyContent: 'flex-end',
     paddingHorizontal: 16,
     paddingBottom: 32,
   },
@@ -393,36 +388,36 @@ const styles = StyleSheet.create({
     padding: 28,
     borderWidth: 1,
     borderColor: Colors.border,
-    alignItems: "center",
+    alignItems: 'center',
   },
   iconWrap: {
     width: 56,
     height: 56,
     borderRadius: 28,
-    backgroundColor: "rgba(255,59,92,0.12)",
-    alignItems: "center",
-    justifyContent: "center",
+    backgroundColor: 'rgba(255,59,92,0.12)',
+    alignItems: 'center',
+    justifyContent: 'center',
     marginBottom: 20,
   },
   modalTitle: {
-    fontFamily: "Inter_900Black",
+    fontFamily: 'Inter_900Black',
     fontSize: 20,
     letterSpacing: -0.3,
     color: Colors.textPrimary,
-    textAlign: "center",
+    textAlign: 'center',
     marginBottom: 10,
   },
   modalBody: {
-    fontFamily: "Inter_400Regular",
+    fontFamily: 'Inter_400Regular',
     fontSize: 14,
     lineHeight: 21,
     color: Colors.textSecondary,
-    textAlign: "center",
+    textAlign: 'center',
     marginBottom: 28,
     maxWidth: 280,
   },
   modalActions: {
-    width: "100%",
+    width: '100%',
     gap: 10,
   },
 });

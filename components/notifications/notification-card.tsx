@@ -1,7 +1,7 @@
-import React from "react";
-import { View, Text, Pressable, StyleSheet } from "react-native";
-import { useTranslation } from "react-i18next";
-import { Colors } from "@/constants/colors";
+import React from 'react';
+import { View, Text, Pressable, StyleSheet } from 'react-native';
+import { useTranslation } from 'react-i18next';
+import { Colors } from '@/constants/colors';
 
 export interface NotificationItem {
   id: string;
@@ -29,7 +29,7 @@ export function NotificationCard({
   onPress?: () => void;
 }) {
   const isUnread = item.read === false;
-  const { t } = useTranslation("notifications");
+  const { t } = useTranslation('notifications');
   const categoryColor = CATEGORY_COLORS[item.category] ?? Colors.textMuted;
   const categoryLabel = t(`category.${item.category}`, {
     defaultValue: item.category.toUpperCase(),
@@ -44,16 +44,12 @@ export function NotificationCard({
 
       <View style={styles.topRow}>
         <View style={[styles.categoryPill, { borderColor: categoryColor }]}>
-          <Text style={[styles.categoryText, { color: categoryColor }]}>
-            {categoryLabel}
-          </Text>
+          <Text style={[styles.categoryText, { color: categoryColor }]}>{categoryLabel}</Text>
         </View>
         <Text style={styles.time}>{item.time}</Text>
       </View>
 
-      <Text style={[styles.title, isUnread && styles.titleUnread]}>
-        {item.title}
-      </Text>
+      <Text style={[styles.title, isUnread && styles.titleUnread]}>{item.title}</Text>
       <Text style={styles.message} numberOfLines={2}>
         {item.message}
       </Text>
@@ -74,7 +70,7 @@ const styles = StyleSheet.create({
     opacity: 0.75,
   },
   unreadDot: {
-    position: "absolute",
+    position: 'absolute',
     bottom: 16,
     right: 16,
     width: 7,
@@ -83,9 +79,9 @@ const styles = StyleSheet.create({
     backgroundColor: Colors.pasion,
   },
   topRow: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "space-between",
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
     marginBottom: 8,
   },
   categoryPill: {
@@ -95,17 +91,17 @@ const styles = StyleSheet.create({
     paddingVertical: 2,
   },
   categoryText: {
-    fontFamily: "Inter_700Bold",
+    fontFamily: 'Inter_700Bold',
     fontSize: 9,
     letterSpacing: 1.2,
   },
   time: {
-    fontFamily: "Inter_400Regular",
+    fontFamily: 'Inter_400Regular',
     fontSize: 12,
     color: Colors.textMuted,
   },
   title: {
-    fontFamily: "Inter_700Bold",
+    fontFamily: 'Inter_700Bold',
     fontSize: 14,
     color: Colors.textSecondary,
     marginBottom: 4,
@@ -114,7 +110,7 @@ const styles = StyleSheet.create({
     color: Colors.textPrimary,
   },
   message: {
-    fontFamily: "Inter_400Regular",
+    fontFamily: 'Inter_400Regular',
     fontSize: 13,
     lineHeight: 18,
     color: Colors.textMuted,

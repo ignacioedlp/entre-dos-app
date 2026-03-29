@@ -1,6 +1,6 @@
-import { createMMKV } from 'react-native-mmkv'
+import { createMMKV } from 'react-native-mmkv';
 
-export const storage = createMMKV({ id: "haven-auth" });
+export const storage = createMMKV({ id: 'haven-auth' });
 
 const TOKEN_KEY = 'auth.token';
 const PROFILE_KEY = 'auth.profile';

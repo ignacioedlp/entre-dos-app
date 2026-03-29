@@ -1,13 +1,13 @@
-import { View, StyleSheet, TouchableOpacity } from "react-native";
-import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { Ionicons } from "@expo/vector-icons";
+import { View, StyleSheet, TouchableOpacity } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { Ionicons } from '@expo/vector-icons';
 
-import { Colors } from "../../constants/colors";
+import { Colors } from '../../constants/colors';
 
-const TABS: { name: string; icon: "home" | "layers" | "person" }[] = [
-  { name: "index", icon: "home" },
-  { name: "packs", icon: "layers" },
-  { name: "profile", icon: "person" },
+const TABS: { name: string; icon: 'home' | 'layers' | 'person' }[] = [
+  { name: 'index', icon: 'home' },
+  { name: 'packs', icon: 'layers' },
+  { name: 'profile', icon: 'person' },
 ];
 
 interface TabBarProps {
@@ -48,19 +48,19 @@ export function CustomTabBar({ state, navigation }: TabBarProps) {
 
 const styles = StyleSheet.create({
   bar: {
-    flexDirection: "row",
+    flexDirection: 'row',
     backgroundColor: Colors.background,
     borderTopWidth: 0,
   },
   tab: {
     flex: 1,
-    alignItems: "center",
-    justifyContent: "center",
+    alignItems: 'center',
+    justifyContent: 'center',
     paddingTop: 12,
     gap: 6,
   },
   activeBar: {
-    width: "60%",
+    width: '60%',
     height: 2,
     borderRadius: 1,
     backgroundColor: Colors.pasion,

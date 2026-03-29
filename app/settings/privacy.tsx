@@ -1,14 +1,14 @@
-import { View, Text, StyleSheet, ScrollView } from "react-native";
-import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { useTranslation } from "react-i18next";
+import { View, Text, StyleSheet, ScrollView } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { useTranslation } from 'react-i18next';
 
-import { Colors } from "@/constants/colors";
+import { Colors } from '@/constants/colors';
 
 export default function PrivacyScreen() {
   const insets = useSafeAreaInsets();
-  const { t } = useTranslation("settings");
+  const { t } = useTranslation('settings');
 
-  const items = t("privacy.items", { returnObjects: true }) as {
+  const items = t('privacy.items', { returnObjects: true }) as {
     title: string;
     body: string;
   }[];
@@ -18,14 +18,11 @@ export default function PrivacyScreen() {
       <View style={styles.handle} />
 
       <ScrollView
-        contentContainerStyle={[
-          styles.scrollContent,
-          { paddingBottom: insets.bottom + 24 },
-        ]}
+        contentContainerStyle={[styles.scrollContent, { paddingBottom: insets.bottom + 24 }]}
         showsVerticalScrollIndicator={false}
       >
-        <Text style={styles.title}>{t("privacy.title")}</Text>
-        <Text style={styles.lastUpdated}>{t("privacy.lastUpdated")}</Text>
+        <Text style={styles.title}>{t('privacy.title')}</Text>
+        <Text style={styles.lastUpdated}>{t('privacy.lastUpdated')}</Text>
 
         {items.map((item) => (
           <View key={item.title} style={styles.section}>
@@ -49,21 +46,21 @@ const styles = StyleSheet.create({
     height: 4,
     borderRadius: 2,
     backgroundColor: Colors.border,
-    alignSelf: "center",
+    alignSelf: 'center',
     marginBottom: 20,
   },
   scrollContent: {
     paddingHorizontal: 24,
   },
   title: {
-    fontFamily: "Inter_900Black",
+    fontFamily: 'Inter_900Black',
     fontSize: 24,
     letterSpacing: -0.5,
     color: Colors.textPrimary,
     marginBottom: 4,
   },
   lastUpdated: {
-    fontFamily: "Inter_400Regular",
+    fontFamily: 'Inter_400Regular',
     fontSize: 12,
     color: Colors.textMuted,
     marginBottom: 24,
@@ -72,13 +69,13 @@ const styles = StyleSheet.create({
     marginBottom: 20,
   },
   sectionTitle: {
-    fontFamily: "Inter_700Bold",
+    fontFamily: 'Inter_700Bold',
     fontSize: 14,
     color: Colors.textPrimary,
     marginBottom: 6,
   },
   sectionBody: {
-    fontFamily: "Inter_400Regular",
+    fontFamily: 'Inter_400Regular',
     fontSize: 13,
     lineHeight: 20,
     color: Colors.textSecondary,

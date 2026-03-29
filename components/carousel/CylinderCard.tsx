@@ -1,16 +1,12 @@
-import { StyleSheet, Dimensions } from "react-native";
-import Animated, {
-  useAnimatedStyle,
-  interpolate,
-  Extrapolation,
-} from "react-native-reanimated";
-import { useTranslation } from "react-i18next";
+import { StyleSheet, Dimensions } from 'react-native';
+import Animated, { useAnimatedStyle, interpolate, Extrapolation } from 'react-native-reanimated';
+import { useTranslation } from 'react-i18next';
 
-import { GameCard } from "../cards/GameCard";
-import { RarityKey, rarityGlow } from "../../constants/colors";
-import { DeckCard } from "../../lib/api";
+import { GameCard } from '../cards/GameCard';
+import { RarityKey, rarityGlow } from '../../constants/colors';
+import { DeckCard } from '../../lib/api';
 
-const { width: SCREEN_WIDTH } = Dimensions.get("window");
+const { width: SCREEN_WIDTH } = Dimensions.get('window');
 export const CARD_WIDTH = SCREEN_WIDTH * 0.68;
 export const CARD_HEIGHT = CARD_WIDTH * (4 / 3);
 
@@ -18,19 +14,14 @@ const CYLINDER_RADIUS = CARD_WIDTH * 0.62;
 export const ANGLE_PER_CARD = 42;
 
 const RARITY_MAP: Record<string, RarityKey> = {
-  common: "comun",
-  rare: "rara",
-  epic: "epica",
-  legendary: "legendaria",
+  common: 'comun',
+  rare: 'rara',
+  epic: 'epica',
+  legendary: 'legendaria',
 };
 
-function clamp(value: number, min: number, max: number) {
-  "worklet";
-  return Math.min(Math.max(value, min), max);
-}
-
 function toRad(deg: number) {
-  "worklet";
+  'worklet';
   return (deg * Math.PI) / 180;
 }
 
@@ -41,15 +32,10 @@ interface CylinderCardProps {
   dragY: Animated.SharedValue<number>;
 }
 
-export function CylinderCard({
-  card,
-  index,
-  rotation,
-  dragY,
-}: CylinderCardProps) {
-  const rarity = RARITY_MAP[card.rarity] ?? "comun";
+export function CylinderCard({ card, index, rotation, dragY }: CylinderCardProps) {
+  const rarity = RARITY_MAP[card.rarity] ?? 'comun';
   const glow = rarityGlow[rarity];
-  const { t } = useTranslation("common");
+  const { t } = useTranslation('common');
 
   const categoryLabel = t(`category.${card.category}`, {
     defaultValue: card.category.toUpperCase(),
@@ -62,25 +48,10 @@ export function CylinderCard({
     const depth = Math.cos(rad);
     const visible = depth > -0.2;
 
-    const scale = interpolate(
-      depth,
-      [-0.2, 0, 1],
-      [0.55, 0.72, 1],
-      Extrapolation.CLAMP,
-    );
-    const opacity = interpolate(
-      depth,
-      [-0.2, 0.2, 1],
-      [0, 0.55, 1],
-      Extrapolation.CLAMP,
-    );
+    const scale = interpolate(depth, [-0.2, 0, 1], [0.55, 0.72, 1], Extrapolation.CLAMP);
+    const opacity = interpolate(depth, [-0.2, 0.2, 1], [0, 0.55, 1], Extrapolation.CLAMP);
     const zIndex = Math.round(depth * 100);
-    const shadowOpacity = interpolate(
-      depth,
-      [0, 1],
-      [0, 0.55],
-      Extrapolation.CLAMP,
-    );
+    const shadowOpacity = interpolate(depth, [0, 1], [0, 0.55], Extrapolation.CLAMP);
 
     const isActive = Math.round(rotation.value / ANGLE_PER_CARD) === index;
     const y = isActive ? dragY.value : 0;
@@ -100,7 +71,7 @@ export function CylinderCard({
       shadowRadius: 24,
       shadowOffset: { width: 0, height: 8 },
       elevation: visible ? Math.round(scale * 10) : 0,
-      pointerEvents: depth > 0.85 ? "auto" : "none",
+      pointerEvents: depth > 0.85 ? 'auto' : 'none',
     };
   });
 
@@ -122,7 +93,7 @@ export function CylinderCard({
 
 const styles = StyleSheet.create({
   cardSlot: {
-    position: "absolute",
+    position: 'absolute',
     width: CARD_WIDTH,
     height: CARD_HEIGHT,
   },

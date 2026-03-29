@@ -8,15 +8,15 @@ import {
   ActivityIndicator,
   Image,
   Modal,
-} from "react-native";
-import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { useRouter } from "expo-router";
-import { Ionicons } from "@expo/vector-icons";
-import { useEffect, useRef, useState } from "react";
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { useTranslation } from "react-i18next";
-import moment from "moment";
-import "moment/locale/es";
+} from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { useRouter } from 'expo-router';
+import { Ionicons } from '@expo/vector-icons';
+import { useEffect, useRef, useState } from 'react';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { useTranslation } from 'react-i18next';
+import moment from 'moment';
+import 'moment/locale/es';
 import Animated, {
   useSharedValue,
   useAnimatedStyle,
@@ -26,17 +26,13 @@ import Animated, {
   withDelay,
   Easing,
   type SharedValue,
-} from "react-native-reanimated";
+} from 'react-native-reanimated';
 
-import { Colors } from "@/constants/colors";
-import {
-  apiGetCoupleStatus,
-  apiUpdateCoupleAnniversary,
-  apiUnlinkCouple,
-} from "@/lib/api";
-import { Button } from "@/components/ui/Button";
-import { useAuth } from "@/context/AuthContext";
-import i18n from "@/i18n";
+import { Colors } from '@/constants/colors';
+import { apiGetCoupleStatus, apiUpdateCoupleAnniversary, apiUnlinkCouple } from '@/lib/api';
+import { Button } from '@/components/ui/Button';
+import { useAuth } from '@/context/AuthContext';
+import i18n from '@/i18n';
 
 const AVATAR_SIZE = 80;
 const DOT_COUNT = 7;
@@ -49,29 +45,29 @@ function AnimatedDot({ opacity }: { opacity: SharedValue<number> }) {
 export default function RelationshipScreen() {
   const insets = useSafeAreaInsets();
   const router = useRouter();
-  const { t } = useTranslation("settings");
+  const { t } = useTranslation('settings');
   const { logout } = useAuth();
   const queryClient = useQueryClient();
 
   const [editing, setEditing] = useState(false);
   const [unlinkVisible, setUnlinkVisible] = useState(false);
-  const [day, setDay] = useState("");
-  const [month, setMonth] = useState("");
-  const [year, setYear] = useState("");
+  const [day, setDay] = useState('');
+  const [month, setMonth] = useState('');
+  const [year, setYear] = useState('');
   const [error, setError] = useState<string | null>(null);
 
   const monthRef = useRef<TextInput>(null);
   const yearRef = useRef<TextInput>(null);
 
   const { data, isLoading } = useQuery({
-    queryKey: ["couple-status"],
+    queryKey: ['couple-status'],
     queryFn: apiGetCoupleStatus,
   });
 
   const mutation = useMutation({
     mutationFn: apiUpdateCoupleAnniversary,
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["couple-status"] });
+      queryClient.invalidateQueries({ queryKey: ['couple-status'] });
     },
   });
 
@@ -79,7 +75,7 @@ export default function RelationshipScreen() {
     mutationFn: apiUnlinkCouple,
     onSuccess: () => {
       logout();
-      router.replace("/(auth)/welcome");
+      router.replace('/(auth)/welcome');
     },
   });
 
@@ -89,13 +85,13 @@ export default function RelationshipScreen() {
     setError(null);
     if (couple?.anniversary) {
       const m = moment(couple.anniversary);
-      setDay(m.format("DD"));
-      setMonth(m.format("MM"));
-      setYear(m.format("YYYY"));
+      setDay(m.format('DD'));
+      setMonth(m.format('MM'));
+      setYear(m.format('YYYY'));
     } else {
-      setDay("");
-      setMonth("");
-      setYear("");
+      setDay('');
+      setMonth('');
+      setYear('');
     }
     setEditing(true);
   }
@@ -106,39 +102,39 @@ export default function RelationshipScreen() {
   }
 
   function handleDayChange(text: string) {
-    const clean = text.replace(/\D/g, "");
+    const clean = text.replace(/\D/g, '');
     setDay(clean);
     if (clean.length === 2) monthRef.current?.focus();
   }
 
   function handleMonthChange(text: string) {
-    const clean = text.replace(/\D/g, "");
+    const clean = text.replace(/\D/g, '');
     setMonth(clean);
     if (clean.length === 2) yearRef.current?.focus();
   }
 
   function handleYearChange(text: string) {
-    setYear(text.replace(/\D/g, ""));
+    setYear(text.replace(/\D/g, ''));
   }
 
   async function handleSave() {
     setError(null);
 
     if (!day || !month || !year || year.length < 4) {
-      setError(t("relationship.errorRequired"));
+      setError(t('relationship.errorRequired'));
       return;
     }
 
-    const dateStr = `${year}-${month.padStart(2, "0")}-${day.padStart(2, "0")}`;
-    const parsed = moment(dateStr, "YYYY-MM-DD", true);
+    const dateStr = `${year}-${month.padStart(2, '0')}-${day.padStart(2, '0')}`;
+    const parsed = moment(dateStr, 'YYYY-MM-DD', true);
 
     if (!parsed.isValid()) {
-      setError(t("relationship.errorInvalidDate"));
+      setError(t('relationship.errorInvalidDate'));
       return;
     }
 
-    if (parsed.isAfter(moment(), "day")) {
-      setError(t("relationship.errorFutureDate"));
+    if (parsed.isAfter(moment(), 'day')) {
+      setError(t('relationship.errorFutureDate'));
       return;
     }
 
@@ -146,7 +142,7 @@ export default function RelationshipScreen() {
       await mutation.mutateAsync(dateStr);
       setEditing(false);
     } catch {
-      setError(t("relationship.errorInvalidDate"));
+      setError(t('relationship.errorInvalidDate'));
     }
   }
 
@@ -162,6 +158,7 @@ export default function RelationshipScreen() {
   // ── Animations ──────────────────────────────────────────────
   const heartScale = useSharedValue(1);
   const heartOpacity = useSharedValue(0.8);
+  // eslint-disable-next-line react-hooks/rules-of-hooks
   const dotOpacities = Array.from({ length: DOT_COUNT }, () => useSharedValue(0.3));
 
   useEffect(() => {
@@ -169,18 +166,15 @@ export default function RelationshipScreen() {
     heartScale.value = withRepeat(
       withSequence(
         withTiming(1.25, { duration: 600, easing: Easing.out(Easing.ease) }),
-        withTiming(1, { duration: 600, easing: Easing.in(Easing.ease) }),
+        withTiming(1, { duration: 600, easing: Easing.in(Easing.ease) })
       ),
       -1,
-      false,
+      false
     );
     heartOpacity.value = withRepeat(
-      withSequence(
-        withTiming(1, { duration: 600 }),
-        withTiming(0.8, { duration: 600 }),
-      ),
+      withSequence(withTiming(1, { duration: 600 }), withTiming(0.8, { duration: 600 })),
       -1,
-      false,
+      false
     );
 
     // Dot wave animation — each dot lights up in sequence
@@ -190,13 +184,14 @@ export default function RelationshipScreen() {
           i * 120,
           withSequence(
             withTiming(1, { duration: 400, easing: Easing.out(Easing.ease) }),
-            withTiming(0.3, { duration: 400, easing: Easing.in(Easing.ease) }),
-          ),
+            withTiming(0.3, { duration: 400, easing: Easing.in(Easing.ease) })
+          )
         ),
         -1,
-        false,
+        false
       );
     });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const heartAnimStyle = useAnimatedStyle(() => ({
@@ -205,11 +200,11 @@ export default function RelationshipScreen() {
   }));
 
   const linkedDate = couple?.linkedAt
-    ? moment(couple.linkedAt).locale(i18n.language).format("LL")
-    : "";
+    ? moment(couple.linkedAt).locale(i18n.language).format('LL')
+    : '';
 
   const anniversaryDate = couple?.anniversary
-    ? moment(couple.anniversary).locale(i18n.language).format("LL")
+    ? moment(couple.anniversary).locale(i18n.language).format('LL')
     : null;
 
   return (
@@ -222,15 +217,11 @@ export default function RelationshipScreen() {
         <Pressable onPress={() => router.back()} style={styles.backBtn}>
           <Ionicons name="arrow-back" size={22} color={Colors.background} />
         </Pressable>
-        <Text style={styles.headerTitle}>{t("relationship.title")}</Text>
+        <Text style={styles.headerTitle}>{t('relationship.title')}</Text>
       </View>
 
       {isLoading && (
-        <ActivityIndicator
-          color={Colors.accent}
-          size="large"
-          style={{ marginTop: 60 }}
-        />
+        <ActivityIndicator color={Colors.accent} size="large" style={{ marginTop: 60 }} />
       )}
 
       {couple && (
@@ -241,17 +232,14 @@ export default function RelationshipScreen() {
               {/* Left avatar + name */}
               <View style={styles.avatarCol}>
                 {couple.userAImageUrl ? (
-                  <Image
-                    source={{ uri: couple.userAImageUrl }}
-                    style={styles.avatar}
-                  />
+                  <Image source={{ uri: couple.userAImageUrl }} style={styles.avatar} />
                 ) : (
                   <View style={[styles.avatar, styles.avatarPlaceholder]}>
                     <Ionicons name="person" size={32} color={Colors.textMuted} />
                   </View>
                 )}
                 <Text style={styles.name} numberOfLines={1}>
-                  {couple.userADisplayName ?? "Partner"}
+                  {couple.userADisplayName ?? 'Partner'}
                 </Text>
               </View>
 
@@ -269,24 +257,21 @@ export default function RelationshipScreen() {
                   ))}
                 </View>
                 <Text style={styles.since}>
-                  {t("relationship.togetherSince", { date: linkedDate })}
+                  {t('relationship.togetherSince', { date: linkedDate })}
                 </Text>
               </View>
 
               {/* Right avatar + name */}
               <View style={styles.avatarCol}>
                 {couple.userBImageUrl ? (
-                  <Image
-                    source={{ uri: couple.userBImageUrl }}
-                    style={styles.avatar}
-                  />
+                  <Image source={{ uri: couple.userBImageUrl }} style={styles.avatar} />
                 ) : (
                   <View style={[styles.avatar, styles.avatarPlaceholder]}>
                     <Ionicons name="person" size={32} color={Colors.textMuted} />
                   </View>
                 )}
                 <Text style={styles.name} numberOfLines={1}>
-                  {couple.userBDisplayName ?? "Partner"}
+                  {couple.userBDisplayName ?? 'Partner'}
                 </Text>
               </View>
             </View>
@@ -294,46 +279,25 @@ export default function RelationshipScreen() {
 
           {/* Anniversary Section */}
           <View style={styles.section}>
-            <Text style={styles.sectionLabel}>
-              {t("relationship.anniversary")}
-            </Text>
+            <Text style={styles.sectionLabel}>{t('relationship.anniversary')}</Text>
 
             {!editing ? (
               <View style={styles.anniversaryView}>
                 {anniversaryDate ? (
                   <>
                     <View style={styles.dateDisplay}>
-                      <Ionicons
-                        name="calendar"
-                        size={20}
-                        color={Colors.accent}
-                      />
+                      <Ionicons name="calendar" size={20} color={Colors.accent} />
                       <Text style={styles.dateText}>{anniversaryDate}</Text>
                     </View>
-                    <Pressable
-                      onPress={startEditing}
-                      style={styles.editBtn}
-                    >
-                      <Ionicons
-                        name="pencil"
-                        size={18}
-                        color={Colors.textSecondary}
-                      />
-                      <Text style={styles.editBtnText}>
-                        {t("relationship.edit")}
-                      </Text>
+                    <Pressable onPress={startEditing} style={styles.editBtn}>
+                      <Ionicons name="pencil" size={18} color={Colors.textSecondary} />
+                      <Text style={styles.editBtnText}>{t('relationship.edit')}</Text>
                     </Pressable>
                   </>
                 ) : (
                   <Pressable onPress={startEditing} style={styles.setDateBtn}>
-                    <Ionicons
-                      name="add-circle-outline"
-                      size={22}
-                      color={Colors.accent}
-                    />
-                    <Text style={styles.setDateText}>
-                      {t("relationship.setDate")}
-                    </Text>
+                    <Ionicons name="add-circle-outline" size={22} color={Colors.accent} />
+                    <Text style={styles.setDateText}>{t('relationship.setDate')}</Text>
                   </Pressable>
                 )}
               </View>
@@ -345,7 +309,7 @@ export default function RelationshipScreen() {
                     style={styles.dateInput}
                     value={day}
                     onChangeText={handleDayChange}
-                    placeholder={t("relationship.day")}
+                    placeholder={t('relationship.day')}
                     placeholderTextColor={Colors.textMuted}
                     keyboardType="number-pad"
                     maxLength={2}
@@ -358,7 +322,7 @@ export default function RelationshipScreen() {
                     style={styles.dateInput}
                     value={month}
                     onChangeText={handleMonthChange}
-                    placeholder={t("relationship.month")}
+                    placeholder={t('relationship.month')}
                     placeholderTextColor={Colors.textMuted}
                     keyboardType="number-pad"
                     maxLength={2}
@@ -370,7 +334,7 @@ export default function RelationshipScreen() {
                     style={[styles.dateInput, styles.yearInput]}
                     value={year}
                     onChangeText={handleYearChange}
-                    placeholder={t("relationship.year")}
+                    placeholder={t('relationship.year')}
                     placeholderTextColor={Colors.textMuted}
                     keyboardType="number-pad"
                     maxLength={4}
@@ -393,17 +357,13 @@ export default function RelationshipScreen() {
                   {mutation.isPending ? (
                     <ActivityIndicator color="#fff" size="small" />
                   ) : (
-                    <Text style={styles.saveBtnText}>
-                      {t("relationship.save")}
-                    </Text>
+                    <Text style={styles.saveBtnText}>{t('relationship.save')}</Text>
                   )}
                 </Pressable>
 
                 <View style={styles.secondaryActions}>
                   <Pressable onPress={cancelEditing} style={styles.textBtn}>
-                    <Text style={styles.textBtnLabel}>
-                      {t("relationship.cancel")}
-                    </Text>
+                    <Text style={styles.textBtnLabel}>{t('relationship.cancel')}</Text>
                   </Pressable>
 
                   {couple.anniversary && (
@@ -413,7 +373,7 @@ export default function RelationshipScreen() {
                       style={styles.textBtn}
                     >
                       <Text style={[styles.textBtnLabel, { color: Colors.accent }]}>
-                        {t("relationship.remove")}
+                        {t('relationship.remove')}
                       </Text>
                     </Pressable>
                   )}
@@ -425,7 +385,7 @@ export default function RelationshipScreen() {
           {/* Unlink Button */}
           <View style={styles.unlinkSection}>
             <Button
-              label={t("relationship.unlink")}
+              label={t('relationship.unlink')}
               onPress={() => setUnlinkVisible(true)}
               variant="ghost"
             />
@@ -443,29 +403,21 @@ export default function RelationshipScreen() {
             <View style={styles.backdrop}>
               <View style={styles.modalCard}>
                 <View style={styles.iconWrap}>
-                  <Ionicons
-                    name="heart-dislike-outline"
-                    size={28}
-                    color={Colors.pasion}
-                  />
+                  <Ionicons name="heart-dislike-outline" size={28} color={Colors.pasion} />
                 </View>
 
-                <Text style={styles.modalTitle}>
-                  {t("relationship.unlinkConfirmTitle")}
-                </Text>
-                <Text style={styles.modalBody}>
-                  {t("relationship.unlinkConfirmMessage")}
-                </Text>
+                <Text style={styles.modalTitle}>{t('relationship.unlinkConfirmTitle')}</Text>
+                <Text style={styles.modalBody}>{t('relationship.unlinkConfirmMessage')}</Text>
 
                 <View style={styles.modalActions}>
                   <Button
-                    label={t("relationship.unlinkConfirm")}
+                    label={t('relationship.unlinkConfirm')}
                     onPress={() => unlinkMutation.mutate()}
                     variant="accent"
                     disabled={unlinkMutation.isPending}
                   />
                   <Button
-                    label={t("relationship.cancel")}
+                    label={t('relationship.cancel')}
                     onPress={() => setUnlinkVisible(false)}
                     variant="ghost"
                   />
@@ -485,8 +437,8 @@ const styles = StyleSheet.create({
     backgroundColor: Colors.background,
   },
   header: {
-    flexDirection: "row",
-    alignItems: "center",
+    flexDirection: 'row',
+    alignItems: 'center',
     paddingHorizontal: 20,
     gap: 20,
     paddingVertical: 14,
@@ -495,13 +447,13 @@ const styles = StyleSheet.create({
     width: 40,
     backgroundColor: Colors.textPrimary,
     height: 40,
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "center",
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
     borderRadius: 25,
   },
   headerTitle: {
-    fontFamily: "Inter_900Black",
+    fontFamily: 'Inter_900Black',
     fontSize: 28,
     letterSpacing: -0.5,
     color: Colors.textPrimary,
@@ -518,12 +470,12 @@ const styles = StyleSheet.create({
     marginTop: 24,
   },
   coupleRow: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "space-between",
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
   },
   avatarCol: {
-    alignItems: "center",
+    alignItems: 'center',
     gap: 10,
     width: AVATAR_SIZE + 10,
   },
@@ -536,25 +488,25 @@ const styles = StyleSheet.create({
   },
   avatarPlaceholder: {
     backgroundColor: Colors.surfaceAlt,
-    alignItems: "center",
-    justifyContent: "center",
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   name: {
-    fontFamily: "Inter_700Bold",
+    fontFamily: 'Inter_700Bold',
     fontSize: 14,
     color: Colors.textPrimary,
-    textAlign: "center",
+    textAlign: 'center',
   },
   connector: {
     flex: 1,
-    alignItems: "center",
+    alignItems: 'center',
     gap: 8,
     paddingHorizontal: 4,
   },
   dotsRow: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "center",
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
     gap: 6,
   },
   dot: {
@@ -567,10 +519,10 @@ const styles = StyleSheet.create({
     marginHorizontal: 4,
   },
   since: {
-    fontFamily: "Inter_400Regular",
+    fontFamily: 'Inter_400Regular',
     fontSize: 11,
     color: Colors.textSecondary,
-    textAlign: "center",
+    textAlign: 'center',
   },
 
   // Anniversary Section
@@ -579,11 +531,11 @@ const styles = StyleSheet.create({
     paddingHorizontal: 20,
   },
   sectionLabel: {
-    fontFamily: "Inter_700Bold",
+    fontFamily: 'Inter_700Bold',
     fontSize: 13,
     letterSpacing: 1,
     color: Colors.textMuted,
-    textTransform: "uppercase",
+    textTransform: 'uppercase',
     marginBottom: 16,
   },
   anniversaryView: {
@@ -595,34 +547,34 @@ const styles = StyleSheet.create({
     gap: 14,
   },
   dateDisplay: {
-    flexDirection: "row",
-    alignItems: "center",
+    flexDirection: 'row',
+    alignItems: 'center',
     gap: 10,
   },
   dateText: {
-    fontFamily: "Inter_700Bold",
+    fontFamily: 'Inter_700Bold',
     fontSize: 17,
     color: Colors.textPrimary,
   },
   editBtn: {
-    flexDirection: "row",
-    alignItems: "center",
+    flexDirection: 'row',
+    alignItems: 'center',
     gap: 6,
-    alignSelf: "flex-start",
+    alignSelf: 'flex-start',
   },
   editBtnText: {
-    fontFamily: "Inter_400Regular",
+    fontFamily: 'Inter_400Regular',
     fontSize: 14,
     color: Colors.textSecondary,
   },
   setDateBtn: {
-    flexDirection: "row",
-    alignItems: "center",
+    flexDirection: 'row',
+    alignItems: 'center',
     gap: 10,
     paddingVertical: 8,
   },
   setDateText: {
-    fontFamily: "Inter_700Bold",
+    fontFamily: 'Inter_700Bold',
     fontSize: 16,
     color: Colors.accent,
   },
@@ -637,9 +589,9 @@ const styles = StyleSheet.create({
     gap: 16,
   },
   inputsRow: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "center",
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
     gap: 8,
   },
   dateInput: {
@@ -649,47 +601,47 @@ const styles = StyleSheet.create({
     borderColor: Colors.border,
     paddingVertical: 14,
     width: 56,
-    fontFamily: "Inter_700Bold",
+    fontFamily: 'Inter_700Bold',
     fontSize: 18,
     color: Colors.textPrimary,
-    textAlign: "center",
+    textAlign: 'center',
   },
   yearInput: {
     width: 80,
   },
   separator: {
-    fontFamily: "Inter_700Bold",
+    fontFamily: 'Inter_700Bold',
     fontSize: 20,
     color: Colors.textMuted,
   },
   errorText: {
-    fontFamily: "Inter_400Regular",
+    fontFamily: 'Inter_400Regular',
     fontSize: 13,
     color: Colors.accent,
-    textAlign: "center",
+    textAlign: 'center',
   },
   saveBtn: {
     backgroundColor: Colors.accent,
     borderRadius: 14,
     paddingVertical: 16,
-    alignItems: "center",
-    justifyContent: "center",
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   saveBtnText: {
-    fontFamily: "Inter_700Bold",
+    fontFamily: 'Inter_700Bold',
     fontSize: 16,
-    color: "#ffffff",
+    color: '#ffffff',
   },
   secondaryActions: {
-    flexDirection: "row",
-    justifyContent: "center",
+    flexDirection: 'row',
+    justifyContent: 'center',
     gap: 24,
   },
   textBtn: {
     paddingVertical: 4,
   },
   textBtnLabel: {
-    fontFamily: "Inter_400Regular",
+    fontFamily: 'Inter_400Regular',
     fontSize: 14,
     color: Colors.textSecondary,
   },
@@ -702,8 +654,8 @@ const styles = StyleSheet.create({
   },
   backdrop: {
     flex: 1,
-    backgroundColor: "rgba(0,0,0,0.7)",
-    justifyContent: "flex-end",
+    backgroundColor: 'rgba(0,0,0,0.7)',
+    justifyContent: 'flex-end',
     paddingHorizontal: 16,
     paddingBottom: 32,
   },
@@ -713,36 +665,36 @@ const styles = StyleSheet.create({
     padding: 28,
     borderWidth: 1,
     borderColor: Colors.border,
-    alignItems: "center",
+    alignItems: 'center',
   },
   iconWrap: {
     width: 56,
     height: 56,
     borderRadius: 28,
-    backgroundColor: "rgba(255,59,92,0.12)",
-    alignItems: "center",
-    justifyContent: "center",
+    backgroundColor: 'rgba(255,59,92,0.12)',
+    alignItems: 'center',
+    justifyContent: 'center',
     marginBottom: 20,
   },
   modalTitle: {
-    fontFamily: "Inter_900Black",
+    fontFamily: 'Inter_900Black',
     fontSize: 20,
     letterSpacing: -0.3,
     color: Colors.textPrimary,
-    textAlign: "center",
+    textAlign: 'center',
     marginBottom: 10,
   },
   modalBody: {
-    fontFamily: "Inter_400Regular",
+    fontFamily: 'Inter_400Regular',
     fontSize: 14,
     lineHeight: 21,
     color: Colors.textSecondary,
-    textAlign: "center",
+    textAlign: 'center',
     marginBottom: 28,
     maxWidth: 280,
   },
   modalActions: {
-    width: "100%",
+    width: '100%',
     gap: 10,
   },
 });

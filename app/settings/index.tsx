@@ -1,47 +1,42 @@
-import { View, Text, StyleSheet, Pressable, Modal } from "react-native";
-import { useState } from "react";
-import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { useRouter } from "expo-router";
-import { Ionicons } from "@expo/vector-icons";
-import { useTranslation } from "react-i18next";
+import { View, Text, StyleSheet, Pressable, Modal } from 'react-native';
+import { useState } from 'react';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { useRouter } from 'expo-router';
+import { Ionicons } from '@expo/vector-icons';
+import { useTranslation } from 'react-i18next';
 
-import { Colors } from "@/constants/colors";
-import { Button } from "@/components/ui/Button";
-import { useAuth } from "@/context/AuthContext";
-import { useRevenueCat } from "@/context/RevenueCatContext";
-import { Toast } from "toastify-react-native";
-import { apiDeleteAccount } from "@/lib/api";
+import { Colors } from '@/constants/colors';
+import { Button } from '@/components/ui/Button';
+import { useAuth } from '@/context/AuthContext';
+import { useRevenueCat } from '@/context/RevenueCatContext';
+import { Toast } from 'toastify-react-native';
+import { apiDeleteAccount } from '@/lib/api';
 
 export default function SettingsScreen() {
   const insets = useSafeAreaInsets();
   const router = useRouter();
   const { logout } = useAuth();
-  const {
-    isPurchaser,
-    entitlementData,
-    presentCustomerCenter,
-    restorePurchases,
-  } = useRevenueCat();
+  const { isPurchaser, entitlementData, presentCustomerCenter, restorePurchases } = useRevenueCat();
   const [logoutVisible, setLogoutVisible] = useState(false);
   const [deleteVisible, setDeleteVisible] = useState(false);
   const [deleteLoading, setDeleteLoading] = useState(false);
-  const { t } = useTranslation("settings");
+  const { t } = useTranslation('settings');
 
   async function handleRestore() {
     try {
       await restorePurchases();
       Toast.success(
-        t("restoreSuccess", {
-          ns: "home",
-          defaultValue: "Purchases restored!",
-        }),
+        t('restoreSuccess', {
+          ns: 'home',
+          defaultValue: 'Purchases restored!',
+        })
       );
     } catch {
       Toast.error(
-        t("restoreError", {
-          ns: "home",
-          defaultValue: "Could not restore purchases.",
-        }),
+        t('restoreError', {
+          ns: 'home',
+          defaultValue: 'Could not restore purchases.',
+        })
       );
     }
   }
@@ -53,51 +48,51 @@ export default function SettingsScreen() {
     onPress?: () => void;
   }[] = [
     {
-      label: t("menu.notifications"),
-      route: "/settings/notifications",
-      icon: "notifications-outline",
+      label: t('menu.notifications'),
+      route: '/settings/notifications',
+      icon: 'notifications-outline',
     },
     {
-      label: t("menu.language"),
-      route: "/settings/language",
-      icon: "language-outline",
+      label: t('menu.language'),
+      route: '/settings/language',
+      icon: 'language-outline',
     },
     {
-      label: t("menu.relationship"),
-      route: "/settings/relationship",
-      icon: "heart-outline",
+      label: t('menu.relationship'),
+      route: '/settings/relationship',
+      icon: 'heart-outline',
     },
     ...(isPurchaser
       ? [
           {
-            label: t("menu.subscription"),
-            icon: "card-outline",
+            label: t('menu.subscription'),
+            icon: 'card-outline',
             onPress: () => presentCustomerCenter(),
           },
         ]
       : !entitlementData?.premium
         ? [
             {
-              label: t("menu.restorePurchases"),
-              icon: "refresh-outline",
+              label: t('menu.restorePurchases'),
+              icon: 'refresh-outline',
               onPress: handleRestore,
             },
           ]
         : []),
     {
-      label: t("menu.terms"),
-      route: "/settings/terms",
-      icon: "document-text-outline",
+      label: t('menu.terms'),
+      route: '/settings/terms',
+      icon: 'document-text-outline',
     },
     {
-      label: t("menu.privacy"),
-      route: "/settings/privacy",
-      icon: "shield-checkmark-outline",
+      label: t('menu.privacy'),
+      route: '/settings/privacy',
+      icon: 'shield-checkmark-outline',
     },
     {
-      label: t("menu.faq"),
-      route: "/settings/faq",
-      icon: "help-circle-outline",
+      label: t('menu.faq'),
+      route: '/settings/faq',
+      icon: 'help-circle-outline',
     },
   ];
 
@@ -107,7 +102,7 @@ export default function SettingsScreen() {
         <Pressable onPress={() => router.back()} style={styles.backBtn}>
           <Ionicons name="arrow-back" size={22} color={Colors.background} />
         </Pressable>
-        <Text style={styles.headerTitle}>{t("title")}</Text>
+        <Text style={styles.headerTitle}>{t('title')}</Text>
       </View>
 
       <View style={styles.content}>
@@ -116,31 +111,18 @@ export default function SettingsScreen() {
             <Pressable
               key={index}
               style={styles.row}
-              onPress={() =>
-                item.onPress ? item.onPress() : router.push(item.route as any)
-              }
+              onPress={() => (item.onPress ? item.onPress() : router.push(item.route as any))}
             >
-              <Ionicons
-                name={item.icon as any}
-                size={20}
-                color={Colors.textMuted}
-              />
+              <Ionicons name={item.icon as any} size={20} color={Colors.textMuted} />
               <Text style={styles.rowLabel}>{item.label}</Text>
             </Pressable>
           ))}
         </View>
 
         <View style={[styles.footer, { paddingBottom: insets.bottom + 16 }]}>
-          <Button
-            label={t("signOut")}
-            onPress={() => setLogoutVisible(true)}
-            variant="accent"
-          />
-          <Pressable
-            onPress={() => setDeleteVisible(true)}
-            style={styles.deleteAccountBtn}
-          >
-            <Text style={styles.deleteAccountLabel}>{t("deleteAccount")}</Text>
+          <Button label={t('signOut')} onPress={() => setLogoutVisible(true)} variant="accent" />
+          <Pressable onPress={() => setDeleteVisible(true)} style={styles.deleteAccountBtn}>
+            <Text style={styles.deleteAccountLabel}>{t('deleteAccount')}</Text>
           </Pressable>
         </View>
       </View>
@@ -156,27 +138,23 @@ export default function SettingsScreen() {
         <View style={styles.backdrop}>
           <View style={styles.card}>
             <View style={styles.iconWrap}>
-              <Ionicons
-                name="log-out-outline"
-                size={28}
-                color={Colors.pasion}
-              />
+              <Ionicons name="log-out-outline" size={28} color={Colors.pasion} />
             </View>
 
-            <Text style={styles.modalTitle}>{t("signOutConfirmTitle")}</Text>
-            <Text style={styles.modalBody}>{t("signOutConfirmMessage")}</Text>
+            <Text style={styles.modalTitle}>{t('signOutConfirmTitle')}</Text>
+            <Text style={styles.modalBody}>{t('signOutConfirmMessage')}</Text>
 
             <View style={styles.actions}>
               <Button
-                label={t("signOut")}
+                label={t('signOut')}
                 onPress={() => {
                   logout();
-                  router.replace("/(auth)/welcome");
+                  router.replace('/(auth)/welcome');
                 }}
                 variant="accent"
               />
               <Button
-                label={t("cancel", { ns: "common" })}
+                label={t('cancel', { ns: 'common' })}
                 onPress={() => setLogoutVisible(false)}
                 variant="ghost"
               />
@@ -199,21 +177,21 @@ export default function SettingsScreen() {
               <Ionicons name="trash-outline" size={28} color={Colors.pasion} />
             </View>
 
-            <Text style={styles.modalTitle}>{t("deleteAccountConfirmTitle")}</Text>
-            <Text style={styles.modalBody}>{t("deleteAccountConfirmMessage")}</Text>
+            <Text style={styles.modalTitle}>{t('deleteAccountConfirmTitle')}</Text>
+            <Text style={styles.modalBody}>{t('deleteAccountConfirmMessage')}</Text>
 
             <View style={styles.actions}>
               <Button
-                label={t("deleteAccount")}
+                label={t('deleteAccount')}
                 onPress={async () => {
                   setDeleteLoading(true);
                   try {
                     await apiDeleteAccount();
-                    Toast.success(t("deleteAccountSuccess"));
+                    Toast.success(t('deleteAccountSuccess'));
                     logout();
-                    router.replace("/(auth)/welcome");
+                    router.replace('/(auth)/welcome');
                   } catch {
-                    Toast.error(t("deleteAccountError", { defaultValue: "Error" }));
+                    Toast.error(t('deleteAccountError', { defaultValue: 'Error' }));
                     setDeleteLoading(false);
                     setDeleteVisible(false);
                   }
@@ -222,7 +200,7 @@ export default function SettingsScreen() {
                 disabled={deleteLoading}
               />
               <Button
-                label={t("cancel", { ns: "common" })}
+                label={t('cancel', { ns: 'common' })}
                 onPress={() => setDeleteVisible(false)}
                 variant="ghost"
                 disabled={deleteLoading}
@@ -241,8 +219,8 @@ const styles = StyleSheet.create({
     backgroundColor: Colors.background,
   },
   header: {
-    flexDirection: "row",
-    alignItems: "center",
+    flexDirection: 'row',
+    alignItems: 'center',
     paddingHorizontal: 20,
     gap: 20,
     paddingVertical: 14,
@@ -253,28 +231,28 @@ const styles = StyleSheet.create({
     height: 40,
     borderRadius: 20,
     backgroundColor: Colors.textPrimary,
-    alignItems: "center",
-    justifyContent: "center",
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   headerTitle: {
-    fontFamily: "Inter_900Black",
+    fontFamily: 'Inter_900Black',
     fontSize: 28,
     letterSpacing: -0.5,
     color: Colors.textPrimary,
   },
   content: {
     flex: 1,
-    justifyContent: "space-between",
+    justifyContent: 'space-between',
   },
   row: {
     paddingVertical: 18,
     paddingHorizontal: 20,
-    flexDirection: "row",
-    alignItems: "center",
+    flexDirection: 'row',
+    alignItems: 'center',
     gap: 12,
   },
   rowLabel: {
-    fontFamily: "Inter_700Bold",
+    fontFamily: 'Inter_700Bold',
     fontSize: 13,
     letterSpacing: 0.8,
     color: Colors.textMuted,
@@ -285,8 +263,8 @@ const styles = StyleSheet.create({
   },
   backdrop: {
     flex: 1,
-    backgroundColor: "rgba(0,0,0,0.7)",
-    justifyContent: "flex-end",
+    backgroundColor: 'rgba(0,0,0,0.7)',
+    justifyContent: 'flex-end',
     paddingHorizontal: 16,
     paddingBottom: 32,
   },
@@ -296,51 +274,51 @@ const styles = StyleSheet.create({
     padding: 28,
     borderWidth: 1,
     borderColor: Colors.border,
-    alignItems: "center",
+    alignItems: 'center',
   },
   iconWrap: {
     width: 56,
     height: 56,
     borderRadius: 28,
-    backgroundColor: "rgba(255,59,92,0.12)",
-    alignItems: "center",
-    justifyContent: "center",
+    backgroundColor: 'rgba(255,59,92,0.12)',
+    alignItems: 'center',
+    justifyContent: 'center',
     marginBottom: 20,
   },
   modalTitle: {
-    fontFamily: "Inter_900Black",
+    fontFamily: 'Inter_900Black',
     fontSize: 20,
     letterSpacing: -0.3,
     color: Colors.textPrimary,
-    textAlign: "center",
+    textAlign: 'center',
     marginBottom: 10,
   },
   modalBody: {
-    fontFamily: "Inter_400Regular",
+    fontFamily: 'Inter_400Regular',
     fontSize: 14,
     lineHeight: 21,
     color: Colors.textSecondary,
-    textAlign: "center",
+    textAlign: 'center',
     marginBottom: 28,
     maxWidth: 280,
   },
   actions: {
-    width: "100%",
+    width: '100%',
     gap: 10,
   },
   deleteAccountBtn: {
-    alignItems: "center",
+    alignItems: 'center',
     paddingVertical: 12,
     marginTop: 4,
   },
   deleteAccountLabel: {
-    fontFamily: "Inter_700Bold",
+    fontFamily: 'Inter_700Bold',
     fontSize: 12,
     letterSpacing: 0.8,
     color: Colors.pasion,
     opacity: 0.7,
   },
   deleteIconWrap: {
-    backgroundColor: "rgba(255,59,92,0.12)",
+    backgroundColor: 'rgba(255,59,92,0.12)',
   },
 });

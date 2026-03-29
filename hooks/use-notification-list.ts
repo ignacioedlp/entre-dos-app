@@ -1,8 +1,13 @@
-import { NotificationItem } from "@/components/notifications/notification-card";
-import { ApiNotification, fetchNotifications, markAllNotificationsRead, markNotificationRead } from "@/lib/api";
-import moment from "moment";
-import { useCallback, useEffect, useState } from "react";
-import i18n from "@/i18n";
+import { NotificationItem } from '@/components/notifications/notification-card';
+import {
+  ApiNotification,
+  fetchNotifications,
+  markAllNotificationsRead,
+  markNotificationRead,
+} from '@/lib/api';
+import moment from 'moment';
+import { useCallback, useEffect, useState } from 'react';
+import i18n from '@/i18n';
 
 function parseApiDate(dateStr: string): Date {
   return moment.utc(dateStr).toDate();
@@ -20,16 +25,16 @@ function formatTime(dateStr: string, t?: TFunction): string {
   const notifDateStr = date.toDateString();
 
   const hhmm = date.toLocaleTimeString([], {
-    hour: "2-digit",
-    minute: "2-digit",
+    hour: '2-digit',
+    minute: '2-digit',
   });
 
   if (notifDateStr === todayStr) return hhmm;
-  if (notifDateStr === yesterdayStr) return i18n.t("notifications:buckets.yesterday");
+  if (notifDateStr === yesterdayStr) return i18n.t('notifications:buckets.yesterday');
   return date.toLocaleDateString();
 }
 
-function getBucket(dateStr: string): "today" | "yesterday" | "earlier" {
+function getBucket(dateStr: string): 'today' | 'yesterday' | 'earlier' {
   const date = parseApiDate(dateStr);
   const now = new Date();
   const todayStr = now.toDateString();
@@ -38,9 +43,9 @@ function getBucket(dateStr: string): "today" | "yesterday" | "earlier" {
   const yesterdayStr = yesterdayDate.toDateString();
   const notifDateStr = date.toDateString();
 
-  if (notifDateStr === todayStr) return "today";
-  if (notifDateStr === yesterdayStr) return "yesterday";
-  return "earlier";
+  if (notifDateStr === todayStr) return 'today';
+  if (notifDateStr === yesterdayStr) return 'yesterday';
+  return 'earlier';
 }
 
 interface UseNotificationListResult {
@@ -78,7 +83,7 @@ export function useNotificationList(): UseNotificationListResult {
       });
     }
 
-    return (["today", "yesterday", "earlier"] as const)
+    return (['today', 'yesterday', 'earlier'] as const)
       .filter((key) => buckets[key].length > 0)
       .map((key) => ({ title: key, items: buckets[key] }));
   }
@@ -93,7 +98,7 @@ export function useNotificationList(): UseNotificationListResult {
       const data = await fetchNotifications();
       setNotifications(data.notifications);
     } catch {
-      setError("Failed to load notifications");
+      setError('Failed to load notifications');
     } finally {
       setIsLoading(false);
     }
@@ -103,34 +108,23 @@ export function useNotificationList(): UseNotificationListResult {
     load();
   }, [load]);
 
-  const markRead = useCallback(
-    async (id: string) => {
-      const numId = id;
+  const markRead = useCallback(async (id: string) => {
+    const numId = id;
+    setNotifications((prev) =>
+      prev.map((n) => (n.id === numId ? { ...n, read: true, readAt: new Date().toISOString() } : n))
+    );
+    try {
+      await markNotificationRead(numId);
+    } catch {
       setNotifications((prev) =>
-        prev.map((n) =>
-          n.id === numId
-            ? { ...n, read: true, readAt: new Date().toISOString() }
-            : n,
-        ),
+        prev.map((n) => (n.id === numId ? { ...n, read: false, readAt: null } : n))
       );
-      try {
-        await markNotificationRead(numId);
-      } catch {
-        setNotifications((prev) =>
-          prev.map((n) =>
-            n.id === numId ? { ...n, read: false, readAt: null } : n,
-          ),
-        );
-      }
-    },
-    [],
-  );
+    }
+  }, []);
 
   const markAllRead = useCallback(async () => {
     const now = new Date().toISOString();
-    setNotifications((prev) =>
-      prev.map((n) => ({ ...n, read: true, readAt: n.readAt ?? now })),
-    );
+    setNotifications((prev) => prev.map((n) => ({ ...n, read: true, readAt: n.readAt ?? now })));
     try {
       await markAllNotificationsRead();
     } catch {

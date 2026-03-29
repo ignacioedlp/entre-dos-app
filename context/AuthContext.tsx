@@ -1,33 +1,15 @@
-import {
-  createContext,
-  useContext,
-  useState,
-  ReactNode,
-  useEffect,
-} from "react";
-import * as Localization from "expo-localization";
-import { GoogleSignin } from "@react-native-google-signin/google-signin";
-import {
-  apiLogin,
-  apiRegister,
-  apiGoogleAuth,
-  apiResetPassword,
-} from "../lib/api";
-import {
-  clearAll,
-  getProfile,
-  getToken,
-  ProfileData,
-  setProfile,
-  setToken,
-} from "../lib/storage";
-import i18n from "@/i18n";
+import { createContext, useContext, useState, ReactNode, useEffect } from 'react';
+import * as Localization from 'expo-localization';
+import { GoogleSignin } from '@react-native-google-signin/google-signin';
+import { apiLogin, apiRegister, apiGoogleAuth, apiResetPassword } from '../lib/api';
+import { clearAll, getProfile, getToken, ProfileData, setProfile, setToken } from '../lib/storage';
+import i18n from '@/i18n';
 
 export class DeletionPendingError extends Error {
   deletionScheduledFor: string;
   idToken?: string;
   constructor(deletionScheduledFor: string, idToken?: string) {
-    super("ACCOUNT_DELETION_PENDING");
+    super('ACCOUNT_DELETION_PENDING');
     this.deletionScheduledFor = deletionScheduledFor;
     this.idToken = idToken;
   }
@@ -47,11 +29,7 @@ interface AuthState {
 interface AuthContextValue extends AuthState {
   login: (email: string, password: string) => Promise<ProfileData>;
   googleLogin: () => Promise<ProfileData>;
-  register: (
-    email: string,
-    password: string,
-    passwordConfirm: string,
-  ) => Promise<void>;
+  register: (email: string, password: string, passwordConfirm: string) => Promise<void>;
   resetPassword: (token: string, password: string) => Promise<ProfileData>;
   logout: () => void;
   updateProfile: (profile: ProfileData) => void;
@@ -81,26 +59,17 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       return profile;
     } catch (err: any) {
       const code = err?.response?.data?.code;
-      if (code === "ACCOUNT_DELETION_PENDING") {
-        throw new DeletionPendingError(err.response.data.deletionScheduledFor ?? "");
+      if (code === 'ACCOUNT_DELETION_PENDING') {
+        throw new DeletionPendingError(err.response.data.deletionScheduledFor ?? '');
       }
       throw err;
     }
   }
 
-  async function register(
-    email: string,
-    password: string,
-    passwordConfirm: string,
-  ): Promise<void> {
-    const deviceLang = Localization.getLocales()[0]?.languageCode ?? "es";
-    const locale = deviceLang === "en" ? "en" : "es";
-    const { accessToken, profile } = await apiRegister(
-      email,
-      password,
-      passwordConfirm,
-      locale,
-    );
+  async function register(email: string, password: string, passwordConfirm: string): Promise<void> {
+    const deviceLang = Localization.getLocales()[0]?.languageCode ?? 'es';
+    const locale = deviceLang === 'en' ? 'en' : 'es';
+    const { accessToken, profile } = await apiRegister(email, password, passwordConfirm, locale);
     setToken(accessToken);
     setProfile(profile);
     setState({ user: profile, token: accessToken });
@@ -110,9 +79,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     await GoogleSignin.hasPlayServices();
     const response = await GoogleSignin.signIn();
     const idToken = response.data?.idToken;
-    if (!idToken) throw new Error("No Google ID token received");
-    const deviceLang = Localization.getLocales()[0]?.languageCode ?? "es";
-    const locale = deviceLang === "en" ? "en" : "es";
+    if (!idToken) throw new Error('No Google ID token received');
+    const deviceLang = Localization.getLocales()[0]?.languageCode ?? 'es';
+    const locale = deviceLang === 'en' ? 'en' : 'es';
     try {
       const { accessToken, profile } = await apiGoogleAuth(idToken, locale);
       setToken(accessToken);
@@ -122,17 +91,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       return profile;
     } catch (err: any) {
       const code = err?.response?.data?.code;
-      if (code === "ACCOUNT_DELETION_PENDING") {
-        throw new DeletionPendingError(err.response.data.deletionScheduledFor ?? "", idToken);
+      if (code === 'ACCOUNT_DELETION_PENDING') {
+        throw new DeletionPendingError(err.response.data.deletionScheduledFor ?? '', idToken);
       }
       throw err;
     }
   }
 
-  async function resetPassword(
-    token: string,
-    password: string,
-  ): Promise<ProfileData> {
+  async function resetPassword(token: string, password: string): Promise<ProfileData> {
     const { accessToken, profile } = await apiResetPassword(token, password);
     setToken(accessToken);
     setProfile(profile);
@@ -170,6 +136,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
 export function useAuth(): AuthContextValue {
   const ctx = useContext(AuthContext);
-  if (!ctx) throw new Error("useAuth must be used within AuthProvider");
+  if (!ctx) throw new Error('useAuth must be used within AuthProvider');
   return ctx;
 }
