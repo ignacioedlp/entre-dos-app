@@ -1,3 +1,5 @@
+import * as Sentry from "@sentry/react-native";
+import { vexo } from "vexo-analytics";
 import { useEffect } from "react";
 import { Stack } from "expo-router";
 import { StatusBar } from "expo-status-bar";
@@ -30,6 +32,14 @@ const toastConfig = {
   info: (props: any) => <InfoToast {...props} />,
 };
 
+Sentry.init({
+  dsn: process.env.EXPO_PUBLIC_SENTRY_DSN,
+  tracesSampleRate: 1.0,
+  enabled: !__DEV__,
+});
+
+vexo(process.env.EXPO_PUBLIC_VEXO_API_KEY!);
+
 SplashScreen.preventAutoHideAsync();
 
 const queryClient = new QueryClient();
@@ -44,7 +54,7 @@ Notifications.setNotificationHandler({
   }),
 });
 
-export default function RootLayout() {
+function RootLayout() {
   const [fontsLoaded, fontError] = useFonts({
     Inter_400Regular,
     Inter_700Bold,
@@ -132,3 +142,5 @@ export default function RootLayout() {
     </GestureHandlerRootView>
   );
 }
+
+export default Sentry.wrap(RootLayout);

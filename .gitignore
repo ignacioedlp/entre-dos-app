@@ -43,3 +43,4 @@ yarn-error.*
 
 google-services.json
 google-key.json
+.env.local
