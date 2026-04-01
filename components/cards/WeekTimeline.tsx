@@ -1,20 +1,15 @@
-import moment from "moment";
-import { View, Text, StyleSheet } from "react-native";
-import { useTranslation } from "react-i18next";
+import moment from 'moment';
+import { View, Text, StyleSheet } from 'react-native';
+import { useTranslation } from 'react-i18next';
 
-import { CardHistoryItem } from "../../lib/api";
-import {
-  Colors,
-  RarityKey,
-  rarityColor,
-  rarityGlow,
-} from "../../constants/colors";
+import { CardHistoryItem } from '../../lib/api';
+import { Colors, RarityKey, rarityColor, rarityGlow } from '../../constants/colors';
 
 const RARITY_MAP: Record<string, RarityKey> = {
-  common: "comun",
-  rare: "rara",
-  epic: "epica",
-  legendary: "legendaria",
+  common: 'comun',
+  rare: 'rara',
+  epic: 'epica',
+  legendary: 'legendaria',
 };
 
 interface WeekTimelineProps {
@@ -69,15 +64,15 @@ function TimelineEntry({
   isLast: boolean;
   currentUserId: string;
 }) {
-  const { t } = useTranslation(["home", "common"]);
-  const rarity = RARITY_MAP[play.rarity] ?? "comun";
+  const { t } = useTranslation(['home', 'common']);
+  const rarity = RARITY_MAP[play.rarity] ?? 'comun';
   const dotColor = rarityColor[rarity];
   const dotGlow = rarityGlow[rarity];
   const isMine = play.userId === currentUserId;
   const playerLabel = isMine
-    ? t("home:weekTimeline.you")
-    : (play.userName ?? t("home:weekTimeline.partner"));
-  const timeStr = moment(play.playedAt).format("MMM D · HH:mm");
+    ? t('home:weekTimeline.you')
+    : (play.userName ?? t('home:weekTimeline.partner'));
+  const timeStr = moment(play.playedAt).format('MMM D · HH:mm');
 
   const categoryLabel = t(`common:category.${play.category}`, {
     defaultValue: play.category.toUpperCase(),
@@ -109,19 +104,15 @@ function TimelineEntry({
         <View style={styles.metaRow}>
           <Text style={styles.timeText}>{timeStr}</Text>
           <Text style={styles.metaSep}> · </Text>
-          <Text style={[styles.playerText, isMine && styles.playerTextMine]}>
-            {playerLabel}
-          </Text>
+          <Text style={[styles.playerText, isMine && styles.playerTextMine]}>{playerLabel}</Text>
         </View>
 
         <View style={styles.badgeRow}>
           <View style={styles.badge}>
             <Text style={styles.badgeText}>{categoryLabel}</Text>
           </View>
-          <View style={[styles.badge, { borderColor: dotColor + "55" }]}>
-            <Text style={[styles.badgeText, { color: dotColor }]}>
-              {rarityLabel}
-            </Text>
+          <View style={[styles.badge, { borderColor: dotColor + '55' }]}>
+            <Text style={[styles.badgeText, { color: dotColor }]}>{rarityLabel}</Text>
           </View>
         </View>
 
@@ -131,7 +122,9 @@ function TimelineEntry({
 
         {play.description ? (
           <Text style={styles.noteText} numberOfLines={3}>
-            "{play.description}"
+            {'"'}
+            {play.description}
+            {'"'}
           </Text>
         ) : null}
       </View>
@@ -139,20 +132,16 @@ function TimelineEntry({
   );
 }
 
-export function WeekTimeline({
-  plays,
-  isLoading,
-  currentUserId,
-}: WeekTimelineProps) {
-  const { t } = useTranslation("home");
+export function WeekTimeline({ plays, isLoading, currentUserId }: WeekTimelineProps) {
+  const { t } = useTranslation('home');
 
   return (
     <View style={styles.container}>
       <View style={styles.sectionHeader}>
-        <Text style={styles.sectionTitle}>{t("weekTimeline.title")}</Text>
+        <Text style={styles.sectionTitle}>{t('weekTimeline.title')}</Text>
         {!isLoading && plays.length > 0 && (
           <Text style={styles.sectionCount}>
-            {t("weekTimeline.played", { count: plays.length })}
+            {t('weekTimeline.played', { count: plays.length })}
           </Text>
         )}
       </View>
@@ -166,7 +155,7 @@ export function WeekTimeline({
           <SkeletonRow />
         </>
       ) : plays.length === 0 ? (
-        <Text style={styles.emptyText}>{t("weekTimeline.empty")}</Text>
+        <Text style={styles.emptyText}>{t('weekTimeline.empty')}</Text>
       ) : (
         plays.map((play, i) => (
           <TimelineEntry
@@ -188,20 +177,20 @@ const styles = StyleSheet.create({
     marginTop: 36,
   },
   sectionHeader: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "space-between",
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
     marginBottom: 12,
   },
   sectionTitle: {
-    fontFamily: "Inter_900Black",
+    fontFamily: 'Inter_900Black',
     fontSize: 11,
     letterSpacing: 2.5,
-    textTransform: "uppercase",
+    textTransform: 'uppercase',
     color: Colors.textMuted,
   },
   sectionCount: {
-    fontFamily: "Inter_400Regular",
+    fontFamily: 'Inter_400Regular',
     fontSize: 12,
     color: Colors.textSecondary,
   },
@@ -211,18 +200,18 @@ const styles = StyleSheet.create({
     marginBottom: 20,
   },
   emptyText: {
-    fontFamily: "Inter_400Regular",
+    fontFamily: 'Inter_400Regular',
     fontSize: 14,
     color: Colors.textMuted,
-    textAlign: "center",
+    textAlign: 'center',
     paddingVertical: 24,
   },
   row: {
-    flexDirection: "row",
+    flexDirection: 'row',
   },
   leftCol: {
     width: 28,
-    alignItems: "center",
+    alignItems: 'center',
     paddingTop: 2,
   },
   dot: {
@@ -246,23 +235,23 @@ const styles = StyleSheet.create({
     paddingBottom: 0,
   },
   metaRow: {
-    flexDirection: "row",
-    alignItems: "center",
-    flexWrap: "wrap",
+    flexDirection: 'row',
+    alignItems: 'center',
+    flexWrap: 'wrap',
   },
   timeText: {
-    fontFamily: "Inter_400Regular",
+    fontFamily: 'Inter_400Regular',
     fontSize: 12,
     color: Colors.textMuted,
-    textTransform: "capitalize",
+    textTransform: 'capitalize',
   },
   metaSep: {
-    fontFamily: "Inter_400Regular",
+    fontFamily: 'Inter_400Regular',
     fontSize: 12,
     color: Colors.textMuted,
   },
   playerText: {
-    fontFamily: "Inter_700Bold",
+    fontFamily: 'Inter_700Bold',
     fontSize: 12,
     color: Colors.textSecondary,
   },
@@ -270,7 +259,7 @@ const styles = StyleSheet.create({
     color: Colors.accent,
   },
   badgeRow: {
-    flexDirection: "row",
+    flexDirection: 'row',
     gap: 6,
     marginTop: 2,
   },
@@ -282,27 +271,27 @@ const styles = StyleSheet.create({
     paddingVertical: 2,
   },
   badgeText: {
-    fontFamily: "Inter_900Black",
+    fontFamily: 'Inter_900Black',
     fontSize: 9,
     letterSpacing: 1.5,
-    textTransform: "uppercase",
+    textTransform: 'uppercase',
     color: Colors.textMuted,
   },
   cardTitle: {
-    fontFamily: "Inter_900Black",
+    fontFamily: 'Inter_900Black',
     fontSize: 15,
     letterSpacing: -0.3,
-    textTransform: "uppercase",
+    textTransform: 'uppercase',
     color: Colors.textPrimary,
     lineHeight: 19,
     marginTop: 2,
   },
   noteText: {
-    fontFamily: "Inter_400Regular",
+    fontFamily: 'Inter_400Regular',
     fontSize: 13,
     lineHeight: 18,
     color: Colors.textSecondary,
-    fontStyle: "italic",
+    fontStyle: 'italic',
     marginTop: 2,
   },
 });

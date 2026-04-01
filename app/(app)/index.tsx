@@ -1,4 +1,4 @@
-import { useRef } from "react";
+import { useRef } from 'react';
 import {
   View,
   Text,
@@ -6,40 +6,34 @@ import {
   Dimensions,
   ActivityIndicator,
   ScrollView,
-  TouchableOpacity,
   Pressable,
-} from "react-native";
-import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { useRouter } from "expo-router";
-import { useQuery } from "@tanstack/react-query";
-import { useTranslation } from "react-i18next";
-import Animated, {
-  useSharedValue,
-  withSpring,
-  withTiming,
-  runOnJS,
-} from "react-native-reanimated";
-import { Gesture, GestureDetector } from "react-native-gesture-handler";
-import { Ionicons } from "@expo/vector-icons";
+} from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { useRouter } from 'expo-router';
+import { useQuery } from '@tanstack/react-query';
+import { useTranslation } from 'react-i18next';
+import Animated, { useSharedValue, withSpring, withTiming, runOnJS } from 'react-native-reanimated';
+import { Gesture, GestureDetector } from 'react-native-gesture-handler';
+import { Ionicons } from '@expo/vector-icons';
 
-import { WeekTimeline } from "../../components/cards/WeekTimeline";
+import { WeekTimeline } from '../../components/cards/WeekTimeline';
 import {
   CylinderCard,
   CARD_HEIGHT,
   CARD_WIDTH,
   ANGLE_PER_CARD,
-} from "../../components/carousel/CylinderCard";
-import { PartnerLastPlay } from "../../components/cards/PartnerLastPlay";
-import { AllPlayedState } from "../../components/home/AllPlayedState";
-import { Colors } from "../../constants/colors";
-import { useAuth } from "../../context/AuthContext";
-import { apiGetDeck, apiGetHistory, DeckCard } from "../../lib/api";
-import { useNotificationList } from "../../hooks/use-notification-list";
+} from '../../components/carousel/CylinderCard';
+import { PartnerLastPlay } from '../../components/cards/PartnerLastPlay';
+import { AllPlayedState } from '../../components/home/AllPlayedState';
+import { Colors } from '../../constants/colors';
+import { useAuth } from '../../context/AuthContext';
+import { apiGetDeck, apiGetHistory, DeckCard } from '../../lib/api';
+import { useNotificationList } from '../../hooks/use-notification-list';
 
-const { width: SCREEN_WIDTH } = Dimensions.get("window");
+const { width: SCREEN_WIDTH } = Dimensions.get('window');
 
 function clamp(value: number, min: number, max: number) {
-  "worklet";
+  'worklet';
   return Math.min(Math.max(value, min), max);
 }
 
@@ -47,22 +41,22 @@ export default function HomeScreen() {
   const insets = useSafeAreaInsets();
   const router = useRouter();
   const { user } = useAuth();
-  const { t } = useTranslation("home");
+  const { t } = useTranslation('home');
 
   const { data, isLoading } = useQuery({
-    queryKey: ["deck"],
+    queryKey: ['deck'],
     queryFn: apiGetDeck,
   });
 
   const { data: historyData, isLoading: isHistoryLoading } = useQuery({
-    queryKey: ["deck-history"],
+    queryKey: ['deck-history'],
     queryFn: apiGetHistory,
   });
 
   const { hasUnread } = useNotificationList();
 
   const allCards = data?.cards ?? [];
-  const cards = allCards.filter((c) => c.status !== "played");
+  const cards = allCards.filter((c) => c.status !== 'played');
   const cardsRef = useRef<DeckCard[]>([]);
   cardsRef.current = cards;
 
@@ -84,9 +78,7 @@ export default function HomeScreen() {
       baseRotation.value = rotation.value;
     })
     .onUpdate((e) => {
-      const isVertical =
-        Math.abs(e.translationY) > Math.abs(e.translationX) &&
-        e.translationY > 0;
+      const isVertical = Math.abs(e.translationY) > Math.abs(e.translationX) && e.translationY > 0;
       if (isVertical) {
         dragY.value = e.translationY;
       } else {
@@ -99,11 +91,7 @@ export default function HomeScreen() {
       if (!list.length) return;
 
       if (dragY.value > 80) {
-        const activeIdx = clamp(
-          Math.round(rotation.value / ANGLE_PER_CARD),
-          0,
-          list.length - 1,
-        );
+        const activeIdx = clamp(Math.round(rotation.value / ANGLE_PER_CARD), 0, list.length - 1);
         const card = list[activeIdx];
         dragY.value = withTiming(CARD_HEIGHT * 1.3, { duration: 260 }, () => {
           runOnJS(doNavigate)(card);
@@ -113,11 +101,7 @@ export default function HomeScreen() {
 
       dragY.value = withSpring(0, { damping: 18, stiffness: 200 });
 
-      const nearest = clamp(
-        Math.round(rotation.value / ANGLE_PER_CARD),
-        0,
-        list.length - 1,
-      );
+      const nearest = clamp(Math.round(rotation.value / ANGLE_PER_CARD), 0, list.length - 1);
       rotation.value = withSpring(nearest * ANGLE_PER_CARD, {
         damping: 18,
         stiffness: 200,
@@ -125,8 +109,7 @@ export default function HomeScreen() {
       baseRotation.value = nearest * ANGLE_PER_CARD;
     });
 
-  const partnerLastPlay =
-    historyData?.history.find((p) => p.userId !== user?.userId) ?? null;
+  const partnerLastPlay = historyData?.history.find((p) => p.userId !== user?.userId) ?? null;
 
   const showAllPlayed = !isLoading && allCards.length > 0 && cards.length === 0;
   const showNeverDealt = !isLoading && allCards.length === 0;
@@ -134,13 +117,9 @@ export default function HomeScreen() {
   return (
     <View style={[styles.root, { paddingTop: insets.top + 20 }]}>
       <View style={styles.header}>
-        <Text style={styles.greeting}>{t("screen.greeting")}</Text>
-        <Pressable onPress={() => router.push("/notifications")}>
-          <Ionicons
-            name="notifications-outline"
-            size={24}
-            color={Colors.textPrimary}
-          />
+        <Text style={styles.greeting}>{t('screen.greeting')}</Text>
+        <Pressable onPress={() => router.push('/notifications')}>
+          <Ionicons name="notifications-outline" size={24} color={Colors.textPrimary} />
           {hasUnread && <View style={styles.badge} />}
         </Pressable>
       </View>
@@ -154,8 +133,8 @@ export default function HomeScreen() {
           {showNeverDealt ? (
             <View style={styles.empty}>
               <Text style={styles.emoji}>🃏</Text>
-              <Text style={styles.emptyTitle}>{t("screen.emptyTitle")}</Text>
-              <Text style={styles.emptyBody}>{t("screen.emptyDescription")}</Text>
+              <Text style={styles.emptyTitle}>{t('screen.emptyTitle')}</Text>
+              <Text style={styles.emptyBody}>{t('screen.emptyDescription')}</Text>
             </View>
           ) : showAllPlayed ? (
             <AllPlayedState />
@@ -164,7 +143,7 @@ export default function HomeScreen() {
               {partnerLastPlay && <PartnerLastPlay play={partnerLastPlay} />}
               <View style={styles.container}>
                 <View style={styles.sectionHeader}>
-                  <Text style={styles.sectionTitle}>{t("screen.deckTitle")}</Text>
+                  <Text style={styles.sectionTitle}>{t('screen.deckTitle')}</Text>
                 </View>
                 <View style={styles.divider} />
               </View>
@@ -185,13 +164,9 @@ export default function HomeScreen() {
               </GestureDetector>
 
               <View style={styles.hint}>
-                <Text style={styles.hintText}>{t("screen.deckHint")}</Text>
+                <Text style={styles.hintText}>{t('screen.deckHint')}</Text>
                 <View style={styles.chevrons}>
-                  <Ionicons
-                    name="chevron-down"
-                    size={18}
-                    color={Colors.textMuted}
-                  />
+                  <Ionicons name="chevron-down" size={18} color={Colors.textMuted} />
                   <Ionicons
                     name="chevron-down"
                     size={18}
@@ -212,7 +187,7 @@ export default function HomeScreen() {
           <WeekTimeline
             plays={historyData?.history ?? []}
             isLoading={isHistoryLoading}
-            currentUserId={user?.userId ?? ""}
+            currentUserId={user?.userId ?? ''}
           />
         </ScrollView>
       )}
@@ -237,27 +212,27 @@ const styles = StyleSheet.create({
     paddingHorizontal: 24,
   },
   header: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "space-between",
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
     paddingHorizontal: 24,
     marginBottom: 32,
   },
   sectionHeader: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "space-between",
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
     marginBottom: 12,
   },
   sectionTitle: {
-    fontFamily: "Inter_900Black",
+    fontFamily: 'Inter_900Black',
     fontSize: 11,
     letterSpacing: 2.5,
-    textTransform: "uppercase",
+    textTransform: 'uppercase',
     color: Colors.textMuted,
   },
   greeting: {
-    fontFamily: "Inter_900Black",
+    fontFamily: 'Inter_900Black',
     fontSize: 28,
     letterSpacing: -0.5,
     color: Colors.textPrimary,
@@ -265,13 +240,13 @@ const styles = StyleSheet.create({
   },
   centered: {
     flex: 1,
-    alignItems: "center",
-    justifyContent: "center",
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   empty: {
     flex: 1,
-    alignItems: "center",
-    justifyContent: "center",
+    alignItems: 'center',
+    justifyContent: 'center',
     gap: 12,
     paddingHorizontal: 24,
   },
@@ -280,19 +255,19 @@ const styles = StyleSheet.create({
     marginBottom: 8,
   },
   emptyTitle: {
-    fontFamily: "Inter_900Black",
+    fontFamily: 'Inter_900Black',
     fontSize: 22,
-    textTransform: "uppercase",
+    textTransform: 'uppercase',
     letterSpacing: -0.5,
     color: Colors.textPrimary,
-    textAlign: "center",
+    textAlign: 'center',
   },
   emptyBody: {
-    fontFamily: "Inter_400Regular",
+    fontFamily: 'Inter_400Regular',
     fontSize: 15,
     lineHeight: 22,
     color: Colors.textSecondary,
-    textAlign: "center",
+    textAlign: 'center',
     maxWidth: 280,
   },
   carouselSection: {
@@ -301,33 +276,33 @@ const styles = StyleSheet.create({
   carouselHitArea: {
     width: SCREEN_WIDTH,
     height: CARD_HEIGHT,
-    alignItems: "center",
-    justifyContent: "center",
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   carouselStage: {
     width: CARD_WIDTH,
     height: CARD_HEIGHT,
-    alignItems: "center",
-    justifyContent: "center",
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   hint: {
-    alignItems: "center",
+    alignItems: 'center',
     marginTop: 24,
     paddingHorizontal: 48,
   },
   hintText: {
-    fontFamily: "Inter_400Regular",
+    fontFamily: 'Inter_400Regular',
     fontSize: 14,
     lineHeight: 20,
     color: Colors.textSecondary,
-    textAlign: "center",
+    textAlign: 'center',
     marginBottom: 10,
   },
   chevrons: {
-    alignItems: "center",
+    alignItems: 'center',
   },
   badge: {
-    position: "absolute",
+    position: 'absolute',
     top: 0,
     right: 0,
     width: 8,

@@ -1,28 +1,28 @@
-import { useEffect, useRef, useState } from "react";
-import { Modal, View, Text, StyleSheet, Platform } from "react-native";
-import * as Notifications from "expo-notifications";
-import { useTranslation } from "react-i18next";
+import { useEffect, useRef, useState } from 'react';
+import { Modal, View, Text, StyleSheet, Platform } from 'react-native';
+import * as Notifications from 'expo-notifications';
+import { useTranslation } from 'react-i18next';
 
-import { useAuth } from "@/context/AuthContext";
-import { useNotifications } from "@/hooks/use-notifications";
-import { Button } from "@/components/ui/Button";
-import { Colors } from "@/constants/colors";
-import { Ionicons } from "@expo/vector-icons";
+import { useAuth } from '@/context/AuthContext';
+import { useNotifications } from '@/hooks/use-notifications';
+import { Button } from '@/components/ui/Button';
+import { Colors } from '@/constants/colors';
+import { Ionicons } from '@expo/vector-icons';
 
 export function NotificationSetup() {
   const { user } = useAuth();
   const { hasBeenPrompted, enable, markAsPrompted } = useNotifications();
   const promptedRef = useRef(false);
   const [visible, setVisible] = useState(false);
-  const { t } = useTranslation("notifications");
+  const { t } = useTranslation('notifications');
 
   useEffect(() => {
-    if (Platform.OS === "android") {
-      Notifications.setNotificationChannelAsync("default", {
-        name: "Default",
+    if (Platform.OS === 'android') {
+      Notifications.setNotificationChannelAsync('default', {
+        name: 'Default',
         importance: Notifications.AndroidImportance.MAX,
         vibrationPattern: [0, 250, 250, 250],
-        lightColor: "#D4AF37",
+        lightColor: '#D4AF37',
       });
     }
   }, []);
@@ -58,20 +58,12 @@ export function NotificationSetup() {
             <Ionicons name="notifications" size={28} color={Colors.pasion} />
           </View>
 
-          <Text style={styles.title}>{t("setup.title")}</Text>
-          <Text style={styles.body}>{t("setup.body")}</Text>
+          <Text style={styles.title}>{t('setup.title')}</Text>
+          <Text style={styles.body}>{t('setup.body')}</Text>
 
           <View style={styles.actions}>
-            <Button
-              label={t("setup.enable")}
-              onPress={handleEnable}
-              variant="accent"
-            />
-            <Button
-              label={t("setup.later")}
-              onPress={handleNotNow}
-              variant="ghost"
-            />
+            <Button label={t('setup.enable')} onPress={handleEnable} variant="accent" />
+            <Button label={t('setup.later')} onPress={handleNotNow} variant="ghost" />
           </View>
         </View>
       </View>
@@ -82,8 +74,8 @@ export function NotificationSetup() {
 const styles = StyleSheet.create({
   backdrop: {
     flex: 1,
-    backgroundColor: "rgba(0,0,0,0.7)",
-    justifyContent: "flex-end",
+    backgroundColor: 'rgba(0,0,0,0.7)',
+    justifyContent: 'flex-end',
     paddingHorizontal: 16,
     paddingBottom: 32,
   },
@@ -93,36 +85,36 @@ const styles = StyleSheet.create({
     padding: 28,
     borderWidth: 1,
     borderColor: Colors.border,
-    alignItems: "center",
+    alignItems: 'center',
   },
   iconWrap: {
     width: 56,
     height: 56,
     borderRadius: 28,
-    backgroundColor: "rgba(255,59,92,0.12)",
-    alignItems: "center",
-    justifyContent: "center",
+    backgroundColor: 'rgba(255,59,92,0.12)',
+    alignItems: 'center',
+    justifyContent: 'center',
     marginBottom: 20,
   },
   title: {
-    fontFamily: "Inter_900Black",
+    fontFamily: 'Inter_900Black',
     fontSize: 20,
     letterSpacing: -0.3,
     color: Colors.textPrimary,
-    textAlign: "center",
+    textAlign: 'center',
     marginBottom: 10,
   },
   body: {
-    fontFamily: "Inter_400Regular",
+    fontFamily: 'Inter_400Regular',
     fontSize: 14,
     lineHeight: 21,
     color: Colors.textSecondary,
-    textAlign: "center",
+    textAlign: 'center',
     marginBottom: 28,
     maxWidth: 280,
   },
   actions: {
-    width: "100%",
+    width: '100%',
     gap: 10,
   },
 });

@@ -6,16 +6,13 @@ import {
   useCallback,
   useRef,
   ReactNode,
-} from "react";
-import Purchases, {
-  LOG_LEVEL,
-  CustomerInfo,
-} from "react-native-purchases";
-import RevenueCatUI from "react-native-purchases-ui";
-import { router } from "expo-router";
-import { useAuth } from "./AuthContext";
+} from 'react';
+import Purchases, { LOG_LEVEL, CustomerInfo } from 'react-native-purchases';
+import RevenueCatUI from 'react-native-purchases-ui';
+import { router } from 'expo-router';
+import { useAuth } from './AuthContext';
 
-const ENTITLEMENT_ID = "Passion";
+const ENTITLEMENT_ID = 'Passion';
 
 interface EntitlementData {
   premium: boolean;
@@ -40,9 +37,7 @@ interface RevenueCatContextValue {
   restorePurchases: () => Promise<CustomerInfo>;
 }
 
-const RevenueCatContext = createContext<RevenueCatContextValue | undefined>(
-  undefined,
-);
+const RevenueCatContext = createContext<RevenueCatContextValue | undefined>(undefined);
 
 function checkEntitlement(info: CustomerInfo | null): boolean {
   return info?.entitlements.active[ENTITLEMENT_ID] !== undefined;
@@ -58,7 +53,7 @@ export function RevenueCatProvider({ children }: { children: ReactNode }) {
   const [loading, setLoading] = useState(true);
 
   // Fetch entitlement data from the API
-  async function fetchEntitlementData() {
+  const fetchEntitlementData = useCallback(async () => {
     if (!token) return;
 
     try {
@@ -77,9 +72,9 @@ export function RevenueCatProvider({ children }: { children: ReactNode }) {
         setIsPurchaser(data.isPurchaser);
       }
     } catch (e) {
-      console.warn("Failed to fetch entitlement data:", e);
+      console.warn('Failed to fetch entitlement data:', e);
     }
-  }
+  }, [token]);
 
   // Update subscription state whenever customerInfo changes
   function updateFromCustomerInfo(info: CustomerInfo) {
@@ -116,14 +111,14 @@ export function RevenueCatProvider({ children }: { children: ReactNode }) {
         updateFromCustomerInfo(customerInfo);
         await fetchEntitlementData();
       } catch (e) {
-        console.warn("RevenueCat init failed:", e);
+        console.warn('RevenueCat init failed:', e);
       } finally {
         setLoading(false);
       }
     }
 
     init();
-  }, [user, token]);
+  }, [user, token, fetchEntitlementData]);
 
   // Listen for real-time subscription changes
   useEffect(() => {
@@ -140,12 +135,12 @@ export function RevenueCatProvider({ children }: { children: ReactNode }) {
   }, [user]);
 
   const presentPaywall = useCallback(() => {
-    router.push("/paywall");
+    router.push('/paywall');
   }, []);
 
   const presentPaywallIfNeeded = useCallback(() => {
     if (checkEntitlement(customerInfo)) return;
-    router.push("/paywall");
+    router.push('/paywall');
   }, [customerInfo]);
 
   const presentCustomerCenter = useCallback(async (): Promise<void> => {
@@ -179,7 +174,6 @@ export function RevenueCatProvider({ children }: { children: ReactNode }) {
 
 export function useRevenueCat(): RevenueCatContextValue {
   const ctx = useContext(RevenueCatContext);
-  if (!ctx)
-    throw new Error("useRevenueCat must be used within RevenueCatProvider");
+  if (!ctx) throw new Error('useRevenueCat must be used within RevenueCatProvider');
   return ctx;
 }

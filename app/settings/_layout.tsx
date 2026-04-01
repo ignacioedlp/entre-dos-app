@@ -1,7 +1,7 @@
-import { Stack } from "expo-router";
+import { Stack } from 'expo-router';
 
 const FORMSHEET_OPTIONS = {
-  presentation: "formSheet" as const,
+  presentation: 'formSheet' as const,
   headerShown: false,
   sheetAllowedDetents: [0.85],
   sheetInitialDetentIndex: 0,
@@ -14,8 +14,8 @@ export default function SettingLayout() {
     <Stack
       screenOptions={{
         headerShown: false,
-        contentStyle: { backgroundColor: "#0a0c10" },
-        animation: "fade",
+        contentStyle: { backgroundColor: '#0a0c10' },
+        animation: 'fade',
       }}
     >
       <Stack.Screen name="terms" options={FORMSHEET_OPTIONS} />

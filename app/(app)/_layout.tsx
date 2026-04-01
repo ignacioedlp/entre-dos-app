@@ -1,6 +1,6 @@
-import { Tabs } from "expo-router";
+import { Tabs } from 'expo-router';
 
-import { CustomTabBar } from "../../components/navigation/CustomTabBar";
+import { CustomTabBar } from '../../components/navigation/CustomTabBar';
 
 export default function AppLayout() {
   return (
