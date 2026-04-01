@@ -7,8 +7,10 @@ import {
   TextInput,
   Keyboard,
   TouchableWithoutFeedback,
+  TouchableOpacity,
   ActivityIndicator,
 } from 'react-native';
+import * as Clipboard from 'expo-clipboard';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useQuery, useMutation } from '@tanstack/react-query';
 import { router } from 'expo-router';
@@ -78,6 +80,14 @@ export default function WaitingScreen() {
     }
   };
 
+  const handlePaste = async () => {
+    const text = await Clipboard.getStringAsync();
+    const cleaned = text.replace(/[^a-zA-Z0-9]/g, '').toUpperCase().slice(0, 6);
+    if (cleaned.length > 0) {
+      handleCodeChange(cleaned);
+    }
+  };
+
   const switchToJoin = () => {
     setMode('join');
     setTimeout(() => inputRef.current?.focus(), 100);
@@ -124,6 +134,10 @@ export default function WaitingScreen() {
                 ))}
               </View>
             </TouchableWithoutFeedback>
+
+            <TouchableOpacity onPress={handlePaste} style={styles.pasteBtn}>
+              <Text style={styles.pasteBtnText}>{t('link.paste')}</Text>
+            </TouchableOpacity>
 
             {joinError && <Text style={styles.errorText}>{joinError}</Text>}
           </View>
@@ -253,6 +267,17 @@ const styles = StyleSheet.create({
     fontFamily: 'Inter_900Black',
     fontSize: 28,
     color: Colors.textPrimary,
+  },
+  pasteBtn: {
+    alignSelf: 'center',
+    marginTop: 16,
+    paddingVertical: 6,
+    paddingHorizontal: 20,
+  },
+  pasteBtnText: {
+    fontFamily: 'Inter_400Regular',
+    fontSize: 14,
+    color: Colors.accent,
   },
   errorText: {
     fontFamily: 'Inter_400Regular',
