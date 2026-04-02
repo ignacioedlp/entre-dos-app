@@ -181,6 +181,7 @@
     "title": "Country",
     "description": "We use your country to show events on the right date.",
     "saved": "Country saved",
-    "saved_description": "Your country has been updated successfully."
+    "saved_description": "Your country has been updated successfully.",
+    "saveError": "Could not save country. Please try again."
   }
 }

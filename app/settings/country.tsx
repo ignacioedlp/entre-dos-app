@@ -29,7 +29,7 @@ export default function CountrySettingsScreen() {
           country: countryCode,
         });
       }
-      Toast.success(t('country.saved'));
+      setIsLoading(false);
     } catch {
       Toast.error(t('country.saveError'));
       setIsLoading(false);

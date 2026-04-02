@@ -181,7 +181,8 @@
     "title": "País",
     "description": "Usamos tu país para mostrarte eventos en la fecha correcta.",
     "saved": "País guardado",
-    "saved_description": "Tu país ha sido actualizado correctamente."
+    "saved_description": "Tu país ha sido actualizado correctamente.",
+    "saveError": "No se pudo guardar el país. Por favor, inténtalo de nuevo."
   },
   "error": "Error",
   "error_try_again": "Algo salió mal. Intentá de nuevo."
