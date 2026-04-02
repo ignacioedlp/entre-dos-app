@@ -12,7 +12,6 @@ import {
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { router } from 'expo-router';
 import { useTranslation } from 'react-i18next';
-import { Svg, G, Path, Defs, ClipPath } from 'react-native-svg';
 import { Ionicons } from '@expo/vector-icons';
 import Animated, { FadeInDown, FadeInUp } from 'react-native-reanimated';
 
@@ -22,63 +21,7 @@ import { Colors } from '../../constants/colors';
 import { useAuth } from '../../context/AuthContext';
 import { apiCompleteOnboarding } from '@/lib/api';
 import i18n from '@/i18n';
-
-const LANGUAGES = [
-  {
-    locale: 'es' as const,
-    label: 'Español',
-    flag: (
-      <Svg width={28} height={28} fill="none" viewBox="0 0 24 24">
-        <G clipPath="url(#AR_svg__a)">
-          <Path
-            d="M12 24c6.627 0 12-5.373 12-12S18.627 0 12 0 0 5.373 0 12s5.373 12 12 12z"
-            fill="#F0F0F0"
-          />
-          <Path
-            d="M12-.001A12 12 0 001.192 6.782H22.81A12 12 0 0012-.001zm0 24a12 12 0 0010.81-6.783H1.191A12 12 0 0012.001 24z"
-            fill="#338AF3"
-          />
-          <Path
-            d="M15.586 12l-1.465.69.78 1.419-1.591-.305-.202 1.608L12 14.229l-1.109 1.183-.201-1.608-1.592.305.78-1.42L8.414 12l1.466-.69-.78-1.419 1.59.305.202-1.608L12 9.771l1.108-1.183.202 1.608 1.59-.306-.78 1.42 1.465.689z"
-            fill="#FFDA44"
-          />
-        </G>
-        <Defs>
-          <ClipPath id="AR_svg__a">
-            <Path fill="#fff" d="M0 0h24v24H0z" />
-          </ClipPath>
-        </Defs>
-      </Svg>
-    ),
-  },
-  {
-    locale: 'en' as const,
-    label: 'English',
-    flag: (
-      <Svg width={28} height={28} fill="none" viewBox="0 0 24 24">
-        <G clipPath="url(#US_svg__a)">
-          <Path
-            d="M12 24c6.627 0 12-5.373 12-12S18.627 0 12 0 0 5.373 0 12s5.373 12 12 12z"
-            fill="#F0F0F0"
-          />
-          <Path
-            d="M11.477 12H24a12.01 12.01 0 00-.413-3.13H11.478V12zm0-6.262h10.761a12.064 12.064 0 00-2.769-3.13h-7.992v3.13zM12 24c2.824 0 5.42-.976 7.47-2.609H4.53A11.948 11.948 0 0012 24zM1.761 18.26h20.477a11.93 11.93 0 001.348-3.13H.413c.3 1.116.758 2.167 1.348 3.13z"
-            fill="#D80027"
-          />
-          <Path
-            d="M5.559 1.874h1.093l-1.017.739.389 1.196-1.018-.74-1.017.74.336-1.033c-.896.746-1.68 1.62-2.328 2.594h.35l-.647.47c-.1.168-.197.34-.29.513l.31.951-.578-.419C1 7.19.868 7.5.75 7.817l.34 1.048h1.258l-1.017.74.388 1.195-1.017-.739-.61.443C.033 10.994 0 11.494 0 12h12V0C9.63 0 7.42.688 5.559 1.874zm.465 8.926l-1.018-.739-1.017.739.389-1.196-1.017-.739h1.257l.388-1.195.389 1.195h1.257l-1.017.74.389 1.195zm-.389-4.691l.389 1.195-1.018-.739-1.017.74.389-1.196-1.017-.74h1.257l.388-1.195.389 1.196h1.257l-1.017.739zm4.693 4.691l-1.017-.739-1.017.739.388-1.196-1.017-.739h1.257l.389-1.195.388 1.195h1.258l-1.018.74.389 1.195zm-.389-4.691l.389 1.195-1.017-.739-1.017.74.388-1.196-1.017-.74h1.257l.389-1.195.388 1.196h1.258l-1.018.739zm0-3.496l.389 1.196-1.017-.74-1.017.74.388-1.196-1.017-.739h1.257L9.311.678l.388 1.196h1.258l-1.018.739z"
-            fill="#0052B4"
-          />
-        </G>
-        <Defs>
-          <ClipPath id="US_svg__a">
-            <Path fill="#fff" d="M0 0h24v24H0z" />
-          </ClipPath>
-        </Defs>
-      </Svg>
-    ),
-  },
-];
+import { SUPPORTED_COUNTRIES, LANGUAGES } from '@/lib/countries';
 
 const STEPS = [
   { icon: 'calendar-outline' as const, key: 'Step1' },
@@ -89,13 +32,24 @@ const STEPS = [
 export default function OnboardingScreen() {
   const insets = useSafeAreaInsets();
   const { user, updateProfile } = useAuth();
-  const { t } = useTranslation('auth');
+  const { t, i18n: languageI18n } = useTranslation('auth');
 
   const [step, setStep] = useState(0);
   const [displayName, setDisplayName] = useState(user?.displayName ?? '');
+  const [country, setCountry] = useState<string | null>(user?.country ?? null);
   const [locale, setLocale] = useState<'es' | 'en'>(user?.locale ?? 'es');
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
+
+  const TOTAL_STEPS = 4;
+  const LAST_STEP = TOTAL_STEPS - 1;
+
+  const getCountryName = (supportedCountry: (typeof SUPPORTED_COUNTRIES)[number]) => {
+    if (languageI18n.language.startsWith('es')) {
+      return supportedCountry.name_es;
+    }
+    return supportedCountry.name_en;
+  };
 
   const handleContinue = () => {
     setStep((s) => s + 1);
@@ -105,7 +59,7 @@ export default function OnboardingScreen() {
     setSubmitting(true);
     setError(null);
     try {
-      const updated = await apiCompleteOnboarding(displayName.trim(), locale);
+      const updated = await apiCompleteOnboarding(displayName.trim(), locale, country);
       updateProfile(updated);
       i18n.changeLanguage(locale);
       router.replace('/(app)/');
@@ -122,7 +76,7 @@ export default function OnboardingScreen() {
         <View style={styles.header}>
           <Logo size="sm" />
           <View style={styles.dots}>
-            {[0, 1, 2].map((i) => (
+            {Array.from({ length: TOTAL_STEPS }).map((_, i) => (
               <View key={i} style={[styles.dot, i === step && styles.dotActive]} />
             ))}
           </View>
@@ -152,6 +106,33 @@ export default function OnboardingScreen() {
 
           {step === 1 && (
             <Animated.View entering={FadeInDown.duration(400)} style={styles.stepContainer}>
+              <Text style={styles.title}>{t('onboarding.countryTitle')}</Text>
+              <Text style={styles.subtitle}>{t('onboarding.countrySubtitle')}</Text>
+
+              <View style={styles.countryGrid}>
+                {SUPPORTED_COUNTRIES.map((supportedCountry) => {
+                  const isSelected = country === supportedCountry.code;
+                  return (
+                    <Pressable
+                      key={supportedCountry.code}
+                      onPress={() => setCountry(supportedCountry.code)}
+                      style={[styles.countryCard, isSelected && styles.countryCardSelected]}
+                    >
+                      <Text style={styles.countryFlag}>{supportedCountry.flag}</Text>
+                      <Text style={styles.countryLabel}>{getCountryName(supportedCountry)}</Text>
+                    </Pressable>
+                  );
+                })}
+              </View>
+
+              <Pressable style={styles.skipCountryButton} onPress={handleContinue}>
+                <Text style={styles.skipCountryText}>{t('onboarding.countrySkip')}</Text>
+              </Pressable>
+            </Animated.View>
+          )}
+
+          {step === 2 && (
+            <Animated.View entering={FadeInDown.duration(400)} style={styles.stepContainer}>
               <Text style={styles.title}>{t('onboarding.languageTitle')}</Text>
               <Text style={styles.subtitle}>{t('onboarding.languageSubtitle')}</Text>
 
@@ -176,7 +157,7 @@ export default function OnboardingScreen() {
             </Animated.View>
           )}
 
-          {step === 2 && (
+          {step === 3 && (
             <Animated.View entering={FadeInDown.duration(400)} style={styles.stepContainer}>
               <Text style={styles.title}>{t('onboarding.explainTitle')}</Text>
 
@@ -208,7 +189,7 @@ export default function OnboardingScreen() {
         </View>
 
         <View style={[styles.ctaArea, { paddingBottom: insets.bottom + 24 }]}>
-          {step < 2 ? (
+          {step < LAST_STEP ? (
             <Button
               label={t('onboarding.continue')}
               onPress={handleContinue}
@@ -319,6 +300,51 @@ const styles = StyleSheet.create({
     fontFamily: 'Inter_700Bold',
     fontSize: 17,
     color: Colors.textPrimary,
+  },
+  countryGrid: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: 10,
+    justifyContent: 'space-between',
+  },
+  countryCard: {
+    width: '48%',
+    backgroundColor: Colors.surface,
+    borderRadius: 16,
+    borderWidth: 1,
+    borderColor: Colors.border,
+    paddingVertical: 14,
+    paddingHorizontal: 12,
+    alignItems: 'center',
+    gap: 6,
+  },
+  countryCardSelected: {
+    borderColor: Colors.accent,
+    shadowColor: Colors.accent,
+    shadowOffset: { width: 0, height: 0 },
+    shadowOpacity: 0.2,
+    shadowRadius: 8,
+    elevation: 4,
+  },
+  countryFlag: {
+    fontSize: 26,
+  },
+  countryLabel: {
+    fontFamily: 'Inter_700Bold',
+    fontSize: 14,
+    color: Colors.textPrimary,
+    textAlign: 'center',
+  },
+  skipCountryButton: {
+    alignSelf: 'center',
+    marginTop: 16,
+    paddingVertical: 8,
+    paddingHorizontal: 10,
+  },
+  skipCountryText: {
+    fontFamily: 'Inter_400Regular',
+    fontSize: 14,
+    color: Colors.textMuted,
   },
   explainList: {
     gap: 20,

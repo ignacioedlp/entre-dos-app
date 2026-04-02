@@ -1,38 +1,47 @@
-import { View, Text, StyleSheet, Pressable } from 'react-native';
+import { useState } from 'react';
+import { StyleSheet, View, Pressable, Text } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
-import { Ionicons } from '@expo/vector-icons';
-import { useState } from 'react';
-import { useQueryClient } from '@tanstack/react-query';
-import { Colors } from '@/constants/colors';
-import { useAuth } from '@/context/AuthContext';
-import { apiUpdateLocale } from '@/lib/api';
-import i18n from '@/i18n';
 import { useTranslation } from 'react-i18next';
-import { LANGUAGES } from '@/lib/countries';
+import { Ionicons } from '@expo/vector-icons';
+import { Colors } from '../../constants/colors';
+import { useAuth } from '../../context/AuthContext';
+import { api } from '../../lib/api';
+import { Toast } from 'toastify-react-native';
+import { SUPPORTED_COUNTRIES } from '../../lib/countries';
 
-export default function LanguageScreen() {
+export default function CountrySettingsScreen() {
   const insets = useSafeAreaInsets();
   const router = useRouter();
+  const { t, i18n } = useTranslation('settings');
   const { user, updateProfile } = useAuth();
-  const [loading, setLoading] = useState(false);
-  const { t } = useTranslation('settings');
-  const queryClient = useQueryClient();
+  const [selectedCountry, setSelectedCountry] = useState<string | null>(user?.country ?? null);
+  const [isLoading, setIsLoading] = useState(false);
 
-  async function handleSelect(locale: 'es' | 'en') {
-    if (loading || locale === user?.locale) return;
-    setLoading(true);
+  const handleSelectCountry = async (countryCode: string) => {
+    setSelectedCountry(countryCode);
+    setIsLoading(true);
     try {
-      const updated = await apiUpdateLocale(locale);
-      updateProfile(updated);
-      i18n.changeLanguage(locale);
-      queryClient.invalidateQueries();
+      await api.put('/profiles/me', { country: countryCode });
+      if (user) {
+        updateProfile({
+          ...user,
+          country: countryCode,
+        });
+      }
+      Toast.success(t('country.saved'));
     } catch {
-      // silently ignore
-    } finally {
-      setLoading(false);
+      Toast.error(t('country.saveError'));
+      setIsLoading(false);
     }
-  }
+  };
+
+  const getCountryName = (country: (typeof SUPPORTED_COUNTRIES)[number]) => {
+    if (i18n.language.startsWith('es')) {
+      return country.name_es;
+    }
+    return country.name_en;
+  };
 
   return (
     <View style={[styles.root, { paddingTop: insets.top + 20 }]}>
@@ -40,20 +49,20 @@ export default function LanguageScreen() {
         <Pressable onPress={() => router.back()} style={styles.backBtn}>
           <Ionicons name="arrow-back" size={22} color={Colors.background} />
         </Pressable>
-        <Text style={styles.headerTitle}>{t('language.title')}</Text>
+        <Text style={styles.headerTitle}>{t('country.title')}</Text>
       </View>
 
-      {LANGUAGES.map((lang, idx) => {
-        const isSelected = user?.locale === lang.locale;
+      {SUPPORTED_COUNTRIES.map((country, idx) => {
+        const isSelected = selectedCountry === country.code;
         return (
           <Pressable
-            key={lang.locale}
-            onPress={() => handleSelect(lang.locale)}
-            disabled={loading}
-            style={[styles.row, idx === 0 && styles.rowFirst, loading && styles.rowDisabled]}
+            key={country.code}
+            onPress={() => handleSelectCountry(country.code)}
+            disabled={isLoading}
+            style={[styles.row, idx === 0 && styles.rowFirst, isLoading && styles.rowDisabled]}
           >
-            {lang.flag}
-            <Text style={styles.label}>{lang.label}</Text>
+            {country.flag}
+            <Text style={styles.label}>{getCountryName(country)}</Text>
             {isSelected && <Ionicons name="checkmark-circle" size={22} color={Colors.accent} />}
           </Pressable>
         );

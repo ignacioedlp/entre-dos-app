@@ -33,6 +33,28 @@
     "body": "Las próximas cartas llegan el lunes.",
     "countdown": "PRÓXIMAS CARTAS EN"
   },
+  "events": {
+    "hero": {
+      "local": "De tu país",
+      "global": "Global",
+      "cta": "Ver eventos",
+      "moreActive_one": "{{count}} más activo",
+      "moreActive_other": "{{count}} más activos"
+    },
+    "screen": {
+      "title": "EVENTOS ACTIVOS.",
+      "subtitle": "Eventos especiales disponibles ahora mismo para tu país o para toda la comunidad.",
+      "total": "Activos",
+      "country": "De tu país",
+      "global": "Globales",
+      "premium": "Premium",
+      "open": "Abierto",
+      "bonus_one": "+{{count}} carta",
+      "bonus_other": "+{{count}} cartas",
+      "emptyTitle": "No hay eventos activos por ahora",
+      "emptyDescription": "Cuando se habilite uno, aparecerá aquí y también lo verás destacado en tu home."
+    }
+  },
   "swipeToConfirm": {
     "label": "CONFIRMAR"
   },

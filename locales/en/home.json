@@ -33,6 +33,28 @@
     "body": "Next cards arrive on Monday.",
     "countdown": "NEXT CARDS IN"
   },
+  "events": {
+    "hero": {
+      "local": "From your country",
+      "global": "Global",
+      "cta": "View events",
+      "moreActive_one": "{{count}} more active",
+      "moreActive_other": "{{count}} more active events"
+    },
+    "screen": {
+      "title": "ACTIVE EVENTS.",
+      "subtitle": "Special events available right now for your country or for the whole community.",
+      "total": "Active",
+      "country": "From your country",
+      "global": "Global",
+      "premium": "Premium",
+      "open": "Open",
+      "bonus_one": "+{{count}} card",
+      "bonus_other": "+{{count}} cards",
+      "emptyTitle": "No active events right now",
+      "emptyDescription": "When one becomes available, it will appear here and be highlighted on your home screen."
+    }
+  },
   "swipeToConfirm": {
     "label": "CONFIRM"
   },

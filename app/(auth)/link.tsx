@@ -82,7 +82,10 @@ export default function WaitingScreen() {
 
   const handlePaste = async () => {
     const text = await Clipboard.getStringAsync();
-    const cleaned = text.replace(/[^a-zA-Z0-9]/g, '').toUpperCase().slice(0, 6);
+    const cleaned = text
+      .replace(/[^a-zA-Z0-9]/g, '')
+      .toUpperCase()
+      .slice(0, 6);
     if (cleaned.length > 0) {
       handleCodeChange(cleaned);
     }

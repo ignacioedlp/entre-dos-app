@@ -114,6 +114,11 @@ function TimelineEntry({
           <View style={[styles.badge, { borderColor: dotColor + '55' }]}>
             <Text style={[styles.badgeText, { color: dotColor }]}>{rarityLabel}</Text>
           </View>
+          {play.event && (
+            <View style={[styles.badge, { borderColor: play.event.color + '55' }]}>
+              <Text style={[styles.badgeText, { color: play.event.color }]}>{play.event.name}</Text>
+            </View>
+          )}
         </View>
 
         <Text style={styles.cardTitle} numberOfLines={2}>

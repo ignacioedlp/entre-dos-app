@@ -17,7 +17,8 @@
   "category": {
     "played": "Jugada",
     "system": "Sistema",
-    "deck_reset": "Mazo renovado"
+    "deck_reset": "Mazo renovado",
+    "event_cards": "Evento"
   },
   "alert": {
     "disabledTitle": "Notificaciones desactivadas",

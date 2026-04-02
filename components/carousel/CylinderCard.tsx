@@ -1,6 +1,11 @@
-import { StyleSheet, Dimensions } from 'react-native';
-import Animated, { useAnimatedStyle, interpolate, Extrapolation } from 'react-native-reanimated';
+import { Dimensions, StyleSheet } from 'react-native';
 import { useTranslation } from 'react-i18next';
+import Animated, {
+  Extrapolation,
+  SharedValue,
+  interpolate,
+  useAnimatedStyle,
+} from 'react-native-reanimated';
 
 import { GameCard } from '../cards/GameCard';
 import { RarityKey, rarityGlow } from '../../constants/colors';
@@ -10,8 +15,24 @@ const { width: SCREEN_WIDTH } = Dimensions.get('window');
 export const CARD_WIDTH = SCREEN_WIDTH * 0.68;
 export const CARD_HEIGHT = CARD_WIDTH * (4 / 3);
 
-const CYLINDER_RADIUS = CARD_WIDTH * 0.62;
-export const ANGLE_PER_CARD = 42;
+const DEFAULT_ANGLE_PER_CARD = 42;
+const MIN_ANGLE_PER_CARD = 28;
+const MIN_RADIUS_FACTOR = 0.48;
+
+export function getAnglePerCard(cardCount: number) {
+  if (cardCount <= 1) {
+    return DEFAULT_ANGLE_PER_CARD;
+  }
+
+  const packedAngle = 300 / Math.max(cardCount - 1, 1);
+  return Math.max(MIN_ANGLE_PER_CARD, Math.min(DEFAULT_ANGLE_PER_CARD, packedAngle));
+}
+
+export function getCylinderRadius(cardCount: number) {
+  const overflowCards = Math.max(cardCount - 7, 0);
+  const factor = Math.max(MIN_RADIUS_FACTOR, 0.62 - overflowCards * 0.025);
+  return CARD_WIDTH * factor;
+}
 
 const RARITY_MAP: Record<string, RarityKey> = {
   common: 'comun',
@@ -28,11 +49,22 @@ function toRad(deg: number) {
 interface CylinderCardProps {
   card: DeckCard;
   index: number;
-  rotation: Animated.SharedValue<number>;
-  dragY: Animated.SharedValue<number>;
+  cardCount: number;
+  anglePerCard: number;
+  cylinderRadius: number;
+  rotation: SharedValue<number>;
+  dragY: SharedValue<number>;
 }
 
-export function CylinderCard({ card, index, rotation, dragY }: CylinderCardProps) {
+export function CylinderCard({
+  card,
+  index,
+  cardCount,
+  anglePerCard,
+  cylinderRadius,
+  rotation,
+  dragY,
+}: CylinderCardProps) {
   const rarity = RARITY_MAP[card.rarity] ?? 'comun';
   const glow = rarityGlow[rarity];
   const { t } = useTranslation('common');
@@ -42,18 +74,29 @@ export function CylinderCard({ card, index, rotation, dragY }: CylinderCardProps
   });
 
   const animStyle = useAnimatedStyle(() => {
-    const angleDeg = index * ANGLE_PER_CARD - rotation.value;
+    const angleDeg = index * anglePerCard - rotation.value;
     const rad = toRad(angleDeg);
-    const x = Math.sin(rad) * CYLINDER_RADIUS;
+    const x = Math.sin(rad) * cylinderRadius;
     const depth = Math.cos(rad);
-    const visible = depth > -0.2;
+    const visibilityCutoff = cardCount > 7 ? -0.35 : -0.2;
+    const visible = depth > visibilityCutoff;
 
-    const scale = interpolate(depth, [-0.2, 0, 1], [0.55, 0.72, 1], Extrapolation.CLAMP);
-    const opacity = interpolate(depth, [-0.2, 0.2, 1], [0, 0.55, 1], Extrapolation.CLAMP);
+    const scale = interpolate(
+      depth,
+      [visibilityCutoff, 0, 1],
+      [0.55, 0.72, 1],
+      Extrapolation.CLAMP
+    );
+    const opacity = interpolate(
+      depth,
+      [visibilityCutoff, 0.2, 1],
+      [0, 0.55, 1],
+      Extrapolation.CLAMP
+    );
     const zIndex = Math.round(depth * 100);
     const shadowOpacity = interpolate(depth, [0, 1], [0, 0.55], Extrapolation.CLAMP);
 
-    const isActive = Math.round(rotation.value / ANGLE_PER_CARD) === index;
+    const isActive = Math.round(rotation.value / anglePerCard) === index;
     const y = isActive ? dragY.value : 0;
 
     return {
@@ -84,6 +127,13 @@ export function CylinderCard({ card, index, rotation, dragY }: CylinderCardProps
           title: card.title,
           description: card.description,
           packIcon: card.packIcon,
+          event: card.event
+            ? {
+                icon: card.event.icon,
+                name: card.event.name,
+                color: card.event.color,
+              }
+            : undefined,
         }}
         width={CARD_WIDTH}
       />

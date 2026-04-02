@@ -12,6 +12,7 @@ export interface ProfileData {
   coupleId: string | null;
   coupleCode: string;
   locale: 'es' | 'en';
+  country: string | null;
   pushNotifications: boolean;
   onboardingCompleted: boolean;
 }

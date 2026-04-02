@@ -18,6 +18,7 @@ export default function SettingLayout() {
         animation: 'fade',
       }}
     >
+      <Stack.Screen name="country" />
       <Stack.Screen name="terms" options={FORMSHEET_OPTIONS} />
       <Stack.Screen name="privacy" options={FORMSHEET_OPTIONS} />
       <Stack.Screen name="faq" options={FORMSHEET_OPTIONS} />

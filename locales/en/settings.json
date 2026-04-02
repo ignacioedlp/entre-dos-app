@@ -11,6 +11,7 @@
   "menu": {
     "notifications": "NOTIFICATIONS",
     "language": "LANGUAGE",
+    "country": "COUNTRY",
     "relationship": "MY RELATIONSHIP",
     "terms": "TERMS & CONDITIONS",
     "privacy": "PRIVACY POLICY",
@@ -175,5 +176,11 @@
         "answer": "Go to Settings > Delete Account. Your account will be deleted in 7 days and you can cancel the request by signing in before that date."
       }
     ]
+  },
+  "country": {
+    "title": "Country",
+    "description": "We use your country to show events on the right date.",
+    "saved": "Country saved",
+    "saved_description": "Your country has been updated successfully."
   }
 }
