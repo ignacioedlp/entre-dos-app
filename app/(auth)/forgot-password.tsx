@@ -1,5 +1,5 @@
 import { View, TextInput, StyleSheet, Pressable } from 'react-native';
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import { useForm, Controller } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
@@ -8,7 +8,8 @@ import { useRouter } from 'expo-router';
 import { useTranslation } from 'react-i18next';
 import { Logo } from '../../components/ui/Logo';
 import { Button } from '../../components/ui/Button';
-import { Colors } from '../../constants/colors';
+import { useColors } from '@/context/ThemeContext';
+import { ThemeColors } from '../../constants/colors';
 import { apiForgotPassword } from '../../lib/api';
 import { AxiosError } from 'axios';
 import { Typography } from '../../components/ui/Typography';
@@ -21,6 +22,8 @@ export default function ForgotPasswordScreen() {
   const [sent, setSent] = useState(false);
   const { t } = useTranslation('auth');
   const inputFontSize = useScaledFontSize(16);
+  const colors = useColors();
+  const styles = useMemo(() => createStyles(colors), [colors]);
 
   const schema = z.object({
     email: z.string().email(t('forgotPassword.errorEmail')),
@@ -61,24 +64,30 @@ export default function ForgotPasswordScreen() {
         </Typography>
 
         {sent ? (
-          <Typography variant="body" color={Colors.textSecondary} style={styles.subtitle}>
+          <Typography variant="body" color={colors.textSecondary} style={styles.subtitle}>
             {t('forgotPassword.successMessage')}
           </Typography>
         ) : (
           <>
-            <Typography variant="body" color={Colors.textSecondary} style={styles.subtitle}>
+            <Typography variant="body" color={colors.textSecondary} style={styles.subtitle}>
               {t('forgotPassword.subtitle')}
             </Typography>
 
-            <Typography variant="body" baseFontSize={14}>{t('forgotPassword.email')}</Typography>
+            <Typography variant="body" baseFontSize={14}>
+              {t('forgotPassword.email')}
+            </Typography>
             <Controller
               control={control}
               name="email"
               render={({ field: { onChange, onBlur, value } }) => (
                 <TextInput
-                  style={[styles.input, { fontSize: inputFontSize }, errors.email && styles.inputError]}
+                  style={[
+                    styles.input,
+                    { fontSize: inputFontSize },
+                    errors.email && styles.inputError,
+                  ]}
                   placeholder={t('forgotPassword.emailPlaceholder')}
-                  placeholderTextColor={Colors.textMuted}
+                  placeholderTextColor={colors.textMuted}
                   keyboardType="email-address"
                   autoCapitalize="none"
                   autoCorrect={false}
@@ -89,13 +98,13 @@ export default function ForgotPasswordScreen() {
               )}
             />
             {errors.email && (
-              <Typography variant="caption" color={Colors.pasion} style={styles.errorText}>
+              <Typography variant="caption" color={colors.pasion} style={styles.errorText}>
                 {errors.email.message}
               </Typography>
             )}
 
             {apiError && (
-              <Typography variant="caption" color={Colors.pasion} style={styles.errorText}>
+              <Typography variant="caption" color={colors.pasion} style={styles.errorText}>
                 {apiError}
               </Typography>
             )}
@@ -113,7 +122,12 @@ export default function ForgotPasswordScreen() {
         )}
 
         <Pressable style={styles.backLink} onPress={() => router.back()}>
-          <Typography variant="body" baseFontSize={14} color={Colors.textSecondary} style={styles.backLinkText}>
+          <Typography
+            variant="body"
+            baseFontSize={14}
+            color={colors.textSecondary}
+            style={styles.backLinkText}
+          >
             {t('forgotPassword.backToLogin')}
           </Typography>
         </Pressable>
@@ -122,48 +136,50 @@ export default function ForgotPasswordScreen() {
   );
 }
 
-const styles = StyleSheet.create({
-  root: {
-    flex: 1,
-    backgroundColor: Colors.background,
-    paddingHorizontal: 24,
-  },
-  header: {
-    marginBottom: 48,
-  },
-  content: {
-    flex: 1,
-  },
-  title: {
-    marginBottom: 12,
-    letterSpacing: -1.5,
-  },
-  subtitle: {
-    marginBottom: 32,
-  },
-  input: {
-    paddingHorizontal: 18,
-    paddingVertical: 16,
-    fontFamily: 'Inter_400Regular',
-    color: Colors.textPrimary,
-    borderBottomWidth: 1,
-    borderColor: '#EDF1F3',
-  },
-  inputError: {
-    borderColor: Colors.pasion,
-  },
-  errorText: {
-    marginTop: 8,
-  },
-  ctaArea: {
-    paddingTop: 16,
-    gap: 10,
-  },
-  backLink: {
-    alignSelf: 'center',
-    paddingVertical: 8,
-  },
-  backLinkText: {
-    textDecorationLine: 'underline',
-  },
-});
+function createStyles(colors: ThemeColors) {
+  return StyleSheet.create({
+    root: {
+      flex: 1,
+      backgroundColor: colors.background,
+      paddingHorizontal: 24,
+    },
+    header: {
+      marginBottom: 48,
+    },
+    content: {
+      flex: 1,
+    },
+    title: {
+      marginBottom: 12,
+      letterSpacing: -1.5,
+    },
+    subtitle: {
+      marginBottom: 32,
+    },
+    input: {
+      paddingHorizontal: 18,
+      paddingVertical: 16,
+      fontFamily: 'Inter_400Regular',
+      color: colors.textPrimary,
+      borderBottomWidth: 1,
+      borderColor: '#EDF1F3',
+    },
+    inputError: {
+      borderColor: colors.pasion,
+    },
+    errorText: {
+      marginTop: 8,
+    },
+    ctaArea: {
+      paddingTop: 16,
+      gap: 10,
+    },
+    backLink: {
+      alignSelf: 'center',
+      paddingVertical: 8,
+    },
+    backLinkText: {
+      textDecorationLine: 'underline',
+    },
+  });
+}

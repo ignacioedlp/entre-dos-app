@@ -3,7 +3,7 @@ import { View, StyleSheet } from 'react-native';
 import moment from 'moment';
 import { useTranslation } from 'react-i18next';
 
-import { Colors } from '../../constants/colors';
+import { useColors } from '@/context/ThemeContext';
 import { Typography } from '../ui/Typography';
 
 function getNextMondayUTC(): moment.Moment {
@@ -30,6 +30,7 @@ export function AllPlayedState() {
   const nextMonday = useMemo(() => getNextMondayUTC(), []);
   const [countdown, setCountdown] = useState(() => formatCountdown(nextMonday));
   const { t } = useTranslation('home');
+  const colors = useColors();
 
   useEffect(() => {
     const id = setInterval(() => {
@@ -46,11 +47,21 @@ export function AllPlayedState() {
       <Typography variant="swissTitle" style={styles.emptyTitle}>
         {t('allPlayed.title')}
       </Typography>
-      <Typography variant="body" baseFontSize={15} baseLineHeight={22} color={Colors.textSecondary} style={styles.emptyBody}>
+      <Typography
+        variant="body"
+        baseFontSize={15}
+        baseLineHeight={22}
+        color={colors.textSecondary}
+        style={styles.emptyBody}
+      >
         {t('allPlayed.body')}
       </Typography>
       <View style={styles.countdownBox}>
-        <Typography variant="cardLabel" color={Colors.textMuted} style={{ opacity: 1, letterSpacing: 2 }}>
+        <Typography
+          variant="cardLabel"
+          color={colors.textMuted}
+          style={{ opacity: 1, letterSpacing: 2 }}
+        >
           {t('allPlayed.countdown')}
         </Typography>
         <Typography variant="heading" baseFontSize={36} style={styles.countdownValue}>

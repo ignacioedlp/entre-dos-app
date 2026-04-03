@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import {
   View,
   StyleSheet,
@@ -16,7 +16,8 @@ import Animated, { FadeInDown, FadeInUp } from 'react-native-reanimated';
 
 import { Logo } from '../../components/ui/Logo';
 import { Button } from '../../components/ui/Button';
-import { Colors } from '../../constants/colors';
+import { useColors } from '@/context/ThemeContext';
+import { ThemeColors } from '../../constants/colors';
 import { useAuth } from '../../context/AuthContext';
 import { apiCompleteOnboarding } from '@/lib/api';
 import i18n from '@/i18n';
@@ -35,6 +36,8 @@ export default function OnboardingScreen() {
   const { user, updateProfile } = useAuth();
   const { t, i18n: languageI18n } = useTranslation('auth');
   const inputFontSize = useScaledFontSize(18);
+  const colors = useColors();
+  const styles = useMemo(() => createStyles(colors), [colors]);
 
   const [step, setStep] = useState(0);
   const [displayName, setDisplayName] = useState(user?.displayName ?? '');
@@ -87,10 +90,15 @@ export default function OnboardingScreen() {
         <View style={styles.content}>
           {step === 0 && (
             <Animated.View entering={FadeInDown.duration(400)} style={styles.stepContainer}>
-              <Typography variant="swissTitle" baseFontSize={40} baseLineHeight={40} style={styles.title}>
+              <Typography
+                variant="swissTitle"
+                baseFontSize={40}
+                baseLineHeight={40}
+                style={styles.title}
+              >
                 {t('onboarding.nameTitle')}
               </Typography>
-              <Typography variant="body" color={Colors.textSecondary} style={styles.subtitle}>
+              <Typography variant="body" color={colors.textSecondary} style={styles.subtitle}>
                 {t('onboarding.nameSubtitle')}
               </Typography>
 
@@ -99,7 +107,7 @@ export default function OnboardingScreen() {
                 value={displayName}
                 onChangeText={setDisplayName}
                 placeholder={t('onboarding.namePlaceholder')}
-                placeholderTextColor={Colors.textMuted}
+                placeholderTextColor={colors.textMuted}
                 autoFocus
                 maxLength={30}
                 returnKeyType="done"
@@ -112,10 +120,15 @@ export default function OnboardingScreen() {
 
           {step === 1 && (
             <Animated.View entering={FadeInDown.duration(400)} style={styles.stepContainer}>
-              <Typography variant="swissTitle" baseFontSize={40} baseLineHeight={40} style={styles.title}>
+              <Typography
+                variant="swissTitle"
+                baseFontSize={40}
+                baseLineHeight={40}
+                style={styles.title}
+              >
                 {t('onboarding.countryTitle')}
               </Typography>
-              <Typography variant="body" color={Colors.textSecondary} style={styles.subtitle}>
+              <Typography variant="body" color={colors.textSecondary} style={styles.subtitle}>
                 {t('onboarding.countrySubtitle')}
               </Typography>
 
@@ -140,7 +153,7 @@ export default function OnboardingScreen() {
               </View>
 
               <Pressable style={styles.skipCountryButton} onPress={handleContinue}>
-                <Typography variant="body" baseFontSize={14} color={Colors.textMuted}>
+                <Typography variant="body" baseFontSize={14} color={colors.textMuted}>
                   {t('onboarding.countrySkip')}
                 </Typography>
               </Pressable>
@@ -149,10 +162,15 @@ export default function OnboardingScreen() {
 
           {step === 2 && (
             <Animated.View entering={FadeInDown.duration(400)} style={styles.stepContainer}>
-              <Typography variant="swissTitle" baseFontSize={40} baseLineHeight={40} style={styles.title}>
+              <Typography
+                variant="swissTitle"
+                baseFontSize={40}
+                baseLineHeight={40}
+                style={styles.title}
+              >
                 {t('onboarding.languageTitle')}
               </Typography>
-              <Typography variant="body" color={Colors.textSecondary} style={styles.subtitle}>
+              <Typography variant="body" color={colors.textSecondary} style={styles.subtitle}>
                 {t('onboarding.languageSubtitle')}
               </Typography>
 
@@ -170,7 +188,7 @@ export default function OnboardingScreen() {
                         {lang.label}
                       </Typography>
                       {isSelected && (
-                        <Ionicons name="checkmark-circle" size={22} color={Colors.accent} />
+                        <Ionicons name="checkmark-circle" size={22} color={colors.accent} />
                       )}
                     </Pressable>
                   );
@@ -181,7 +199,12 @@ export default function OnboardingScreen() {
 
           {step === 3 && (
             <Animated.View entering={FadeInDown.duration(400)} style={styles.stepContainer}>
-              <Typography variant="swissTitle" baseFontSize={40} baseLineHeight={40} style={styles.title}>
+              <Typography
+                variant="swissTitle"
+                baseFontSize={40}
+                baseLineHeight={40}
+                style={styles.title}
+              >
                 {t('onboarding.explainTitle')}
               </Typography>
 
@@ -193,13 +216,18 @@ export default function OnboardingScreen() {
                     style={styles.explainItem}
                   >
                     <View style={styles.explainIcon}>
-                      <Ionicons name={s.icon} size={24} color={Colors.accent} />
+                      <Ionicons name={s.icon} size={24} color={colors.accent} />
                     </View>
                     <View style={styles.explainText}>
                       <Typography variant="bodyBold" baseFontSize={16}>
                         {t(`onboarding.explainStep${idx + 1}Title` as any)}
                       </Typography>
-                      <Typography variant="body" baseFontSize={14} baseLineHeight={20} color={Colors.textSecondary}>
+                      <Typography
+                        variant="body"
+                        baseFontSize={14}
+                        baseLineHeight={20}
+                        color={colors.textSecondary}
+                      >
                         {t(`onboarding.explainStep${idx + 1}` as any)}
                       </Typography>
                     </View>
@@ -208,7 +236,7 @@ export default function OnboardingScreen() {
               </View>
 
               {error && (
-                <Typography variant="caption" color={Colors.pasion} style={styles.errorText}>
+                <Typography variant="caption" color={colors.pasion} style={styles.errorText}>
                   {error}
                 </Typography>
               )}
@@ -234,7 +262,7 @@ export default function OnboardingScreen() {
 
         {submitting && (
           <View style={styles.loadingOverlay}>
-            <ActivityIndicator size="large" color={Colors.accent} />
+            <ActivityIndicator size="large" color={colors.accent} />
           </View>
         )}
       </View>
@@ -242,151 +270,153 @@ export default function OnboardingScreen() {
   );
 }
 
-const styles = StyleSheet.create({
-  root: {
-    flex: 1,
-    backgroundColor: Colors.background,
-    paddingHorizontal: 24,
-  },
-  header: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    marginBottom: 48,
-  },
-  dots: {
-    flexDirection: 'row',
-    gap: 8,
-  },
-  dot: {
-    width: 8,
-    height: 8,
-    borderRadius: 4,
-    backgroundColor: Colors.border,
-  },
-  dotActive: {
-    backgroundColor: Colors.accent,
-    width: 24,
-  },
-  content: {
-    flex: 1,
-  },
-  stepContainer: {
-    flex: 1,
-  },
-  title: {
-    marginBottom: 12,
-    letterSpacing: -1.5,
-  },
-  subtitle: {
-    marginBottom: 40,
-  },
-  input: {
-    backgroundColor: Colors.surface,
-    borderRadius: 16,
-    borderWidth: 1,
-    borderColor: Colors.border,
-    paddingHorizontal: 20,
-    paddingVertical: 18,
-    fontFamily: 'Inter_400Regular',
-    color: Colors.textPrimary,
-  },
-  languageList: {
-    gap: 12,
-  },
-  languageRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: Colors.surface,
-    borderRadius: 16,
-    borderWidth: 1,
-    borderColor: Colors.border,
-    paddingHorizontal: 20,
-    paddingVertical: 18,
-    gap: 14,
-  },
-  languageRowSelected: {
-    borderColor: Colors.accent,
-    shadowColor: Colors.accent,
-    shadowOffset: { width: 0, height: 0 },
-    shadowOpacity: 0.2,
-    shadowRadius: 8,
-    elevation: 4,
-  },
-  languageLabel: {
-    flex: 1,
-  },
-  countryGrid: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    gap: 10,
-    justifyContent: 'space-between',
-  },
-  countryCard: {
-    width: '48%',
-    backgroundColor: Colors.surface,
-    borderRadius: 16,
-    borderWidth: 1,
-    borderColor: Colors.border,
-    paddingVertical: 14,
-    paddingHorizontal: 12,
-    alignItems: 'center',
-    gap: 6,
-  },
-  countryCardSelected: {
-    borderColor: Colors.accent,
-    shadowColor: Colors.accent,
-    shadowOffset: { width: 0, height: 0 },
-    shadowOpacity: 0.2,
-    shadowRadius: 8,
-    elevation: 4,
-  },
-  countryFlag: {
-    textTransform: 'none',
-    letterSpacing: 0,
-  },
-  countryLabel: {
-    textAlign: 'center',
-  },
-  skipCountryButton: {
-    alignSelf: 'center',
-    marginTop: 16,
-    paddingVertical: 8,
-    paddingHorizontal: 10,
-  },
-  explainList: {
-    gap: 20,
-    marginTop: 8,
-  },
-  explainItem: {
-    flexDirection: 'row',
-    gap: 16,
-    alignItems: 'flex-start',
-  },
-  explainIcon: {
-    width: 48,
-    height: 48,
-    borderRadius: 14,
-    backgroundColor: Colors.surface,
-    borderWidth: 1,
-    borderColor: Colors.border,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  explainText: {
-    flex: 1,
-    gap: 4,
-  },
-  errorText: {
-    marginTop: 16,
-  },
-  ctaArea: {
-    paddingTop: 16,
-  },
-  loadingOverlay: {
-    ...StyleSheet.absoluteFillObject,
-    backgroundColor: 'rgba(10, 12, 16, 0.6)',
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-});
+function createStyles(colors: ThemeColors) {
+  return StyleSheet.create({
+    root: {
+      flex: 1,
+      backgroundColor: colors.background,
+      paddingHorizontal: 24,
+    },
+    header: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      justifyContent: 'space-between',
+      marginBottom: 48,
+    },
+    dots: {
+      flexDirection: 'row',
+      gap: 8,
+    },
+    dot: {
+      width: 8,
+      height: 8,
+      borderRadius: 4,
+      backgroundColor: colors.border,
+    },
+    dotActive: {
+      backgroundColor: colors.accent,
+      width: 24,
+    },
+    content: {
+      flex: 1,
+    },
+    stepContainer: {
+      flex: 1,
+    },
+    title: {
+      marginBottom: 12,
+      letterSpacing: -1.5,
+    },
+    subtitle: {
+      marginBottom: 40,
+    },
+    input: {
+      backgroundColor: colors.surface,
+      borderRadius: 16,
+      borderWidth: 1,
+      borderColor: colors.border,
+      paddingHorizontal: 20,
+      paddingVertical: 18,
+      fontFamily: 'Inter_400Regular',
+      color: colors.textPrimary,
+    },
+    languageList: {
+      gap: 12,
+    },
+    languageRow: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      backgroundColor: colors.surface,
+      borderRadius: 16,
+      borderWidth: 1,
+      borderColor: colors.border,
+      paddingHorizontal: 20,
+      paddingVertical: 18,
+      gap: 14,
+    },
+    languageRowSelected: {
+      borderColor: colors.accent,
+      shadowColor: colors.accent,
+      shadowOffset: { width: 0, height: 0 },
+      shadowOpacity: 0.2,
+      shadowRadius: 8,
+      elevation: 4,
+    },
+    languageLabel: {
+      flex: 1,
+    },
+    countryGrid: {
+      flexDirection: 'row',
+      flexWrap: 'wrap',
+      gap: 10,
+      justifyContent: 'space-between',
+    },
+    countryCard: {
+      width: '48%',
+      backgroundColor: colors.surface,
+      borderRadius: 16,
+      borderWidth: 1,
+      borderColor: colors.border,
+      paddingVertical: 14,
+      paddingHorizontal: 12,
+      alignItems: 'center',
+      gap: 6,
+    },
+    countryCardSelected: {
+      borderColor: colors.accent,
+      shadowColor: colors.accent,
+      shadowOffset: { width: 0, height: 0 },
+      shadowOpacity: 0.2,
+      shadowRadius: 8,
+      elevation: 4,
+    },
+    countryFlag: {
+      textTransform: 'none',
+      letterSpacing: 0,
+    },
+    countryLabel: {
+      textAlign: 'center',
+    },
+    skipCountryButton: {
+      alignSelf: 'center',
+      marginTop: 16,
+      paddingVertical: 8,
+      paddingHorizontal: 10,
+    },
+    explainList: {
+      gap: 20,
+      marginTop: 8,
+    },
+    explainItem: {
+      flexDirection: 'row',
+      gap: 16,
+      alignItems: 'flex-start',
+    },
+    explainIcon: {
+      width: 48,
+      height: 48,
+      borderRadius: 14,
+      backgroundColor: colors.surface,
+      borderWidth: 1,
+      borderColor: colors.border,
+      alignItems: 'center',
+      justifyContent: 'center',
+    },
+    explainText: {
+      flex: 1,
+      gap: 4,
+    },
+    errorText: {
+      marginTop: 16,
+    },
+    ctaArea: {
+      paddingTop: 16,
+    },
+    loadingOverlay: {
+      ...StyleSheet.absoluteFillObject,
+      backgroundColor: 'rgba(10, 12, 16, 0.6)',
+      alignItems: 'center',
+      justifyContent: 'center',
+    },
+  });
+}

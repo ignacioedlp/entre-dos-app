@@ -76,7 +76,9 @@ export function GameCard({ card, width = 160, rotation = 0, style }: GameCardPro
               width: '100%',
             }}
           >
-            <Typography variant="cardLabel" color={fg}>{card.label}</Typography>
+            <Typography variant="cardLabel" color={fg}>
+              {card.label}
+            </Typography>
 
             {card.event && (
               <Animated.View style={[styles.badge, { borderColor: card.event.color + '55' }]}>

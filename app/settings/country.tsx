@@ -1,10 +1,11 @@
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 import { StyleSheet, View, Pressable } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
 import { useTranslation } from 'react-i18next';
 import { Ionicons } from '@expo/vector-icons';
-import { Colors } from '../../constants/colors';
+import { ThemeColors } from '../../constants/colors';
+import { useColors } from '../../context/ThemeContext';
 import { useAuth } from '../../context/AuthContext';
 import { api } from '../../lib/api';
 import { Toast } from 'toastify-react-native';
@@ -18,6 +19,8 @@ export default function CountrySettingsScreen() {
   const { user, updateProfile } = useAuth();
   const [selectedCountry, setSelectedCountry] = useState<string | null>(user?.country ?? null);
   const [isLoading, setIsLoading] = useState(false);
+  const colors = useColors();
+  const styles = useMemo(() => createStyles(colors), [colors]);
 
   const handleSelectCountry = async (countryCode: string) => {
     setSelectedCountry(countryCode);
@@ -48,7 +51,7 @@ export default function CountrySettingsScreen() {
     <View style={[styles.root, { paddingTop: insets.top + 20 }]}>
       <View style={styles.header}>
         <Pressable onPress={() => router.back()} style={styles.backBtn}>
-          <Ionicons name="arrow-back" size={22} color={Colors.background} />
+          <Ionicons name="arrow-back" size={22} color={colors.background} />
         </Pressable>
         <Typography variant="heading" style={styles.headerTitle}>
           {t('country.title')}
@@ -68,7 +71,7 @@ export default function CountrySettingsScreen() {
             <Typography variant="bodyBold" style={styles.label}>
               {getCountryName(country)}
             </Typography>
-            {isSelected && <Ionicons name="checkmark-circle" size={22} color={Colors.accent} />}
+            {isSelected && <Ionicons name="checkmark-circle" size={22} color={colors.accent} />}
           </Pressable>
         );
       })}
@@ -76,48 +79,50 @@ export default function CountrySettingsScreen() {
   );
 }
 
-const styles = StyleSheet.create({
-  root: {
-    flex: 1,
-    backgroundColor: Colors.background,
-  },
-  header: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    paddingHorizontal: 20,
-    gap: 20,
-    paddingVertical: 14,
-  },
-  backBtn: {
-    width: 40,
-    backgroundColor: Colors.textPrimary,
-    height: 40,
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    borderRadius: 25,
-  },
-  headerTitle: {
-    color: Colors.textPrimary,
-  },
-  row: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    paddingVertical: 14,
-    paddingHorizontal: 16,
-    borderTopWidth: 1,
-    borderTopColor: Colors.border,
-    gap: 12,
-  },
-  rowFirst: {
-    borderTopWidth: 1,
-    borderTopColor: Colors.border,
-  },
-  rowDisabled: {
-    opacity: 0.5,
-  },
-  label: {
-    flex: 1,
-    color: Colors.textPrimary,
-  },
-});
+function createStyles(colors: ThemeColors) {
+  return StyleSheet.create({
+    root: {
+      flex: 1,
+      backgroundColor: colors.background,
+    },
+    header: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      paddingHorizontal: 20,
+      gap: 20,
+      paddingVertical: 14,
+    },
+    backBtn: {
+      width: 40,
+      backgroundColor: colors.textPrimary,
+      height: 40,
+      flexDirection: 'row',
+      alignItems: 'center',
+      justifyContent: 'center',
+      borderRadius: 25,
+    },
+    headerTitle: {
+      color: colors.textPrimary,
+    },
+    row: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      paddingVertical: 14,
+      paddingHorizontal: 16,
+      borderTopWidth: 1,
+      borderTopColor: colors.border,
+      gap: 12,
+    },
+    rowFirst: {
+      borderTopWidth: 1,
+      borderTopColor: colors.border,
+    },
+    rowDisabled: {
+      opacity: 0.5,
+    },
+    label: {
+      flex: 1,
+      color: colors.textPrimary,
+    },
+  });
+}

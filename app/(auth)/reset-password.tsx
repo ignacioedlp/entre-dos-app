@@ -7,7 +7,7 @@ import {
   KeyboardAvoidingView,
   Platform,
 } from 'react-native';
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import { useForm, Controller } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
@@ -17,7 +17,8 @@ import { useRouter, useLocalSearchParams } from 'expo-router';
 import { useTranslation } from 'react-i18next';
 import { Logo } from '../../components/ui/Logo';
 import { Button } from '../../components/ui/Button';
-import { Colors } from '../../constants/colors';
+import { useColors } from '@/context/ThemeContext';
+import { ThemeColors } from '../../constants/colors';
 import { useAuth } from '../../context/AuthContext';
 import { AxiosError } from 'axios';
 import { Typography } from '../../components/ui/Typography';
@@ -33,6 +34,8 @@ export default function ResetPasswordScreen() {
   const { resetPassword } = useAuth();
   const { t } = useTranslation('auth');
   const inputFontSize = useScaledFontSize(16);
+  const colors = useColors();
+  const styles = useMemo(() => createStyles(colors), [colors]);
 
   const schema = z
     .object({
@@ -59,16 +62,26 @@ export default function ResetPasswordScreen() {
           <Logo size="lg" />
         </View>
         <View style={styles.content}>
-          <Typography variant="swissTitle" baseFontSize={40} baseLineHeight={40} style={styles.title}>
+          <Typography
+            variant="swissTitle"
+            baseFontSize={40}
+            baseLineHeight={40}
+            style={styles.title}
+          >
             {t('resetPassword.title')}
           </Typography>
-          <Typography variant="body" color={Colors.textSecondary} style={styles.subtitle}>
+          <Typography variant="body" color={colors.textSecondary} style={styles.subtitle}>
             {t('resetPassword.errorInvalidToken')}
           </Typography>
         </View>
         <View style={[styles.ctaArea, { paddingBottom: insets.bottom + 24 }]}>
           <Pressable style={styles.backLink} onPress={() => router.replace('/(auth)/login')}>
-            <Typography variant="body" baseFontSize={14} color={Colors.textSecondary} style={styles.backLinkText}>
+            <Typography
+              variant="body"
+              baseFontSize={14}
+              color={colors.textSecondary}
+              style={styles.backLinkText}
+            >
               {t('forgotPassword.backToLogin')}
             </Typography>
           </Pressable>
@@ -112,14 +125,21 @@ export default function ResetPasswordScreen() {
           </View>
 
           <View style={styles.content}>
-            <Typography variant="swissTitle" baseFontSize={40} baseLineHeight={40} style={styles.title}>
+            <Typography
+              variant="swissTitle"
+              baseFontSize={40}
+              baseLineHeight={40}
+              style={styles.title}
+            >
               {t('resetPassword.title')}
             </Typography>
-            <Typography variant="body" color={Colors.textSecondary} style={styles.subtitle}>
+            <Typography variant="body" color={colors.textSecondary} style={styles.subtitle}>
               {t('resetPassword.subtitle')}
             </Typography>
 
-            <Typography variant="body" baseFontSize={14}>{t('resetPassword.password')}</Typography>
+            <Typography variant="body" baseFontSize={14}>
+              {t('resetPassword.password')}
+            </Typography>
             <Controller
               control={control}
               name="password"
@@ -133,7 +153,7 @@ export default function ResetPasswordScreen() {
                       errors.password && styles.inputError,
                     ]}
                     placeholder={t('resetPassword.passwordPlaceholder')}
-                    placeholderTextColor={Colors.textMuted}
+                    placeholderTextColor={colors.textMuted}
                     secureTextEntry={!showPassword}
                     autoCapitalize="none"
                     autoCorrect={false}
@@ -149,14 +169,14 @@ export default function ResetPasswordScreen() {
                     <Feather
                       name={showPassword ? 'eye-off' : 'eye'}
                       size={20}
-                      color={Colors.textMuted}
+                      color={colors.textMuted}
                     />
                   </Pressable>
                 </View>
               )}
             />
             {errors.password && (
-              <Typography variant="caption" color={Colors.pasion} style={styles.errorText}>
+              <Typography variant="caption" color={colors.pasion} style={styles.errorText}>
                 {errors.password.message}
               </Typography>
             )}
@@ -177,7 +197,7 @@ export default function ResetPasswordScreen() {
                       errors.confirmPassword && styles.inputError,
                     ]}
                     placeholder={t('resetPassword.passwordPlaceholder')}
-                    placeholderTextColor={Colors.textMuted}
+                    placeholderTextColor={colors.textMuted}
                     secureTextEntry={!showConfirmPassword}
                     autoCapitalize="none"
                     autoCorrect={false}
@@ -193,20 +213,20 @@ export default function ResetPasswordScreen() {
                     <Feather
                       name={showConfirmPassword ? 'eye-off' : 'eye'}
                       size={20}
-                      color={Colors.textMuted}
+                      color={colors.textMuted}
                     />
                   </Pressable>
                 </View>
               )}
             />
             {errors.confirmPassword && (
-              <Typography variant="caption" color={Colors.pasion} style={styles.errorText}>
+              <Typography variant="caption" color={colors.pasion} style={styles.errorText}>
                 {errors.confirmPassword.message}
               </Typography>
             )}
 
             {apiError && (
-              <Typography variant="caption" color={Colors.pasion} style={styles.apiError}>
+              <Typography variant="caption" color={colors.pasion} style={styles.apiError}>
                 {apiError}
               </Typography>
             )}
@@ -225,76 +245,78 @@ export default function ResetPasswordScreen() {
   );
 }
 
-const styles = StyleSheet.create({
-  keyboardAvoid: {
-    flex: 1,
-  },
-  root: {
-    flex: 1,
-    backgroundColor: Colors.background,
-    paddingHorizontal: 24,
-  },
-  scroll: {
-    flex: 1,
-  },
-  scrollContent: {
-    flexGrow: 1,
-  },
-  header: {
-    marginBottom: 48,
-  },
-  content: {
-    flex: 1,
-  },
-  title: {
-    marginBottom: 12,
-    letterSpacing: -1.5,
-  },
-  subtitle: {
-    marginBottom: 32,
-  },
-  labelSpaced: {
-    marginTop: 24,
-  },
-  input: {
-    paddingHorizontal: 18,
-    paddingVertical: 16,
-    fontFamily: 'Inter_400Regular',
-    color: Colors.textPrimary,
-    borderBottomWidth: 1,
-    borderColor: '#EDF1F3',
-  },
-  inputError: {
-    borderColor: Colors.pasion,
-  },
-  passwordWrapper: {
-    flexDirection: 'row',
-    alignItems: 'center',
-  },
-  passwordInput: {
-    flex: 1,
-  },
-  eyeButton: {
-    position: 'absolute',
-    right: 4,
-    paddingVertical: 16,
-    paddingHorizontal: 8,
-  },
-  errorText: {
-    marginTop: 8,
-  },
-  apiError: {
-    marginTop: 16,
-  },
-  ctaArea: {
-    paddingTop: 16,
-    gap: 10,
-  },
-  backLink: {
-    alignSelf: 'center',
-    paddingVertical: 8,
-  },
-  backLinkText: {
-    textDecorationLine: 'underline',
-  },
-});
+function createStyles(colors: ThemeColors) {
+  return StyleSheet.create({
+    keyboardAvoid: {
+      flex: 1,
+    },
+    root: {
+      flex: 1,
+      backgroundColor: colors.background,
+      paddingHorizontal: 24,
+    },
+    scroll: {
+      flex: 1,
+    },
+    scrollContent: {
+      flexGrow: 1,
+    },
+    header: {
+      marginBottom: 48,
+    },
+    content: {
+      flex: 1,
+    },
+    title: {
+      marginBottom: 12,
+      letterSpacing: -1.5,
+    },
+    subtitle: {
+      marginBottom: 32,
+    },
+    labelSpaced: {
+      marginTop: 24,
+    },
+    input: {
+      paddingHorizontal: 18,
+      paddingVertical: 16,
+      fontFamily: 'Inter_400Regular',
+      color: colors.textPrimary,
+      borderBottomWidth: 1,
+      borderColor: '#EDF1F3',
+    },
+    inputError: {
+      borderColor: colors.pasion,
+    },
+    passwordWrapper: {
+      flexDirection: 'row',
+      alignItems: 'center',
+    },
+    passwordInput: {
+      flex: 1,
+    },
+    eyeButton: {
+      position: 'absolute',
+      right: 4,
+      paddingVertical: 16,
+      paddingHorizontal: 8,
+    },
+    errorText: {
+      marginTop: 8,
+    },
+    apiError: {
+      marginTop: 16,
+    },
+    ctaArea: {
+      paddingTop: 16,
+      gap: 10,
+    },
+    backLink: {
+      alignSelf: 'center',
+      paddingVertical: 8,
+    },
+    backLinkText: {
+      textDecorationLine: 'underline',
+    },
+  });
+}

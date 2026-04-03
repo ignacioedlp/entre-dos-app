@@ -18,7 +18,8 @@
     "faq": "PREGUNTAS FRECUENTES",
     "subscription": "GESTIONAR SUSCRIPCIÓN",
     "restorePurchases": "RESTAURAR COMPRAS",
-    "fontSize": "TAMAÑO DE FUENTE"
+    "fontSize": "TAMAÑO DE FUENTE",
+    "theme": "TEMA"
   },
   "fontSize": {
     "title": "TAMAÑO DE FUENTE.",
@@ -34,6 +35,12 @@
   },
   "language": {
     "title": "IDIOMA."
+  },
+  "theme": {
+    "title": "TEMA.",
+    "light": "Claro",
+    "dark": "Oscuro",
+    "system": "Predeterminado del sistema"
   },
   "profile": {
     "title": "MI PERFIL.",

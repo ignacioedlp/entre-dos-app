@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect } from 'react';
+import { useState, useRef, useEffect, useMemo } from 'react';
 import {
   View,
   StyleSheet,
@@ -16,7 +16,8 @@ import { router } from 'expo-router';
 import { useTranslation } from 'react-i18next';
 import { Logo } from '../../components/ui/Logo';
 import { Button } from '../../components/ui/Button';
-import { Colors } from '../../constants/colors';
+import { useColors } from '@/context/ThemeContext';
+import { ThemeColors } from '../../constants/colors';
 import { useAuth } from '../../context/AuthContext';
 import { apiGetCoupleStatus, apiLinkCouple } from '@/lib/api';
 import { Typography } from '../../components/ui/Typography';
@@ -30,6 +31,8 @@ export default function WaitingScreen() {
   const { user, updateProfile } = useAuth();
   const coupleCode = user?.coupleCode ?? '------';
   const { t } = useTranslation('auth');
+  const colors = useColors();
+  const styles = useMemo(() => createStyles(colors), [colors]);
 
   const { data: statusData } = useQuery({
     queryKey: ['couple-status'],
@@ -112,10 +115,15 @@ export default function WaitingScreen() {
           </View>
 
           <View style={styles.content}>
-            <Typography variant="swissTitle" baseFontSize={40} baseLineHeight={40} style={styles.title}>
+            <Typography
+              variant="swissTitle"
+              baseFontSize={40}
+              baseLineHeight={40}
+              style={styles.title}
+            >
               {t('link.joinTitle')}
             </Typography>
-            <Typography variant="body" color={Colors.textSecondary} style={styles.subtitle}>
+            <Typography variant="body" color={colors.textSecondary} style={styles.subtitle}>
               {t('link.joinSubtitle')}
             </Typography>
 
@@ -145,13 +153,13 @@ export default function WaitingScreen() {
             </TouchableWithoutFeedback>
 
             <TouchableOpacity onPress={handlePaste} style={styles.pasteBtn}>
-              <Typography variant="body" baseFontSize={14} color={Colors.accent}>
+              <Typography variant="body" baseFontSize={14} color={colors.accent}>
                 {t('link.paste')}
               </Typography>
             </TouchableOpacity>
 
             {joinError && (
-              <Typography variant="caption" color={Colors.pasion} style={styles.errorText}>
+              <Typography variant="caption" color={colors.pasion} style={styles.errorText}>
                 {joinError}
               </Typography>
             )}
@@ -183,13 +191,18 @@ export default function WaitingScreen() {
 
       <View style={styles.content}>
         <View style={styles.spinnerWrapper}>
-          <Typography variant="swissTitle" baseFontSize={40} baseLineHeight={40} style={styles.title}>
+          <Typography
+            variant="swissTitle"
+            baseFontSize={40}
+            baseLineHeight={40}
+            style={styles.title}
+          >
             {t('link.shareTitle')}
           </Typography>
-          <ActivityIndicator size="large" color={Colors.accent} style={styles.spinner} />
+          <ActivityIndicator size="large" color={colors.accent} style={styles.spinner} />
         </View>
 
-        <Typography variant="body" color={Colors.textSecondary} style={styles.subtitle}>
+        <Typography variant="body" color={colors.textSecondary} style={styles.subtitle}>
           {t('link.shareSubtitle')}
         </Typography>
 
@@ -213,88 +226,90 @@ export default function WaitingScreen() {
   );
 }
 
-const styles = StyleSheet.create({
-  root: {
-    flex: 1,
-    backgroundColor: Colors.background,
-    paddingHorizontal: 24,
-  },
-  header: {
-    marginBottom: 48,
-  },
-  content: {
-    flex: 1,
-  },
-  title: {
-    marginBottom: 12,
-    letterSpacing: -1.5,
-  },
-  subtitle: {
-    marginBottom: 40,
-  },
-  codeBox: {
-    backgroundColor: Colors.surface,
-    borderRadius: 20,
-    paddingVertical: 28,
-    alignItems: 'center',
-    borderWidth: 1,
-    borderColor: Colors.border,
-  },
-  code: {
-    letterSpacing: 10,
-    textTransform: 'uppercase',
-  },
-  hiddenInput: {
-    position: 'absolute',
-    width: 1,
-    height: 1,
-    opacity: 0,
-  },
-  digitRow: {
-    flexDirection: 'row',
-    gap: 10,
-  },
-  digitBox: {
-    flex: 1,
-    aspectRatio: 0.75,
-    backgroundColor: Colors.surface,
-    borderRadius: 14,
-    borderWidth: 1,
-    borderColor: Colors.border,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  digitBoxActive: {
-    borderColor: Colors.accent,
-    shadowColor: Colors.accent,
-    shadowOffset: { width: 0, height: 0 },
-    shadowOpacity: 0.4,
-    shadowRadius: 8,
-    elevation: 6,
-  },
-  digitText: {
-    letterSpacing: 0,
-  },
-  pasteBtn: {
-    alignSelf: 'center',
-    marginTop: 16,
-    paddingVertical: 6,
-    paddingHorizontal: 20,
-  },
-  errorText: {
-    marginTop: 12,
-  },
-  ctaArea: {
-    paddingTop: 16,
-    gap: 12,
-  },
-  secondaryBtn: {},
-  spinnerWrapper: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-  },
-  spinner: {
-    marginBottom: 20,
-  },
-});
+function createStyles(colors: ThemeColors) {
+  return StyleSheet.create({
+    root: {
+      flex: 1,
+      backgroundColor: colors.background,
+      paddingHorizontal: 24,
+    },
+    header: {
+      marginBottom: 48,
+    },
+    content: {
+      flex: 1,
+    },
+    title: {
+      marginBottom: 12,
+      letterSpacing: -1.5,
+    },
+    subtitle: {
+      marginBottom: 40,
+    },
+    codeBox: {
+      backgroundColor: colors.surface,
+      borderRadius: 20,
+      paddingVertical: 28,
+      alignItems: 'center',
+      borderWidth: 1,
+      borderColor: colors.border,
+    },
+    code: {
+      letterSpacing: 10,
+      textTransform: 'uppercase',
+    },
+    hiddenInput: {
+      position: 'absolute',
+      width: 1,
+      height: 1,
+      opacity: 0,
+    },
+    digitRow: {
+      flexDirection: 'row',
+      gap: 10,
+    },
+    digitBox: {
+      flex: 1,
+      aspectRatio: 0.75,
+      backgroundColor: colors.surface,
+      borderRadius: 14,
+      borderWidth: 1,
+      borderColor: colors.border,
+      alignItems: 'center',
+      justifyContent: 'center',
+    },
+    digitBoxActive: {
+      borderColor: colors.accent,
+      shadowColor: colors.accent,
+      shadowOffset: { width: 0, height: 0 },
+      shadowOpacity: 0.4,
+      shadowRadius: 8,
+      elevation: 6,
+    },
+    digitText: {
+      letterSpacing: 0,
+    },
+    pasteBtn: {
+      alignSelf: 'center',
+      marginTop: 16,
+      paddingVertical: 6,
+      paddingHorizontal: 20,
+    },
+    errorText: {
+      marginTop: 12,
+    },
+    ctaArea: {
+      paddingTop: 16,
+      gap: 12,
+    },
+    secondaryBtn: {},
+    spinnerWrapper: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      justifyContent: 'space-between',
+    },
+    spinner: {
+      marginBottom: 20,
+    },
+  });
+}

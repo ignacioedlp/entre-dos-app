@@ -1,13 +1,14 @@
 import React from 'react';
 import { View, StyleSheet, TouchableOpacity, Animated } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import { Colors } from '../../constants/colors';
+import { darkColors } from '../../constants/colors';
 import { Typography } from './Typography';
 
+// Toast color mappings - use shared colors from darkColors that don't change with theme
 const SUCCESS_COLOR = '#4ade80';
-const ERROR_COLOR = Colors.accent; // #FF3B5C
-const WARN_COLOR = Colors.legendaria; // #f59e0b
-const INFO_COLOR = Colors.rara; // #38bdf8
+const ERROR_COLOR = darkColors.accent; // #FF3B5C
+const WARN_COLOR = darkColors.legendaria; // #f59e0b
+const INFO_COLOR = darkColors.rara; // #38bdf8
 
 interface ToastProps {
   text1?: string;
@@ -55,11 +56,7 @@ const ToastCard = ({
           </Typography>
         ) : null}
         {text2 ? (
-          <Typography
-            variant="caption"
-            color="rgba(255,255,255,0.8)"
-            numberOfLines={2}
-          >
+          <Typography variant="caption" color="rgba(255,255,255,0.8)" numberOfLines={2}>
             {text2}
           </Typography>
         ) : null}

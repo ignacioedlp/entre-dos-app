@@ -7,7 +7,7 @@ import {
   KeyboardAvoidingView,
   Platform,
 } from 'react-native';
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import { useForm, Controller } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
@@ -17,7 +17,8 @@ import { useRouter } from 'expo-router';
 import { useTranslation } from 'react-i18next';
 import { Logo } from '../../components/ui/Logo';
 import { Button } from '../../components/ui/Button';
-import { Colors } from '../../constants/colors';
+import { useColors } from '@/context/ThemeContext';
+import { ThemeColors } from '../../constants/colors';
 import { useAuth } from '../../context/AuthContext';
 import { Typography } from '../../components/ui/Typography';
 import { useScaledFontSize } from '../../context/FontScaleContext';
@@ -32,6 +33,8 @@ export default function RegisterScreen() {
   const { register, googleLogin } = useAuth();
   const { t } = useTranslation('auth');
   const inputFontSize = useScaledFontSize(16);
+  const colors = useColors();
+  const styles = useMemo(() => createStyles(colors), [colors]);
 
   const schema = z
     .object({
@@ -94,22 +97,33 @@ export default function RegisterScreen() {
           </View>
 
           <View style={styles.content}>
-            <Typography variant="swissTitle" baseFontSize={40} baseLineHeight={40} style={styles.title}>
+            <Typography
+              variant="swissTitle"
+              baseFontSize={40}
+              baseLineHeight={40}
+              style={styles.title}
+            >
               {t('register.title')}
             </Typography>
-            <Typography variant="body" color={Colors.textSecondary} style={styles.subtitle}>
+            <Typography variant="body" color={colors.textSecondary} style={styles.subtitle}>
               {t('register.subtitle')}
             </Typography>
 
-            <Typography variant="body" baseFontSize={14}>{t('register.email')}</Typography>
+            <Typography variant="body" baseFontSize={14}>
+              {t('register.email')}
+            </Typography>
             <Controller
               control={control}
               name="email"
               render={({ field: { onChange, onBlur, value } }) => (
                 <TextInput
-                  style={[styles.input, { fontSize: inputFontSize }, errors.email && styles.inputError]}
+                  style={[
+                    styles.input,
+                    { fontSize: inputFontSize },
+                    errors.email && styles.inputError,
+                  ]}
                   placeholder={t('register.emailPlaceholder')}
-                  placeholderTextColor={Colors.textMuted}
+                  placeholderTextColor={colors.textMuted}
                   keyboardType="email-address"
                   autoCapitalize="none"
                   autoCorrect={false}
@@ -120,12 +134,14 @@ export default function RegisterScreen() {
               )}
             />
             {errors.email && (
-              <Typography variant="caption" color={Colors.pasion} style={styles.errorText}>
+              <Typography variant="caption" color={colors.pasion} style={styles.errorText}>
                 {errors.email.message}
               </Typography>
             )}
 
-            <Typography variant="body" baseFontSize={14} style={styles.labelSpaced}>{t('register.password')}</Typography>
+            <Typography variant="body" baseFontSize={14} style={styles.labelSpaced}>
+              {t('register.password')}
+            </Typography>
             <Controller
               control={control}
               name="password"
@@ -139,7 +155,7 @@ export default function RegisterScreen() {
                       errors.password && styles.inputError,
                     ]}
                     placeholder={t('register.passwordPlaceholder')}
-                    placeholderTextColor={Colors.textMuted}
+                    placeholderTextColor={colors.textMuted}
                     secureTextEntry={!showPassword}
                     autoCapitalize="none"
                     autoCorrect={false}
@@ -155,19 +171,21 @@ export default function RegisterScreen() {
                     <Feather
                       name={showPassword ? 'eye-off' : 'eye'}
                       size={20}
-                      color={Colors.textMuted}
+                      color={colors.textMuted}
                     />
                   </Pressable>
                 </View>
               )}
             />
             {errors.password && (
-              <Typography variant="caption" color={Colors.pasion} style={styles.errorText}>
+              <Typography variant="caption" color={colors.pasion} style={styles.errorText}>
                 {errors.password.message}
               </Typography>
             )}
 
-            <Typography variant="body" baseFontSize={14} style={styles.labelSpaced}>{t('register.passwordConfirm')}</Typography>
+            <Typography variant="body" baseFontSize={14} style={styles.labelSpaced}>
+              {t('register.passwordConfirm')}
+            </Typography>
             <Controller
               control={control}
               name="confirmPassword"
@@ -181,7 +199,7 @@ export default function RegisterScreen() {
                       errors.confirmPassword && styles.inputError,
                     ]}
                     placeholder={t('register.passwordPlaceholder')}
-                    placeholderTextColor={Colors.textMuted}
+                    placeholderTextColor={colors.textMuted}
                     secureTextEntry={!showConfirmPassword}
                     autoCapitalize="none"
                     autoCorrect={false}
@@ -197,25 +215,29 @@ export default function RegisterScreen() {
                     <Feather
                       name={showConfirmPassword ? 'eye-off' : 'eye'}
                       size={20}
-                      color={Colors.textMuted}
+                      color={colors.textMuted}
                     />
                   </Pressable>
                 </View>
               )}
             />
             {errors.confirmPassword && (
-              <Typography variant="caption" color={Colors.pasion} style={styles.errorText}>
+              <Typography variant="caption" color={colors.pasion} style={styles.errorText}>
                 {errors.confirmPassword.message}
               </Typography>
             )}
 
             {apiError && (
-              <Typography variant="caption" color={Colors.pasion} style={styles.apiError}>
+              <Typography variant="caption" color={colors.pasion} style={styles.apiError}>
                 {apiError}
               </Typography>
             )}
 
-            <Typography variant="caption" color={Colors.textSecondary} style={styles.termsAndConditions}>
+            <Typography
+              variant="caption"
+              color={colors.textSecondary}
+              style={styles.termsAndConditions}
+            >
               {t('register.termsAndConditions')}
             </Typography>
           </View>
@@ -230,7 +252,7 @@ export default function RegisterScreen() {
 
           <View style={styles.divider}>
             <View style={styles.dividerLine} />
-            <Typography variant="caption" color={Colors.textMuted}>
+            <Typography variant="caption" color={colors.textMuted}>
               {t('register.or')}
             </Typography>
             <View style={styles.dividerLine} />
@@ -248,9 +270,14 @@ export default function RegisterScreen() {
           </Pressable>
 
           <Pressable style={styles.loginLink} onPress={() => router.replace('/(auth)/login')}>
-            <Typography variant="body" baseFontSize={14} color={Colors.textSecondary}>
+            <Typography variant="body" baseFontSize={14} color={colors.textSecondary}>
               {t('register.hasAccount')}
-              <Typography variant="bodyBold" baseFontSize={14} color={Colors.accent} style={styles.loginLinkAccent}>
+              <Typography
+                variant="bodyBold"
+                baseFontSize={14}
+                color={colors.accent}
+                style={styles.loginLinkAccent}
+              >
                 {t('register.signInLink')}
               </Typography>
             </Typography>
@@ -261,102 +288,104 @@ export default function RegisterScreen() {
   );
 }
 
-const styles = StyleSheet.create({
-  keyboardAvoid: {
-    flex: 1,
-  },
-  root: {
-    flex: 1,
-    backgroundColor: Colors.background,
-    paddingHorizontal: 24,
-  },
-  scroll: {
-    flex: 1,
-  },
-  scrollContent: {
-    flexGrow: 1,
-  },
-  header: {
-    marginBottom: 48,
-  },
-  content: {
-    flex: 1,
-  },
-  title: {
-    marginBottom: 12,
-    letterSpacing: -1.5,
-  },
-  termsAndConditions: {
-    marginTop: 16,
-  },
-  subtitle: {
-    marginBottom: 32,
-  },
-  labelSpaced: {
-    marginTop: 24,
-  },
-  input: {
-    paddingHorizontal: 18,
-    paddingVertical: 16,
-    fontFamily: 'Inter_400Regular',
-    color: Colors.textPrimary,
-    borderBottomWidth: 1,
-    borderColor: '#EDF1F3',
-  },
-  inputError: {
-    borderColor: Colors.pasion,
-  },
-  passwordWrapper: {
-    flexDirection: 'row',
-    alignItems: 'center',
-  },
-  passwordInput: {
-    flex: 1,
-  },
-  eyeButton: {
-    position: 'absolute',
-    right: 4,
-    paddingVertical: 16,
-    paddingHorizontal: 8,
-  },
-  errorText: {
-    marginTop: 8,
-  },
-  apiError: {
-    marginTop: 16,
-  },
-  ctaArea: {
-    paddingTop: 16,
-    gap: 10,
-  },
-  divider: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 12,
-  },
-  dividerLine: {
-    flex: 1,
-    height: 1,
-    backgroundColor: Colors.border,
-  },
-  googleButton: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    gap: 10,
-    backgroundColor: '#ffffff',
-    borderRadius: 9999,
-    paddingVertical: 16,
-  },
-  googleButtonPressed: {
-    opacity: 0.85,
-    transform: [{ scale: 0.98 }],
-  },
-  loginLink: {
-    alignSelf: 'center',
-    paddingVertical: 8,
-  },
-  loginLinkAccent: {
-    textDecorationLine: 'underline',
-  },
-});
+function createStyles(colors: ThemeColors) {
+  return StyleSheet.create({
+    keyboardAvoid: {
+      flex: 1,
+    },
+    root: {
+      flex: 1,
+      backgroundColor: colors.background,
+      paddingHorizontal: 24,
+    },
+    scroll: {
+      flex: 1,
+    },
+    scrollContent: {
+      flexGrow: 1,
+    },
+    header: {
+      marginBottom: 48,
+    },
+    content: {
+      flex: 1,
+    },
+    title: {
+      marginBottom: 12,
+      letterSpacing: -1.5,
+    },
+    termsAndConditions: {
+      marginTop: 16,
+    },
+    subtitle: {
+      marginBottom: 32,
+    },
+    labelSpaced: {
+      marginTop: 24,
+    },
+    input: {
+      paddingHorizontal: 18,
+      paddingVertical: 16,
+      fontFamily: 'Inter_400Regular',
+      color: colors.textPrimary,
+      borderBottomWidth: 1,
+      borderColor: '#EDF1F3',
+    },
+    inputError: {
+      borderColor: colors.pasion,
+    },
+    passwordWrapper: {
+      flexDirection: 'row',
+      alignItems: 'center',
+    },
+    passwordInput: {
+      flex: 1,
+    },
+    eyeButton: {
+      position: 'absolute',
+      right: 4,
+      paddingVertical: 16,
+      paddingHorizontal: 8,
+    },
+    errorText: {
+      marginTop: 8,
+    },
+    apiError: {
+      marginTop: 16,
+    },
+    ctaArea: {
+      paddingTop: 16,
+      gap: 10,
+    },
+    divider: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: 12,
+    },
+    dividerLine: {
+      flex: 1,
+      height: 1,
+      backgroundColor: colors.border,
+    },
+    googleButton: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      justifyContent: 'center',
+      gap: 10,
+      backgroundColor: '#ffffff',
+      borderRadius: 9999,
+      paddingVertical: 16,
+    },
+    googleButtonPressed: {
+      opacity: 0.85,
+      transform: [{ scale: 0.98 }],
+    },
+    loginLink: {
+      alignSelf: 'center',
+      paddingVertical: 8,
+    },
+    loginLinkAccent: {
+      textDecorationLine: 'underline',
+    },
+  });
+}

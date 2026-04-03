@@ -18,7 +18,14 @@
     "faq": "FAQ",
     "subscription": "MANAGE SUBSCRIPTION",
     "restorePurchases": "RESTORE PURCHASES",
-    "fontSize": "FONT SIZE"
+    "fontSize": "FONT SIZE",
+    "theme": "THEME"
+  },
+  "theme": {
+    "title": "THEME.",
+    "light": "Light",
+    "dark": "Dark",
+    "system": "System default"
   },
   "fontSize": {
     "title": "FONT SIZE.",

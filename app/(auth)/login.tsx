@@ -1,5 +1,5 @@
 import { View, TextInput, StyleSheet, Pressable, Modal } from 'react-native';
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import { useForm, Controller } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
@@ -9,7 +9,8 @@ import { useRouter } from 'expo-router';
 import { useTranslation } from 'react-i18next';
 import { Logo } from '../../components/ui/Logo';
 import { Button } from '../../components/ui/Button';
-import { Colors } from '../../constants/colors';
+import { useColors } from '@/context/ThemeContext';
+import { ThemeColors } from '../../constants/colors';
 import { useAuth, DeletionPendingError } from '../../context/AuthContext';
 import { apiCancelDeletion } from '../../lib/api';
 import { setToken, setProfile } from '../../lib/storage';
@@ -31,6 +32,8 @@ export default function LoginScreen() {
   const { login, googleLogin, updateProfile } = useAuth();
   const { t } = useTranslation('auth');
   const inputFontSize = useScaledFontSize(16);
+  const colors = useColors();
+  const styles = useMemo(() => createStyles(colors), [colors]);
 
   const schema = z.object({
     email: z.string().email(t('login.errorEmail')),
@@ -119,11 +122,13 @@ export default function LoginScreen() {
         <Typography variant="swissTitle" baseFontSize={40} baseLineHeight={40} style={styles.title}>
           {t('login.title')}
         </Typography>
-        <Typography variant="body" color={Colors.textSecondary} style={styles.subtitle}>
+        <Typography variant="body" color={colors.textSecondary} style={styles.subtitle}>
           {t('login.subtitle')}
         </Typography>
 
-        <Typography variant="body" baseFontSize={14}>{t('login.email')}</Typography>
+        <Typography variant="body" baseFontSize={14}>
+          {t('login.email')}
+        </Typography>
         <Controller
           control={control}
           name="email"
@@ -131,7 +136,7 @@ export default function LoginScreen() {
             <TextInput
               style={[styles.input, { fontSize: inputFontSize }, errors.email && styles.inputError]}
               placeholder={t('login.emailPlaceholder')}
-              placeholderTextColor={Colors.textMuted}
+              placeholderTextColor={colors.textMuted}
               keyboardType="email-address"
               autoCapitalize="none"
               autoCorrect={false}
@@ -142,21 +147,28 @@ export default function LoginScreen() {
           )}
         />
         {errors.email && (
-          <Typography variant="caption" color={Colors.pasion} style={styles.errorText}>
+          <Typography variant="caption" color={colors.pasion} style={styles.errorText}>
             {errors.email.message}
           </Typography>
         )}
 
-        <Typography variant="body" baseFontSize={14} style={styles.labelPassword}>{t('login.password')}</Typography>
+        <Typography variant="body" baseFontSize={14} style={styles.labelPassword}>
+          {t('login.password')}
+        </Typography>
         <Controller
           control={control}
           name="password"
           render={({ field: { onChange, onBlur, value } }) => (
             <View style={styles.passwordWrapper}>
               <TextInput
-                style={[styles.input, styles.passwordInput, { fontSize: inputFontSize }, errors.password && styles.inputError]}
+                style={[
+                  styles.input,
+                  styles.passwordInput,
+                  { fontSize: inputFontSize },
+                  errors.password && styles.inputError,
+                ]}
                 placeholder={t('login.passwordPlaceholder')}
-                placeholderTextColor={Colors.textMuted}
+                placeholderTextColor={colors.textMuted}
                 secureTextEntry={!showPassword}
                 autoCapitalize="none"
                 autoCorrect={false}
@@ -169,25 +181,29 @@ export default function LoginScreen() {
                 style={styles.eyeButton}
                 hitSlop={8}
               >
-                <Feather name={showPassword ? 'eye-off' : 'eye'} size={20} color={Colors.textMuted} />
+                <Feather
+                  name={showPassword ? 'eye-off' : 'eye'}
+                  size={20}
+                  color={colors.textMuted}
+                />
               </Pressable>
             </View>
           )}
         />
         {errors.password && (
-          <Typography variant="caption" color={Colors.pasion} style={styles.errorText}>
+          <Typography variant="caption" color={colors.pasion} style={styles.errorText}>
             {errors.password.message}
           </Typography>
         )}
 
         <Pressable style={styles.forgotLink} onPress={() => router.push('/(auth)/forgot-password')}>
-          <Typography variant="caption" color={Colors.textSecondary} style={styles.forgotText}>
+          <Typography variant="caption" color={colors.textSecondary} style={styles.forgotText}>
             {t('login.forgotPassword')}
           </Typography>
         </Pressable>
 
         {apiError && (
-          <Typography variant="caption" color={Colors.pasion} style={styles.errorText}>
+          <Typography variant="caption" color={colors.pasion} style={styles.errorText}>
             {apiError}
           </Typography>
         )}
@@ -202,7 +218,7 @@ export default function LoginScreen() {
 
         <View style={styles.divider}>
           <View style={styles.dividerLine} />
-          <Typography variant="caption" color={Colors.textMuted}>
+          <Typography variant="caption" color={colors.textMuted}>
             {t('login.or')}
           </Typography>
           <View style={styles.dividerLine} />
@@ -220,9 +236,14 @@ export default function LoginScreen() {
         </Pressable>
 
         <Pressable style={styles.registerLink} onPress={() => router.push('/(auth)/register')}>
-          <Typography variant="body" baseFontSize={14} color={Colors.textSecondary}>
+          <Typography variant="body" baseFontSize={14} color={colors.textSecondary}>
             {t('login.noAccount')}
-            <Typography variant="bodyBold" baseFontSize={14} color={Colors.accent} style={styles.registerLinkAccent}>
+            <Typography
+              variant="bodyBold"
+              baseFontSize={14}
+              color={colors.accent}
+              style={styles.registerLinkAccent}
+            >
               {t('login.registerLink')}
             </Typography>
           </Typography>
@@ -240,12 +261,18 @@ export default function LoginScreen() {
         <View style={styles.backdrop}>
           <View style={styles.card}>
             <View style={styles.iconWrap}>
-              <Ionicons name="warning-outline" size={28} color={Colors.pasion} />
+              <Ionicons name="warning-outline" size={28} color={colors.pasion} />
             </View>
             <Typography variant="heading" baseFontSize={20} style={styles.modalTitle}>
               {t('login.deletionPendingTitle')}
             </Typography>
-            <Typography variant="body" baseFontSize={14} baseLineHeight={21} color={Colors.textSecondary} style={styles.modalBody}>
+            <Typography
+              variant="body"
+              baseFontSize={14}
+              baseLineHeight={21}
+              color={colors.textSecondary}
+              style={styles.modalBody}
+            >
               {t('login.deletionPendingMessage', { date: deletionPending?.scheduledFor })}
             </Typography>
             <View style={styles.modalActions}>
@@ -269,132 +296,134 @@ export default function LoginScreen() {
   );
 }
 
-const styles = StyleSheet.create({
-  root: {
-    flex: 1,
-    backgroundColor: Colors.background,
-    paddingHorizontal: 24,
-  },
-  header: {
-    marginBottom: 48,
-  },
-  content: {
-    flex: 1,
-  },
-  title: {
-    marginBottom: 12,
-    letterSpacing: -1.5,
-  },
-  subtitle: {
-    marginBottom: 32,
-  },
-  labelPassword: {
-    marginTop: 24,
-  },
-  input: {
-    paddingHorizontal: 18,
-    paddingVertical: 16,
-    fontFamily: 'Inter_400Regular',
-    color: Colors.textPrimary,
-    borderBottomWidth: 1,
-    borderColor: '#EDF1F3',
-  },
-  inputError: {
-    borderColor: Colors.pasion,
-  },
-  passwordWrapper: {
-    flexDirection: 'row',
-    alignItems: 'center',
-  },
-  passwordInput: {
-    flex: 1,
-  },
-  eyeButton: {
-    position: 'absolute',
-    right: 4,
-    paddingVertical: 16,
-    paddingHorizontal: 8,
-  },
-  forgotLink: {
-    alignSelf: 'flex-end',
-    marginTop: 12,
-  },
-  forgotText: {
-    textDecorationLine: 'underline',
-  },
-  errorText: {
-    marginTop: 8,
-  },
-  ctaArea: {
-    paddingTop: 16,
-    gap: 10,
-  },
-  divider: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 12,
-  },
-  dividerLine: {
-    flex: 1,
-    height: 1,
-    backgroundColor: Colors.border,
-  },
-  googleButton: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    gap: 10,
-    backgroundColor: '#ffffff',
-    borderRadius: 9999,
-    paddingVertical: 16,
-  },
-  googleButtonPressed: {
-    opacity: 0.85,
-    transform: [{ scale: 0.98 }],
-  },
-  registerLink: {
-    alignSelf: 'center',
-    paddingVertical: 8,
-  },
-  registerLinkAccent: {
-    textDecorationLine: 'underline',
-  },
-  backdrop: {
-    flex: 1,
-    backgroundColor: 'rgba(0,0,0,0.7)',
-    justifyContent: 'flex-end',
-    paddingHorizontal: 16,
-    paddingBottom: 32,
-  },
-  card: {
-    backgroundColor: Colors.surface,
-    borderRadius: 20,
-    padding: 28,
-    borderWidth: 1,
-    borderColor: Colors.border,
-    alignItems: 'center',
-  },
-  iconWrap: {
-    width: 56,
-    height: 56,
-    borderRadius: 28,
-    backgroundColor: 'rgba(255,59,92,0.12)',
-    alignItems: 'center',
-    justifyContent: 'center',
-    marginBottom: 20,
-  },
-  modalTitle: {
-    letterSpacing: -0.3,
-    textAlign: 'center',
-    marginBottom: 10,
-  },
-  modalBody: {
-    textAlign: 'center',
-    marginBottom: 28,
-    maxWidth: 280,
-  },
-  modalActions: {
-    width: '100%',
-    gap: 10,
-  },
-});
+function createStyles(colors: ThemeColors) {
+  return StyleSheet.create({
+    root: {
+      flex: 1,
+      backgroundColor: colors.background,
+      paddingHorizontal: 24,
+    },
+    header: {
+      marginBottom: 48,
+    },
+    content: {
+      flex: 1,
+    },
+    title: {
+      marginBottom: 12,
+      letterSpacing: -1.5,
+    },
+    subtitle: {
+      marginBottom: 32,
+    },
+    labelPassword: {
+      marginTop: 24,
+    },
+    input: {
+      paddingHorizontal: 18,
+      paddingVertical: 16,
+      fontFamily: 'Inter_400Regular',
+      color: colors.textPrimary,
+      borderBottomWidth: 1,
+      borderColor: '#EDF1F3',
+    },
+    inputError: {
+      borderColor: colors.pasion,
+    },
+    passwordWrapper: {
+      flexDirection: 'row',
+      alignItems: 'center',
+    },
+    passwordInput: {
+      flex: 1,
+    },
+    eyeButton: {
+      position: 'absolute',
+      right: 4,
+      paddingVertical: 16,
+      paddingHorizontal: 8,
+    },
+    forgotLink: {
+      alignSelf: 'flex-end',
+      marginTop: 12,
+    },
+    forgotText: {
+      textDecorationLine: 'underline',
+    },
+    errorText: {
+      marginTop: 8,
+    },
+    ctaArea: {
+      paddingTop: 16,
+      gap: 10,
+    },
+    divider: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: 12,
+    },
+    dividerLine: {
+      flex: 1,
+      height: 1,
+      backgroundColor: colors.border,
+    },
+    googleButton: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      justifyContent: 'center',
+      gap: 10,
+      backgroundColor: '#ffffff',
+      borderRadius: 9999,
+      paddingVertical: 16,
+    },
+    googleButtonPressed: {
+      opacity: 0.85,
+      transform: [{ scale: 0.98 }],
+    },
+    registerLink: {
+      alignSelf: 'center',
+      paddingVertical: 8,
+    },
+    registerLinkAccent: {
+      textDecorationLine: 'underline',
+    },
+    backdrop: {
+      flex: 1,
+      backgroundColor: 'rgba(0,0,0,0.7)',
+      justifyContent: 'flex-end',
+      paddingHorizontal: 16,
+      paddingBottom: 32,
+    },
+    card: {
+      backgroundColor: colors.surface,
+      borderRadius: 20,
+      padding: 28,
+      borderWidth: 1,
+      borderColor: colors.border,
+      alignItems: 'center',
+    },
+    iconWrap: {
+      width: 56,
+      height: 56,
+      borderRadius: 28,
+      backgroundColor: 'rgba(255,59,92,0.12)',
+      alignItems: 'center',
+      justifyContent: 'center',
+      marginBottom: 20,
+    },
+    modalTitle: {
+      letterSpacing: -0.3,
+      textAlign: 'center',
+      marginBottom: 10,
+    },
+    modalBody: {
+      textAlign: 'center',
+      marginBottom: 28,
+      maxWidth: 280,
+    },
+    modalActions: {
+      width: '100%',
+      gap: 10,
+    },
+  });
+}

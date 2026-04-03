@@ -1,6 +1,6 @@
-import { Colors } from '@/constants/colors';
 import React from 'react';
 import { Pressable, View } from 'react-native';
+import { useColors } from '@/context/ThemeContext';
 
 interface ToggleProps {
   value: boolean;
@@ -8,6 +8,8 @@ interface ToggleProps {
 }
 
 export function Toggle({ value, onToggle }: ToggleProps) {
+  const colors = useColors();
+
   return (
     <Pressable
       onPress={onToggle}
@@ -16,7 +18,7 @@ export function Toggle({ value, onToggle }: ToggleProps) {
         width: 50,
         height: 30,
         borderRadius: 15,
-        backgroundColor: value ? Colors.pasion : '#D1D5DB',
+        backgroundColor: value ? colors.pasion : colors.textMuted,
         justifyContent: 'center',
         alignItems: value ? 'flex-end' : 'flex-start',
         paddingHorizontal: 3,

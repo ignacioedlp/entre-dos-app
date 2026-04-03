@@ -1,7 +1,7 @@
 import { Animated, Text, TextProps, TextStyle, StyleProp } from 'react-native';
 import { useFontScale } from '@/context/FontScaleContext';
+import { useColors } from '@/context/ThemeContext';
 import { TypographyVariant, typographyVariants } from '@/constants/typography';
-import { Colors } from '@/constants/colors';
 
 interface TypographyProps extends Omit<TextProps, 'style'> {
   variant?: TypographyVariant;
@@ -16,7 +16,7 @@ interface TypographyProps extends Omit<TextProps, 'style'> {
 
 export function Typography({
   variant = 'body',
-  color = Colors.textPrimary,
+  color,
   style,
   baseFontSize,
   baseLineHeight,
@@ -24,6 +24,7 @@ export function Typography({
   ...rest
 }: TypographyProps) {
   const { multiplier } = useFontScale();
+  const colors = useColors();
   const base = typographyVariants[variant];
 
   const effectiveFontSize = baseFontSize ?? base.fontSize;
@@ -38,7 +39,7 @@ export function Typography({
     ...(base.letterSpacing !== undefined && { letterSpacing: base.letterSpacing }),
     ...(base.textTransform !== undefined && { textTransform: base.textTransform }),
     ...(base.opacity !== undefined && { opacity: base.opacity }),
-    color,
+    color: color ?? colors.textPrimary,
   };
 
   return (

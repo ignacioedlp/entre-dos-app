@@ -1,5 +1,7 @@
+import { useMemo } from 'react';
 import { Pressable, StyleSheet, ViewStyle } from 'react-native';
-import { Colors } from '../../constants/colors';
+import { ThemeColors } from '../../constants/colors';
+import { useColors } from '../../context/ThemeContext';
 import { Typography } from './Typography';
 
 interface ButtonProps {
@@ -11,6 +13,8 @@ interface ButtonProps {
 }
 
 export function Button({ label, onPress, variant = 'accent', style, disabled }: ButtonProps) {
+  const colors = useColors();
+  const styles = useMemo(() => createStyles(colors), [colors]);
   const isAccent = variant === 'accent';
 
   return (
@@ -27,38 +31,40 @@ export function Button({ label, onPress, variant = 'accent', style, disabled }: 
       accessibilityRole="button"
       accessibilityLabel={label}
     >
-      <Typography variant="button" color={isAccent ? '#ffffff' : Colors.textSecondary}>
+      <Typography variant="button" color={isAccent ? '#ffffff' : colors.textSecondary}>
         {label}
       </Typography>
     </Pressable>
   );
 }
 
-const styles = StyleSheet.create({
-  base: {
-    borderRadius: 9999,
-    paddingVertical: 16,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  accent: {
-    backgroundColor: Colors.accent,
-    shadowColor: Colors.accent,
-    shadowOffset: { width: 0, height: 0 },
-    shadowOpacity: 0.45,
-    shadowRadius: 20,
-    elevation: 12,
-  },
-  ghost: {
-    backgroundColor: 'transparent',
-    borderWidth: 1,
-    borderColor: Colors.border,
-  },
-  pressed: {
-    opacity: 0.85,
-    transform: [{ scale: 0.98 }],
-  },
-  disabled: {
-    opacity: 0.4,
-  },
-});
+function createStyles(colors: ThemeColors) {
+  return StyleSheet.create({
+    base: {
+      borderRadius: 9999,
+      paddingVertical: 16,
+      alignItems: 'center',
+      justifyContent: 'center',
+    },
+    accent: {
+      backgroundColor: colors.accent,
+      shadowColor: colors.accent,
+      shadowOffset: { width: 0, height: 0 },
+      shadowOpacity: 0.45,
+      shadowRadius: 20,
+      elevation: 12,
+    },
+    ghost: {
+      backgroundColor: 'transparent',
+      borderWidth: 1,
+      borderColor: colors.border,
+    },
+    pressed: {
+      opacity: 0.85,
+      transform: [{ scale: 0.98 }],
+    },
+    disabled: {
+      opacity: 0.4,
+    },
+  });
+}

@@ -16,6 +16,7 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { AuthProvider } from '../context/AuthContext';
 import { RevenueCatProvider } from '../context/RevenueCatContext';
 import { FontScaleProvider } from '../context/FontScaleContext';
+import { ThemeProvider, useTheme } from '../context/ThemeContext';
 import ToastManager from 'toastify-react-native';
 import { SuccessToast, ErrorToast, WarnToast, InfoToast } from '../components/ui/CustomToast';
 import * as Notifications from 'expo-notifications';
@@ -49,6 +50,11 @@ Notifications.setNotificationHandler({
     shouldShowList: true,
   }),
 });
+
+function ThemedStatusBar() {
+  const { theme } = useTheme();
+  return <StatusBar style={theme === 'light' ? 'dark' : 'light'} />;
+}
 
 function RootLayout() {
   const [fontsLoaded, fontError] = useFonts({
@@ -87,45 +93,47 @@ function RootLayout() {
         <QueryClientProvider client={queryClient}>
           <AuthProvider>
             <RevenueCatProvider>
-              <FontScaleProvider>
-              <NotificationSetup />
-              <StatusBar style="light" />
-              <Stack screenOptions={{ headerShown: false }}>
-                <Stack.Screen name="index" />
-                <Stack.Screen name="(auth)" />
-                <Stack.Screen name="(app)" />
-                <Stack.Screen
-                  name="play-card"
-                  options={{
-                    presentation: 'formSheet',
-                    headerShown: false,
-                    sheetAllowedDetents: [0.5],
-                    sheetInitialDetentIndex: 0,
-                    sheetGrabberVisible: true,
-                    sheetCornerRadius: 16,
-                  }}
-                />
-                <Stack.Screen
-                  name="paywall"
-                  options={{
-                    presentation: 'formSheet',
-                    headerShown: false,
-                    sheetAllowedDetents: [0.85],
-                    sheetInitialDetentIndex: 0,
-                    sheetGrabberVisible: true,
-                    sheetCornerRadius: 16,
-                  }}
-                />
-                <Stack.Screen name="notifications" options={{ headerShown: false }} />
-              </Stack>
-              <ToastManager
-                config={toastConfig}
-                showProgressBar
-                animationStyle="fade"
-                position="top"
-                topOffset={56}
-              />
-              </FontScaleProvider>
+              <ThemeProvider>
+                <FontScaleProvider>
+                  <NotificationSetup />
+                  <ThemedStatusBar />
+                  <Stack screenOptions={{ headerShown: false }}>
+                    <Stack.Screen name="index" />
+                    <Stack.Screen name="(auth)" />
+                    <Stack.Screen name="(app)" />
+                    <Stack.Screen
+                      name="play-card"
+                      options={{
+                        presentation: 'formSheet',
+                        headerShown: false,
+                        sheetAllowedDetents: [0.5],
+                        sheetInitialDetentIndex: 0,
+                        sheetGrabberVisible: true,
+                        sheetCornerRadius: 16,
+                      }}
+                    />
+                    <Stack.Screen
+                      name="paywall"
+                      options={{
+                        presentation: 'formSheet',
+                        headerShown: false,
+                        sheetAllowedDetents: [0.85],
+                        sheetInitialDetentIndex: 0,
+                        sheetGrabberVisible: true,
+                        sheetCornerRadius: 16,
+                      }}
+                    />
+                    <Stack.Screen name="notifications" options={{ headerShown: false }} />
+                  </Stack>
+                  <ToastManager
+                    config={toastConfig}
+                    showProgressBar
+                    animationStyle="fade"
+                    position="top"
+                    topOffset={56}
+                  />
+                </FontScaleProvider>
+              </ThemeProvider>
             </RevenueCatProvider>
           </AuthProvider>
         </QueryClientProvider>

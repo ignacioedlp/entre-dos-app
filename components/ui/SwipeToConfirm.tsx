@@ -1,4 +1,5 @@
 import { View, StyleSheet } from 'react-native';
+import { useMemo } from 'react';
 import { Gesture, GestureDetector } from 'react-native-gesture-handler';
 import Animated, {
   useSharedValue,
@@ -8,7 +9,8 @@ import Animated, {
   runOnJS,
 } from 'react-native-reanimated';
 import { useTranslation } from 'react-i18next';
-import { Colors } from '../../constants/colors';
+import { useColors } from '@/context/ThemeContext';
+import { ThemeColors } from '../../constants/colors';
 import { Ionicons } from '@expo/vector-icons';
 
 const TRACK_HEIGHT = 64;
@@ -25,6 +27,8 @@ export function SwipeToConfirm({ onConfirm, label }: SwipeToConfirmProps) {
   const trackWidth = useSharedValue(0);
   const confirmed = useSharedValue(false);
   const { t } = useTranslation('home');
+  const colors = useColors();
+  const styles = useMemo(() => createStyles(colors), [colors]);
 
   const resolvedLabel = label ?? t('swipeToConfirm.label');
 
@@ -73,39 +77,41 @@ export function SwipeToConfirm({ onConfirm, label }: SwipeToConfirmProps) {
   );
 }
 
-const styles = StyleSheet.create({
-  track: {
-    height: TRACK_HEIGHT,
-    backgroundColor: Colors.surfaceAlt,
-    borderRadius: TRACK_HEIGHT / 2,
-    padding: PADDING,
-    justifyContent: 'center',
-    overflow: 'hidden',
-  },
-  label: {
-    position: 'absolute',
-    right: 120,
-    fontFamily: 'Inter_700Bold',
-    fontWeight: '700',
-    fontSize: 13,
-    letterSpacing: 2,
-    color: Colors.textMuted,
-  },
-  thumb: {
-    width: THUMB_SIZE,
-    height: THUMB_SIZE,
-    borderRadius: THUMB_SIZE / 2,
-    backgroundColor: Colors.textPrimary,
-    alignItems: 'center',
-    justifyContent: 'center',
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.4,
-    shadowRadius: 6,
-    elevation: 6,
-  },
-  arrow: {
-    fontSize: 22,
-    color: Colors.background,
-  },
-});
+function createStyles(colors: ThemeColors) {
+  return StyleSheet.create({
+    track: {
+      height: TRACK_HEIGHT,
+      backgroundColor: colors.surfaceAlt,
+      borderRadius: TRACK_HEIGHT / 2,
+      padding: PADDING,
+      justifyContent: 'center',
+      overflow: 'hidden',
+    },
+    label: {
+      position: 'absolute',
+      right: 120,
+      fontFamily: 'Inter_700Bold',
+      fontWeight: '700',
+      fontSize: 13,
+      letterSpacing: 2,
+      color: colors.textMuted,
+    },
+    thumb: {
+      width: THUMB_SIZE,
+      height: THUMB_SIZE,
+      borderRadius: THUMB_SIZE / 2,
+      backgroundColor: colors.textPrimary,
+      alignItems: 'center',
+      justifyContent: 'center',
+      shadowColor: '#000',
+      shadowOffset: { width: 0, height: 2 },
+      shadowOpacity: 0.4,
+      shadowRadius: 6,
+      elevation: 6,
+    },
+    arrow: {
+      fontSize: 22,
+      color: colors.background,
+    },
+  });
+}

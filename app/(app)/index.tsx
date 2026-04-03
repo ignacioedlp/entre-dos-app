@@ -1,4 +1,4 @@
-import { useRef, useEffect } from 'react';
+import { useRef, useEffect, useMemo } from 'react';
 import {
   View,
   StyleSheet,
@@ -34,7 +34,7 @@ import {
 } from '../../components/carousel/CylinderCard';
 import { PartnerLastPlay } from '../../components/cards/PartnerLastPlay';
 import { AllPlayedState } from '../../components/home/AllPlayedState';
-import { Colors } from '../../constants/colors';
+import { useColors } from '../../context/ThemeContext';
 import { useAuth } from '../../context/AuthContext';
 import { apiGetDeck, apiGetHistory, DeckCard } from '../../lib/api';
 import { useNotificationList } from '../../hooks/use-notification-list';
@@ -53,6 +53,8 @@ export default function HomeScreen() {
   const router = useRouter();
   const { user } = useAuth();
   const { t } = useTranslation('home');
+  const colors = useColors();
+  const styles = useMemo(() => createStyles(colors), [colors]);
 
   const { data, isLoading } = useQuery({
     queryKey: ['deck'],
@@ -162,12 +164,14 @@ export default function HomeScreen() {
   const showNeverDealt = !isLoading && allCards.length === 0;
 
   return (
-    <View style={[styles.root, { paddingTop: insets.top + 20 }]}>
-      <View style={styles.header}>
-        <Typography variant="heading" style={styles.greeting}>{t('screen.greeting')}</Typography>
+    <View style={[createStyles(colors).root, { paddingTop: insets.top + 20 }]}>
+      <View style={createStyles(colors).header}>
+        <Typography variant="heading" style={styles.greeting}>
+          {t('screen.greeting')}
+        </Typography>
         <View style={styles.headerActions}>
           <Pressable onPress={() => router.push('/notifications')}>
-            <Ionicons name="notifications-outline" size={24} color={Colors.textPrimary} />
+            <Ionicons name="notifications-outline" size={24} color={colors.textPrimary} />
             {hasUnread && <View style={styles.badge} />}
           </Pressable>
         </View>
@@ -176,13 +180,25 @@ export default function HomeScreen() {
       <ScrollView showsVerticalScrollIndicator={false} style={styles.scroll}>
         {isLoading ? (
           <View style={styles.centered}>
-            <ActivityIndicator color={Colors.accent} size="large" />
+            <ActivityIndicator color={colors.accent} size="large" />
           </View>
         ) : showNeverDealt ? (
           <View style={styles.empty}>
-            <Typography variant="heading" baseFontSize={48} style={styles.emoji}>🃏</Typography>
-            <Typography variant="swissTitle" style={styles.emptyTitle}>{t('screen.emptyTitle')}</Typography>
-            <Typography variant="body" baseFontSize={15} baseLineHeight={22} color={Colors.textSecondary} style={styles.emptyBody}>{t('screen.emptyDescription')}</Typography>
+            <Typography variant="heading" baseFontSize={48} style={styles.emoji}>
+              🃏
+            </Typography>
+            <Typography variant="swissTitle" style={styles.emptyTitle}>
+              {t('screen.emptyTitle')}
+            </Typography>
+            <Typography
+              variant="body"
+              baseFontSize={15}
+              baseLineHeight={22}
+              color={colors.textSecondary}
+              style={styles.emptyBody}
+            >
+              {t('screen.emptyDescription')}
+            </Typography>
           </View>
         ) : showAllPlayed ? (
           <AllPlayedState />
@@ -191,7 +207,13 @@ export default function HomeScreen() {
             {partnerLastPlay && <PartnerLastPlay play={partnerLastPlay} />}
             <View style={styles.container}>
               <View style={styles.sectionHeader}>
-                <Typography variant="cardLabel" color={Colors.textMuted} style={{ opacity: 1, letterSpacing: 2.5 }}>{t('screen.deckTitle')}</Typography>
+                <Typography
+                  variant="cardLabel"
+                  color={colors.textMuted}
+                  style={{ opacity: 1, letterSpacing: 2.5 }}
+                >
+                  {t('screen.deckTitle')}
+                </Typography>
               </View>
               <View style={styles.divider} />
             </View>
@@ -215,16 +237,24 @@ export default function HomeScreen() {
             </GestureDetector>
 
             <View style={styles.hint}>
-              <Typography variant="body" baseFontSize={14} baseLineHeight={20} color={Colors.textSecondary} style={styles.hintText}>{t('screen.deckHint')}</Typography>
+              <Typography
+                variant="body"
+                baseFontSize={14}
+                baseLineHeight={20}
+                color={colors.textSecondary}
+                style={styles.hintText}
+              >
+                {t('screen.deckHint')}
+              </Typography>
               <View style={styles.chevrons}>
                 <Animated.View style={chevron1Style}>
-                  <Ionicons name="chevron-down" size={18} color={Colors.textMuted} />
+                  <Ionicons name="chevron-down" size={18} color={colors.textMuted} />
                 </Animated.View>
                 <Animated.View style={[chevron2Style, { marginTop: -10 }]}>
-                  <Ionicons name="chevron-down" size={18} color={Colors.textMuted} />
+                  <Ionicons name="chevron-down" size={18} color={colors.textMuted} />
                 </Animated.View>
                 <Animated.View style={[chevron3Style, { marginTop: -10 }]}>
-                  <Ionicons name="chevron-down" size={18} color={Colors.textMuted} />
+                  <Ionicons name="chevron-down" size={18} color={colors.textMuted} />
                 </Animated.View>
               </View>
             </View>
@@ -241,111 +271,113 @@ export default function HomeScreen() {
   );
 }
 
-const styles = StyleSheet.create({
-  root: {
-    flex: 1,
-    backgroundColor: Colors.background,
-  },
-  scroll: {
-    flex: 1,
-  },
-  divider: {
-    height: 1,
-    backgroundColor: Colors.border,
-    marginBottom: 20,
-  },
-  container: {
-    paddingHorizontal: 24,
-  },
-  header: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    paddingHorizontal: 24,
-    marginBottom: 32,
-  },
-  headerActions: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 14,
-  },
-  eventCountPill: {
-    width: 10,
-    height: 10,
-    borderRadius: 5,
-    backgroundColor: Colors.accent,
-    shadowColor: Colors.accent,
-    shadowOpacity: 0.6,
-    shadowRadius: 8,
-    shadowOffset: { width: 0, height: 0 },
-  },
-  sectionHeader: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    marginBottom: 12,
-  },
-  greeting: {
-    marginBottom: 8,
-  },
-  centered: {
-    flex: 1,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  empty: {
-    flex: 1,
-    alignItems: 'center',
-    justifyContent: 'center',
-    gap: 12,
-    paddingHorizontal: 24,
-  },
-  emoji: {
-    marginBottom: 8,
-    textTransform: 'none',
-    letterSpacing: 0,
-  },
-  emptyTitle: {
-    textAlign: 'center',
-  },
-  emptyBody: {
-    textAlign: 'center',
-    maxWidth: 280,
-  },
-  carouselSection: {
-    flex: 1,
-  },
-  carouselHitArea: {
-    width: SCREEN_WIDTH,
-    height: CARD_HEIGHT,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  carouselStage: {
-    width: CARD_WIDTH,
-    height: CARD_HEIGHT,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  hint: {
-    alignItems: 'center',
-    marginTop: 24,
-    paddingHorizontal: 48,
-  },
-  hintText: {
-    textAlign: 'center',
-    marginBottom: 10,
-  },
-  chevrons: {
-    alignItems: 'center',
-  },
-  badge: {
-    position: 'absolute',
-    top: 0,
-    right: 0,
-    width: 8,
-    height: 8,
-    borderRadius: 4,
-    backgroundColor: Colors.pasion,
-  },
-});
+function createStyles(colors: ReturnType<typeof useColors>) {
+  return StyleSheet.create({
+    root: {
+      flex: 1,
+      backgroundColor: colors.background,
+    },
+    scroll: {
+      flex: 1,
+    },
+    divider: {
+      height: 1,
+      backgroundColor: colors.border,
+      marginBottom: 20,
+    },
+    container: {
+      paddingHorizontal: 24,
+    },
+    header: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      justifyContent: 'space-between',
+      paddingHorizontal: 24,
+      marginBottom: 32,
+    },
+    headerActions: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: 14,
+    },
+    eventCountPill: {
+      width: 10,
+      height: 10,
+      borderRadius: 5,
+      backgroundColor: colors.accent,
+      shadowColor: colors.accent,
+      shadowOpacity: 0.6,
+      shadowRadius: 8,
+      shadowOffset: { width: 0, height: 0 },
+    },
+    sectionHeader: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      justifyContent: 'space-between',
+      marginBottom: 12,
+    },
+    greeting: {
+      marginBottom: 8,
+    },
+    centered: {
+      flex: 1,
+      alignItems: 'center',
+      justifyContent: 'center',
+    },
+    empty: {
+      flex: 1,
+      alignItems: 'center',
+      justifyContent: 'center',
+      gap: 12,
+      paddingHorizontal: 24,
+    },
+    emoji: {
+      marginBottom: 8,
+      textTransform: 'none',
+      letterSpacing: 0,
+    },
+    emptyTitle: {
+      textAlign: 'center',
+    },
+    emptyBody: {
+      textAlign: 'center',
+      maxWidth: 280,
+    },
+    carouselSection: {
+      flex: 1,
+    },
+    carouselHitArea: {
+      width: SCREEN_WIDTH,
+      height: CARD_HEIGHT,
+      alignItems: 'center',
+      justifyContent: 'center',
+    },
+    carouselStage: {
+      width: CARD_WIDTH,
+      height: CARD_HEIGHT,
+      alignItems: 'center',
+      justifyContent: 'center',
+    },
+    hint: {
+      alignItems: 'center',
+      marginTop: 24,
+      paddingHorizontal: 48,
+    },
+    hintText: {
+      textAlign: 'center',
+      marginBottom: 10,
+    },
+    chevrons: {
+      alignItems: 'center',
+    },
+    badge: {
+      position: 'absolute',
+      top: 0,
+      right: 0,
+      width: 8,
+      height: 8,
+      borderRadius: 4,
+      backgroundColor: colors.pasion,
+    },
+  });
+}

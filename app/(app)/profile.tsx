@@ -11,11 +11,12 @@ import {
   Alert,
 } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { Colors } from '@/constants/colors';
+import { useMemo, useState } from 'react';
+import { ThemeColors } from '@/constants/colors';
+import { useColors } from '@/context/ThemeContext';
 import { Ionicons } from '@expo/vector-icons';
 import { router } from 'expo-router';
 import { useTranslation } from 'react-i18next';
-import { useState } from 'react';
 import { useMutation } from '@tanstack/react-query';
 
 import { useAuth } from '@/context/AuthContext';
@@ -29,6 +30,8 @@ export default function ProfileScreen() {
   const { t } = useTranslation('settings');
   const { user, updateProfile } = useAuth();
   const inputFontSize = useScaledFontSize(18);
+  const colors = useColors();
+  const styles = useMemo(() => createStyles(colors), [colors]);
 
   const [editing, setEditing] = useState(false);
   const [nameValue, setNameValue] = useState('');
@@ -85,7 +88,7 @@ export default function ProfileScreen() {
           {t('profile.title')}
         </Typography>
         <Pressable onPress={() => router.push('/settings')}>
-          <Ionicons name="settings-outline" size={24} color={Colors.textPrimary} />
+          <Ionicons name="settings-outline" size={24} color={colors.textPrimary} />
         </Pressable>
       </View>
 
@@ -97,7 +100,7 @@ export default function ProfileScreen() {
               <Image source={{ uri: user.avatarUrl }} style={styles.avatar} />
             ) : (
               <View style={[styles.avatar, styles.avatarPlaceholder]}>
-                <Ionicons name="person" size={48} color={Colors.textMuted} />
+                <Ionicons name="person" size={48} color={colors.textMuted} />
               </View>
             )}
             {avatarPending && (
@@ -117,7 +120,7 @@ export default function ProfileScreen() {
             <Typography variant="bodyBold" baseFontSize={20}>
               {user?.displayName || t('profile.namePlaceholder')}
             </Typography>
-            <Ionicons name="pencil" size={16} color={Colors.textSecondary} />
+            <Ionicons name="pencil" size={16} color={colors.textSecondary} />
           </Pressable>
         ) : (
           <View style={styles.editContainerInline}>
@@ -126,7 +129,7 @@ export default function ProfileScreen() {
               value={nameValue}
               onChangeText={setNameValue}
               placeholder={t('profile.namePlaceholder')}
-              placeholderTextColor={Colors.textMuted}
+              placeholderTextColor={colors.textMuted}
               autoFocus
               maxLength={30}
               returnKeyType="done"
@@ -152,7 +155,7 @@ export default function ProfileScreen() {
                 )}
               </Pressable>
               <Pressable onPress={cancelEditing} style={styles.cancelBtn}>
-                <Typography variant="body" baseFontSize={14} color={Colors.textSecondary}>
+                <Typography variant="body" baseFontSize={14} color={colors.textSecondary}>
                   {t('profile.cancel')}
                 </Typography>
               </Pressable>
@@ -164,108 +167,110 @@ export default function ProfileScreen() {
   );
 }
 
-const styles = StyleSheet.create({
-  root: {
-    flex: 1,
-    backgroundColor: Colors.background,
-  },
-  header: {
-    paddingHorizontal: 24,
-    marginBottom: 24,
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-  },
-  headerTitle: {
-    color: Colors.textPrimary,
-  },
+function createStyles(colors: ThemeColors) {
+  return StyleSheet.create({
+    root: {
+      flex: 1,
+      backgroundColor: colors.background,
+    },
+    header: {
+      paddingHorizontal: 24,
+      marginBottom: 24,
+      flexDirection: 'row',
+      alignItems: 'center',
+      justifyContent: 'space-between',
+    },
+    headerTitle: {
+      color: colors.textPrimary,
+    },
 
-  // Avatar
-  avatarSection: {
-    alignItems: 'center',
-    marginBottom: 32,
-    gap: 12,
-  },
-  avatarContainer: {
-    position: 'relative',
-  },
-  avatar: {
-    width: 120,
-    height: 120,
-    borderRadius: 60,
-  },
-  avatarPlaceholder: {
-    backgroundColor: Colors.surface,
-    borderWidth: 1,
-    borderColor: Colors.border,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  avatarOverlay: {
-    position: 'absolute',
-    top: 0,
-    left: 0,
-    right: 0,
-    bottom: 0,
-    borderRadius: 60,
-    backgroundColor: 'rgba(0,0,0,0.4)',
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  cameraButton: {
-    position: 'absolute',
-    bottom: 0,
-    right: 0,
-    width: 36,
-    height: 36,
-    borderRadius: 18,
-    backgroundColor: Colors.accent,
-    alignItems: 'center',
-    justifyContent: 'center',
-    borderWidth: 3,
-    borderColor: Colors.background,
-  },
+    // Avatar
+    avatarSection: {
+      alignItems: 'center',
+      marginBottom: 32,
+      gap: 12,
+    },
+    avatarContainer: {
+      position: 'relative',
+    },
+    avatar: {
+      width: 120,
+      height: 120,
+      borderRadius: 60,
+    },
+    avatarPlaceholder: {
+      backgroundColor: colors.surface,
+      borderWidth: 1,
+      borderColor: colors.border,
+      alignItems: 'center',
+      justifyContent: 'center',
+    },
+    avatarOverlay: {
+      position: 'absolute',
+      top: 0,
+      left: 0,
+      right: 0,
+      bottom: 0,
+      borderRadius: 60,
+      backgroundColor: 'rgba(0,0,0,0.4)',
+      alignItems: 'center',
+      justifyContent: 'center',
+    },
+    cameraButton: {
+      position: 'absolute',
+      bottom: 0,
+      right: 0,
+      width: 36,
+      height: 36,
+      borderRadius: 18,
+      backgroundColor: colors.accent,
+      alignItems: 'center',
+      justifyContent: 'center',
+      borderWidth: 3,
+      borderColor: colors.background,
+    },
 
-  // Name under avatar
-  nameUnderAvatar: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 8,
-  },
+    // Name under avatar
+    nameUnderAvatar: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: 8,
+    },
 
-  // Edit mode inline
-  editContainerInline: {
-    alignItems: 'center',
-    gap: 12,
-    width: '100%',
-    paddingHorizontal: 24,
-  },
-  nameInputInline: {
-    backgroundColor: Colors.surface,
-    borderRadius: 12,
-    borderWidth: 1,
-    borderColor: Colors.border,
-    paddingVertical: 12,
-    paddingHorizontal: 16,
-    fontFamily: 'Inter_700Bold',
-    color: Colors.textPrimary,
-    width: '100%',
-  },
-  editActions: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 12,
-  },
-  saveBtn: {
-    backgroundColor: Colors.accent,
-    borderRadius: 14,
-    paddingVertical: 12,
-    paddingHorizontal: 16,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  cancelBtn: {
-    alignItems: 'center',
-    paddingVertical: 4,
-  },
-});
+    // Edit mode inline
+    editContainerInline: {
+      alignItems: 'center',
+      gap: 12,
+      width: '100%',
+      paddingHorizontal: 24,
+    },
+    nameInputInline: {
+      backgroundColor: colors.surface,
+      borderRadius: 12,
+      borderWidth: 1,
+      borderColor: colors.border,
+      paddingVertical: 12,
+      paddingHorizontal: 16,
+      fontFamily: 'Inter_700Bold',
+      color: colors.textPrimary,
+      width: '100%',
+    },
+    editActions: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: 12,
+    },
+    saveBtn: {
+      backgroundColor: colors.accent,
+      borderRadius: 14,
+      paddingVertical: 12,
+      paddingHorizontal: 16,
+      alignItems: 'center',
+      justifyContent: 'center',
+    },
+    cancelBtn: {
+      alignItems: 'center',
+      paddingVertical: 4,
+    },
+  });
+}

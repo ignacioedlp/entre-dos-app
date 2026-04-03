@@ -3,7 +3,8 @@ import { View, StyleSheet } from 'react-native';
 import { useTranslation } from 'react-i18next';
 
 import { CardHistoryItem } from '../../lib/api';
-import { Colors, RarityKey, rarityColor, rarityGlow } from '../../constants/colors';
+import { RarityKey, rarityColor, rarityGlow, ThemeColors } from '../../constants/colors';
+import { useColors } from '../../context/ThemeContext';
 import { Typography } from '../ui/Typography';
 
 const RARITY_MAP: Record<string, RarityKey> = {
@@ -19,11 +20,17 @@ interface WeekTimelineProps {
   currentUserId: string;
 }
 
-function SkeletonRow() {
+function SkeletonRow({
+  colors,
+  styles,
+}: {
+  colors: ThemeColors;
+  styles: ReturnType<typeof createStyles>;
+}) {
   return (
     <View style={styles.row}>
       <View style={styles.leftCol}>
-        <View style={[styles.dot, { backgroundColor: Colors.border }]} />
+        <View style={[styles.dot, { backgroundColor: colors.border }]} />
         <View style={styles.lineSegment} />
       </View>
       <View style={[styles.rightCol, { gap: 6, paddingBottom: 20 }]}>
@@ -32,7 +39,7 @@ function SkeletonRow() {
             width: 120,
             height: 10,
             borderRadius: 4,
-            backgroundColor: Colors.surfaceAlt,
+            backgroundColor: colors.surfaceAlt,
           }}
         />
         <View
@@ -40,7 +47,7 @@ function SkeletonRow() {
             width: 180,
             height: 14,
             borderRadius: 4,
-            backgroundColor: Colors.surfaceAlt,
+            backgroundColor: colors.surfaceAlt,
           }}
         />
         <View
@@ -48,7 +55,7 @@ function SkeletonRow() {
             width: 100,
             height: 10,
             borderRadius: 4,
-            backgroundColor: Colors.surfaceAlt,
+            backgroundColor: colors.surfaceAlt,
           }}
         />
       </View>
@@ -60,10 +67,14 @@ function TimelineEntry({
   play,
   isLast,
   currentUserId,
+  colors,
+  styles,
 }: {
   play: CardHistoryItem;
   isLast: boolean;
   currentUserId: string;
+  colors: ThemeColors;
+  styles: ReturnType<typeof createStyles>;
 }) {
   const { t } = useTranslation(['home', 'common']);
   const rarity = RARITY_MAP[play.rarity] ?? 'comun';
@@ -103,15 +114,19 @@ function TimelineEntry({
 
       <View style={[styles.rightCol, isLast ? styles.rightColLast : null]}>
         <View style={styles.metaRow}>
-          <Typography variant="caption" color={Colors.textMuted} style={{ textTransform: 'capitalize' }}>
+          <Typography
+            variant="caption"
+            color={colors.textMuted}
+            style={{ textTransform: 'capitalize' }}
+          >
             {timeStr}
           </Typography>
-          <Typography variant="caption" color={Colors.textMuted}>
+          <Typography variant="caption" color={colors.textMuted}>
             {' · '}
           </Typography>
           <Typography
             variant="caption"
-            color={isMine ? Colors.accent : Colors.textSecondary}
+            color={isMine ? colors.accent : colors.textSecondary}
             style={{ fontFamily: 'Inter_700Bold', fontWeight: '700' }}
           >
             {playerLabel}
@@ -120,18 +135,33 @@ function TimelineEntry({
 
         <View style={styles.badgeRow}>
           <View style={styles.badge}>
-            <Typography variant="cardLabel" baseFontSize={9} style={{ opacity: 1, letterSpacing: 1.5 }} color={Colors.textMuted}>
+            <Typography
+              variant="cardLabel"
+              baseFontSize={9}
+              style={{ opacity: 1, letterSpacing: 1.5 }}
+              color={colors.textMuted}
+            >
               {categoryLabel}
             </Typography>
           </View>
           <View style={[styles.badge, { borderColor: dotColor + '55' }]}>
-            <Typography variant="cardLabel" baseFontSize={9} style={{ opacity: 1, letterSpacing: 1.5 }} color={dotColor}>
+            <Typography
+              variant="cardLabel"
+              baseFontSize={9}
+              style={{ opacity: 1, letterSpacing: 1.5 }}
+              color={dotColor}
+            >
               {rarityLabel}
             </Typography>
           </View>
           {play.event && (
             <View style={[styles.badge, { borderColor: play.event.color + '55' }]}>
-              <Typography variant="cardLabel" baseFontSize={9} style={{ opacity: 1, letterSpacing: 1.5 }} color={play.event.color}>
+              <Typography
+                variant="cardLabel"
+                baseFontSize={9}
+                style={{ opacity: 1, letterSpacing: 1.5 }}
+                color={play.event.color}
+              >
                 {play.event.name}
               </Typography>
             </View>
@@ -142,7 +172,7 @@ function TimelineEntry({
           variant="swissTitle"
           baseFontSize={15}
           baseLineHeight={19}
-          color={Colors.textPrimary}
+          color={colors.textPrimary}
           numberOfLines={2}
           style={styles.cardTitle}
         >
@@ -154,7 +184,7 @@ function TimelineEntry({
             variant="body"
             baseFontSize={13}
             baseLineHeight={18}
-            color={Colors.textSecondary}
+            color={colors.textSecondary}
             numberOfLines={3}
             style={styles.noteText}
           >
@@ -170,15 +200,21 @@ function TimelineEntry({
 
 export function WeekTimeline({ plays, isLoading, currentUserId }: WeekTimelineProps) {
   const { t } = useTranslation('home');
+  const colors = useColors();
+  const styles = createStyles(colors);
 
   return (
     <View style={styles.container}>
       <View style={styles.sectionHeader}>
-        <Typography variant="cardLabel" color={Colors.textMuted} style={{ opacity: 1, letterSpacing: 2.5 }}>
+        <Typography
+          variant="cardLabel"
+          color={colors.textMuted}
+          style={{ opacity: 1, letterSpacing: 2.5 }}
+        >
           {t('weekTimeline.title')}
         </Typography>
         {!isLoading && plays.length > 0 && (
-          <Typography variant="caption" color={Colors.textSecondary}>
+          <Typography variant="caption" color={colors.textSecondary}>
             {t('weekTimeline.played', { count: plays.length })}
           </Typography>
         )}
@@ -188,12 +224,17 @@ export function WeekTimeline({ plays, isLoading, currentUserId }: WeekTimelinePr
 
       {isLoading ? (
         <>
-          <SkeletonRow />
-          <SkeletonRow />
-          <SkeletonRow />
+          <SkeletonRow colors={colors} styles={styles} />
+          <SkeletonRow colors={colors} styles={styles} />
+          <SkeletonRow colors={colors} styles={styles} />
         </>
       ) : plays.length === 0 ? (
-        <Typography variant="body" baseFontSize={14} color={Colors.textMuted} style={styles.emptyText}>
+        <Typography
+          variant="body"
+          baseFontSize={14}
+          color={colors.textMuted}
+          style={styles.emptyText}
+        >
           {t('weekTimeline.empty')}
         </Typography>
       ) : (
@@ -203,6 +244,8 @@ export function WeekTimeline({ plays, isLoading, currentUserId }: WeekTimelinePr
             play={play}
             isLast={i === plays.length - 1}
             currentUserId={currentUserId}
+            colors={colors}
+            styles={styles}
           />
         ))
       )}
@@ -210,78 +253,79 @@ export function WeekTimeline({ plays, isLoading, currentUserId }: WeekTimelinePr
   );
 }
 
-const styles = StyleSheet.create({
-  container: {
-    paddingHorizontal: 24,
-    paddingBottom: 48,
-    marginTop: 36,
-  },
-  sectionHeader: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    marginBottom: 12,
-  },
-  divider: {
-    height: 1,
-    backgroundColor: Colors.border,
-    marginBottom: 20,
-  },
-  emptyText: {
-    textAlign: 'center',
-    paddingVertical: 24,
-  },
-  row: {
-    flexDirection: 'row',
-  },
-  leftCol: {
-    width: 28,
-    alignItems: 'center',
-    paddingTop: 2,
-  },
-  dot: {
-    width: 10,
-    height: 10,
-    borderRadius: 5,
-  },
-  lineSegment: {
-    flex: 1,
-    width: 1,
-    backgroundColor: Colors.border,
-    marginTop: 4,
-    marginBottom: 0,
-  },
-  rightCol: {
-    flex: 1,
-    paddingBottom: 24,
-    gap: 4,
-  },
-  rightColLast: {
-    paddingBottom: 0,
-  },
-  metaRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    flexWrap: 'wrap',
-  },
-  badgeRow: {
-    flexDirection: 'row',
-    gap: 6,
-    marginTop: 2,
-  },
-  badge: {
-    borderWidth: 1,
-    borderColor: Colors.border,
-    borderRadius: 4,
-    paddingHorizontal: 6,
-    paddingVertical: 2,
-  },
-  cardTitle: {
-    marginTop: 2,
-    letterSpacing: -0.3,
-  },
-  noteText: {
-    fontStyle: 'italic',
-    marginTop: 2,
-  },
-});
+const createStyles = (colors: ThemeColors) =>
+  StyleSheet.create({
+    container: {
+      paddingHorizontal: 24,
+      paddingBottom: 48,
+      marginTop: 36,
+    },
+    sectionHeader: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      justifyContent: 'space-between',
+      marginBottom: 12,
+    },
+    divider: {
+      height: 1,
+      backgroundColor: colors.border,
+      marginBottom: 20,
+    },
+    emptyText: {
+      textAlign: 'center',
+      paddingVertical: 24,
+    },
+    row: {
+      flexDirection: 'row',
+    },
+    leftCol: {
+      width: 28,
+      alignItems: 'center',
+      paddingTop: 2,
+    },
+    dot: {
+      width: 10,
+      height: 10,
+      borderRadius: 5,
+    },
+    lineSegment: {
+      flex: 1,
+      width: 1,
+      backgroundColor: colors.border,
+      marginTop: 4,
+      marginBottom: 0,
+    },
+    rightCol: {
+      flex: 1,
+      paddingBottom: 24,
+      gap: 4,
+    },
+    rightColLast: {
+      paddingBottom: 0,
+    },
+    metaRow: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      flexWrap: 'wrap',
+    },
+    badgeRow: {
+      flexDirection: 'row',
+      gap: 6,
+      marginTop: 2,
+    },
+    badge: {
+      borderWidth: 1,
+      borderColor: colors.border,
+      borderRadius: 4,
+      paddingHorizontal: 6,
+      paddingVertical: 2,
+    },
+    cardTitle: {
+      marginTop: 2,
+      letterSpacing: -0.3,
+    },
+    noteText: {
+      fontStyle: 'italic',
+      marginTop: 2,
+    },
+  });

@@ -97,7 +97,13 @@ export function PackCard({ pack, half, isPremium }: PackCardProps) {
 
       <View style={styles.cardSpacer} />
 
-      <Typography variant="body" color={theme.subText} baseFontSize={13} baseLineHeight={18} style={styles.packQuote}>
+      <Typography
+        variant="body"
+        color={theme.subText}
+        baseFontSize={13}
+        baseLineHeight={18}
+        style={styles.packQuote}
+      >
         {'"'}
         {pack.description}
         {'"'}
@@ -109,7 +115,11 @@ export function PackCard({ pack, half, isPremium }: PackCardProps) {
           activeOpacity={0.85}
           onPress={handleSubscribe}
         >
-          <Typography variant="cardLabel" color={theme.btnText} style={{ opacity: 1, letterSpacing: 1.5 }}>
+          <Typography
+            variant="cardLabel"
+            color={theme.btnText}
+            style={{ opacity: 1, letterSpacing: 1.5 }}
+          >
             {t('packs.subscribe')}
           </Typography>
         </TouchableOpacity>

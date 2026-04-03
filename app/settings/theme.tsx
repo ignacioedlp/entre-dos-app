@@ -1,42 +1,27 @@
-import { useMemo, useState } from 'react';
-import { View, StyleSheet, Pressable } from 'react-native';
+import { useMemo } from 'react';
+import { View, Pressable, StyleSheet } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
-import { useQueryClient } from '@tanstack/react-query';
-import { ThemeColors } from '@/constants/colors';
-import { useColors } from '@/context/ThemeContext';
-import { useAuth } from '@/context/AuthContext';
-import { apiUpdateLocale } from '@/lib/api';
-import i18n from '@/i18n';
 import { useTranslation } from 'react-i18next';
-import { LANGUAGES } from '@/lib/countries';
+
+import { ThemeColors } from '@/constants/colors';
+import { useColors, useTheme } from '@/context/ThemeContext';
+import { ThemeKey } from '@/lib/theme';
 import { Typography } from '@/components/ui/Typography';
 
-export default function LanguageScreen() {
+const THEME_OPTIONS: { key: ThemeKey; icon: string }[] = [
+  { key: 'dark', icon: 'moon-outline' },
+  { key: 'light', icon: 'sunny-outline' },
+];
+
+export default function ThemeScreen() {
   const insets = useSafeAreaInsets();
   const router = useRouter();
-  const { user, updateProfile } = useAuth();
-  const [loading, setLoading] = useState(false);
-  const { t } = useTranslation('settings');
-  const queryClient = useQueryClient();
   const colors = useColors();
+  const { theme, setTheme } = useTheme();
+  const { t } = useTranslation('settings');
   const styles = useMemo(() => createStyles(colors), [colors]);
-
-  async function handleSelect(locale: 'es' | 'en') {
-    if (loading || locale === user?.locale) return;
-    setLoading(true);
-    try {
-      const updated = await apiUpdateLocale(locale);
-      updateProfile(updated);
-      i18n.changeLanguage(locale);
-      queryClient.invalidateQueries();
-    } catch {
-      // silently ignore
-    } finally {
-      setLoading(false);
-    }
-  }
 
   return (
     <View style={[styles.root, { paddingTop: insets.top + 20 }]}>
@@ -45,23 +30,34 @@ export default function LanguageScreen() {
           <Ionicons name="arrow-back" size={22} color={colors.background} />
         </Pressable>
         <Typography variant="heading" style={styles.headerTitle}>
-          {t('language.title')}
+          {t('theme.title', { defaultValue: 'Tema' })}
         </Typography>
       </View>
 
-      {LANGUAGES.map((lang, idx) => {
-        const isSelected = user?.locale === lang.locale;
+      {THEME_OPTIONS.map((option, idx) => {
+        const isSelected = theme === option.key;
+        const label =
+          option.key === 'dark'
+            ? t('theme.dark', { defaultValue: 'Oscuro' })
+            : t('theme.light', { defaultValue: 'Claro' });
+
         return (
           <Pressable
-            key={lang.locale}
-            onPress={() => handleSelect(lang.locale)}
-            disabled={loading}
-            style={[styles.row, idx === 0 && styles.rowFirst, loading && styles.rowDisabled]}
+            key={option.key}
+            onPress={() => setTheme(option.key)}
+            style={[styles.row, idx === 0 && styles.rowFirst]}
           >
-            {lang.flag}
-            <Typography variant="bodyBold" style={styles.label}>
-              {lang.label}
-            </Typography>
+            <View style={styles.rowContent}>
+              <Ionicons
+                name={option.icon as any}
+                size={22}
+                color={colors.textMuted}
+                style={styles.icon}
+              />
+              <Typography variant="bodyBold" style={styles.label}>
+                {label}
+              </Typography>
+            </View>
             {isSelected && <Ionicons name="checkmark-circle" size={22} color={colors.accent} />}
           </Pressable>
         );
@@ -82,15 +78,15 @@ function createStyles(colors: ThemeColors) {
       paddingHorizontal: 20,
       gap: 20,
       paddingVertical: 14,
+      marginBottom: 8,
     },
     backBtn: {
       width: 40,
-      backgroundColor: colors.textPrimary,
       height: 40,
-      flexDirection: 'row',
+      borderRadius: 20,
+      backgroundColor: colors.textPrimary,
       alignItems: 'center',
       justifyContent: 'center',
-      borderRadius: 25,
     },
     headerTitle: {
       color: colors.textPrimary,
@@ -98,21 +94,24 @@ function createStyles(colors: ThemeColors) {
     row: {
       flexDirection: 'row',
       alignItems: 'center',
-      paddingVertical: 14,
-      paddingHorizontal: 16,
+      paddingVertical: 18,
+      paddingHorizontal: 20,
       borderTopWidth: 1,
       borderTopColor: colors.border,
-      gap: 12,
     },
     rowFirst: {
       borderTopWidth: 1,
       borderTopColor: colors.border,
     },
-    rowDisabled: {
-      opacity: 0.5,
+    rowContent: {
+      flex: 1,
+      flexDirection: 'row',
+      alignItems: 'center',
+    },
+    icon: {
+      marginRight: 12,
     },
     label: {
-      flex: 1,
       color: colors.textPrimary,
     },
   });

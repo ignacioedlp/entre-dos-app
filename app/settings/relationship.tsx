@@ -11,7 +11,7 @@ import {
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useTranslation } from 'react-i18next';
 import moment from 'moment';
@@ -27,7 +27,8 @@ import Animated, {
   type SharedValue,
 } from 'react-native-reanimated';
 
-import { Colors } from '@/constants/colors';
+import { useColors } from '@/context/ThemeContext';
+import { ThemeColors } from '@/constants/colors';
 import { apiGetCoupleStatus, apiUpdateCoupleAnniversary, apiUnlinkCouple } from '@/lib/api';
 import { Button } from '@/components/ui/Button';
 import { useAuth } from '@/context/AuthContext';
@@ -38,7 +39,13 @@ import { useScaledFontSize } from '@/context/FontScaleContext';
 const AVATAR_SIZE = 80;
 const DOT_COUNT = 7;
 
-function AnimatedDot({ opacity }: { opacity: SharedValue<number> }) {
+function AnimatedDot({
+  opacity,
+  styles,
+}: {
+  opacity: SharedValue<number>;
+  styles: ReturnType<typeof createStyles>;
+}) {
   const style = useAnimatedStyle(() => ({ opacity: opacity.value }));
   return <Animated.View style={[styles.dot, style]} />;
 }
@@ -51,6 +58,8 @@ export default function RelationshipScreen() {
   const queryClient = useQueryClient();
   const inputFontSize = useScaledFontSize(18);
   const separatorFontSize = useScaledFontSize(20);
+  const colors = useColors();
+  const styles = useMemo(() => createStyles(colors), [colors]);
 
   const [editing, setEditing] = useState(false);
   const [unlinkVisible, setUnlinkVisible] = useState(false);
@@ -218,7 +227,7 @@ export default function RelationshipScreen() {
       {/* Header */}
       <View style={styles.header}>
         <Pressable onPress={() => router.back()} style={styles.backBtn}>
-          <Ionicons name="arrow-back" size={22} color={Colors.background} />
+          <Ionicons name="arrow-back" size={22} color={colors.background} />
         </Pressable>
         <Typography variant="heading" style={styles.headerTitle}>
           {t('relationship.title')}
@@ -226,7 +235,7 @@ export default function RelationshipScreen() {
       </View>
 
       {isLoading && (
-        <ActivityIndicator color={Colors.accent} size="large" style={{ marginTop: 60 }} />
+        <ActivityIndicator color={colors.accent} size="large" style={{ marginTop: 60 }} />
       )}
 
       {couple && (
@@ -240,10 +249,15 @@ export default function RelationshipScreen() {
                   <Image source={{ uri: couple.userAImageUrl }} style={styles.avatar} />
                 ) : (
                   <View style={[styles.avatar, styles.avatarPlaceholder]}>
-                    <Ionicons name="person" size={32} color={Colors.textMuted} />
+                    <Ionicons name="person" size={32} color={colors.textMuted} />
                   </View>
                 )}
-                <Typography variant="bodyBold" baseFontSize={14} style={styles.name} numberOfLines={1}>
+                <Typography
+                  variant="bodyBold"
+                  baseFontSize={14}
+                  style={styles.name}
+                  numberOfLines={1}
+                >
                   {couple.userADisplayName ?? 'Partner'}
                 </Typography>
               </View>
@@ -252,16 +266,21 @@ export default function RelationshipScreen() {
               <View style={styles.connector}>
                 <View style={styles.dotsRow}>
                   {dotOpacities.slice(0, Math.floor(DOT_COUNT / 2)).map((dotOp, i) => (
-                    <AnimatedDot key={`l-${i}`} opacity={dotOp} />
+                    <AnimatedDot key={`l-${i}`} opacity={dotOp} styles={styles} />
                   ))}
                   <Animated.View style={[styles.heartCenter, heartAnimStyle]}>
-                    <Ionicons name="heart" size={22} color={Colors.accent} />
+                    <Ionicons name="heart" size={22} color={colors.accent} />
                   </Animated.View>
                   {dotOpacities.slice(Math.ceil(DOT_COUNT / 2)).map((dotOp, i) => (
-                    <AnimatedDot key={`r-${i}`} opacity={dotOp} />
+                    <AnimatedDot key={`r-${i}`} opacity={dotOp} styles={styles} />
                   ))}
                 </View>
-                <Typography variant="body" baseFontSize={11} color={Colors.textSecondary} style={styles.since}>
+                <Typography
+                  variant="body"
+                  baseFontSize={11}
+                  color={colors.textSecondary}
+                  style={styles.since}
+                >
                   {t('relationship.togetherSince', { date: linkedDate })}
                 </Typography>
               </View>
@@ -272,10 +291,15 @@ export default function RelationshipScreen() {
                   <Image source={{ uri: couple.userBImageUrl }} style={styles.avatar} />
                 ) : (
                   <View style={[styles.avatar, styles.avatarPlaceholder]}>
-                    <Ionicons name="person" size={32} color={Colors.textMuted} />
+                    <Ionicons name="person" size={32} color={colors.textMuted} />
                   </View>
                 )}
-                <Typography variant="bodyBold" baseFontSize={14} style={styles.name} numberOfLines={1}>
+                <Typography
+                  variant="bodyBold"
+                  baseFontSize={14}
+                  style={styles.name}
+                  numberOfLines={1}
+                >
                   {couple.userBDisplayName ?? 'Partner'}
                 </Typography>
               </View>
@@ -284,7 +308,7 @@ export default function RelationshipScreen() {
 
           {/* Anniversary Section */}
           <View style={styles.section}>
-            <Typography variant="label" color={Colors.textMuted} style={styles.sectionLabel}>
+            <Typography variant="label" color={colors.textMuted} style={styles.sectionLabel}>
               {t('relationship.anniversary')}
             </Typography>
 
@@ -293,22 +317,22 @@ export default function RelationshipScreen() {
                 {anniversaryDate ? (
                   <>
                     <View style={styles.dateDisplay}>
-                      <Ionicons name="calendar" size={20} color={Colors.accent} />
+                      <Ionicons name="calendar" size={20} color={colors.accent} />
                       <Typography variant="bodyBold" baseFontSize={17}>
                         {anniversaryDate}
                       </Typography>
                     </View>
                     <Pressable onPress={startEditing} style={styles.editBtn}>
-                      <Ionicons name="pencil" size={18} color={Colors.textSecondary} />
-                      <Typography variant="body" baseFontSize={14} color={Colors.textSecondary}>
+                      <Ionicons name="pencil" size={18} color={colors.textSecondary} />
+                      <Typography variant="body" baseFontSize={14} color={colors.textSecondary}>
                         {t('relationship.edit')}
                       </Typography>
                     </Pressable>
                   </>
                 ) : (
                   <Pressable onPress={startEditing} style={styles.setDateBtn}>
-                    <Ionicons name="add-circle-outline" size={22} color={Colors.accent} />
-                    <Typography variant="bodyBold" color={Colors.accent}>
+                    <Ionicons name="add-circle-outline" size={22} color={colors.accent} />
+                    <Typography variant="bodyBold" color={colors.accent}>
                       {t('relationship.setDate')}
                     </Typography>
                   </Pressable>
@@ -323,13 +347,17 @@ export default function RelationshipScreen() {
                     value={day}
                     onChangeText={handleDayChange}
                     placeholder={t('relationship.day')}
-                    placeholderTextColor={Colors.textMuted}
+                    placeholderTextColor={colors.textMuted}
                     keyboardType="number-pad"
                     maxLength={2}
                     textAlign="center"
                     autoFocus
                   />
-                  <Typography variant="bodyBold" style={{ fontSize: separatorFontSize }} color={Colors.textMuted}>
+                  <Typography
+                    variant="bodyBold"
+                    style={{ fontSize: separatorFontSize }}
+                    color={colors.textMuted}
+                  >
                     /
                   </Typography>
                   <TextInput
@@ -338,12 +366,16 @@ export default function RelationshipScreen() {
                     value={month}
                     onChangeText={handleMonthChange}
                     placeholder={t('relationship.month')}
-                    placeholderTextColor={Colors.textMuted}
+                    placeholderTextColor={colors.textMuted}
                     keyboardType="number-pad"
                     maxLength={2}
                     textAlign="center"
                   />
-                  <Typography variant="bodyBold" style={{ fontSize: separatorFontSize }} color={Colors.textMuted}>
+                  <Typography
+                    variant="bodyBold"
+                    style={{ fontSize: separatorFontSize }}
+                    color={colors.textMuted}
+                  >
                     /
                   </Typography>
                   <TextInput
@@ -352,7 +384,7 @@ export default function RelationshipScreen() {
                     value={year}
                     onChangeText={handleYearChange}
                     placeholder={t('relationship.year')}
-                    placeholderTextColor={Colors.textMuted}
+                    placeholderTextColor={colors.textMuted}
                     keyboardType="number-pad"
                     maxLength={4}
                     textAlign="center"
@@ -360,7 +392,12 @@ export default function RelationshipScreen() {
                 </View>
 
                 {error && (
-                  <Typography variant="body" baseFontSize={13} color={Colors.accent} style={{ textAlign: 'center' }}>
+                  <Typography
+                    variant="body"
+                    baseFontSize={13}
+                    color={colors.accent}
+                    style={{ textAlign: 'center' }}
+                  >
                     {error}
                   </Typography>
                 )}
@@ -386,7 +423,7 @@ export default function RelationshipScreen() {
 
                 <View style={styles.secondaryActions}>
                   <Pressable onPress={cancelEditing} style={styles.textBtn}>
-                    <Typography variant="body" baseFontSize={14} color={Colors.textSecondary}>
+                    <Typography variant="body" baseFontSize={14} color={colors.textSecondary}>
                       {t('relationship.cancel')}
                     </Typography>
                   </Pressable>
@@ -397,7 +434,7 @@ export default function RelationshipScreen() {
                       disabled={mutation.isPending}
                       style={styles.textBtn}
                     >
-                      <Typography variant="body" baseFontSize={14} color={Colors.accent}>
+                      <Typography variant="body" baseFontSize={14} color={colors.accent}>
                         {t('relationship.remove')}
                       </Typography>
                     </Pressable>
@@ -428,13 +465,19 @@ export default function RelationshipScreen() {
             <View style={styles.backdrop}>
               <View style={styles.modalCard}>
                 <View style={styles.iconWrap}>
-                  <Ionicons name="heart-dislike-outline" size={28} color={Colors.pasion} />
+                  <Ionicons name="heart-dislike-outline" size={28} color={colors.pasion} />
                 </View>
 
                 <Typography variant="heading" baseFontSize={20} style={styles.modalTitle}>
                   {t('relationship.unlinkConfirmTitle')}
                 </Typography>
-                <Typography variant="body" baseFontSize={14} baseLineHeight={21} color={Colors.textSecondary} style={styles.modalBody}>
+                <Typography
+                  variant="body"
+                  baseFontSize={14}
+                  baseLineHeight={21}
+                  color={colors.textSecondary}
+                  style={styles.modalBody}
+                >
                   {t('relationship.unlinkConfirmMessage')}
                 </Typography>
 
@@ -460,214 +503,216 @@ export default function RelationshipScreen() {
   );
 }
 
-const styles = StyleSheet.create({
-  root: {
-    flex: 1,
-    backgroundColor: Colors.background,
-  },
-  header: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    paddingHorizontal: 20,
-    gap: 20,
-    paddingVertical: 14,
-  },
-  backBtn: {
-    width: 40,
-    backgroundColor: Colors.textPrimary,
-    height: 40,
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    borderRadius: 25,
-  },
-  headerTitle: {
-    color: Colors.textPrimary,
-  },
+function createStyles(colors: ThemeColors) {
+  return StyleSheet.create({
+    root: {
+      flex: 1,
+      backgroundColor: colors.background,
+    },
+    header: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      paddingHorizontal: 20,
+      gap: 20,
+      paddingVertical: 14,
+    },
+    backBtn: {
+      width: 40,
+      backgroundColor: colors.textPrimary,
+      height: 40,
+      flexDirection: 'row',
+      alignItems: 'center',
+      justifyContent: 'center',
+      borderRadius: 25,
+    },
+    headerTitle: {
+      color: colors.textPrimary,
+    },
 
-  // Partner Card
-  card: {
-    backgroundColor: Colors.surface,
-    borderRadius: 20,
-    borderWidth: 1,
-    borderColor: Colors.border,
-    padding: 24,
-    marginHorizontal: 20,
-    marginTop: 24,
-  },
-  coupleRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-  },
-  avatarCol: {
-    alignItems: 'center',
-    gap: 10,
-    width: AVATAR_SIZE + 10,
-  },
-  avatar: {
-    width: AVATAR_SIZE,
-    height: AVATAR_SIZE,
-    borderRadius: AVATAR_SIZE / 2,
-    borderWidth: 2,
-    borderColor: Colors.border,
-  },
-  avatarPlaceholder: {
-    backgroundColor: Colors.surfaceAlt,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  name: {
-    textAlign: 'center',
-  },
-  connector: {
-    flex: 1,
-    alignItems: 'center',
-    gap: 8,
-    paddingHorizontal: 4,
-  },
-  dotsRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    gap: 6,
-  },
-  dot: {
-    width: 5,
-    height: 5,
-    borderRadius: 2.5,
-    backgroundColor: Colors.accent,
-  },
-  heartCenter: {
-    marginHorizontal: 4,
-  },
-  since: {
-    textAlign: 'center',
-  },
+    // Partner Card
+    card: {
+      backgroundColor: colors.surface,
+      borderRadius: 20,
+      borderWidth: 1,
+      borderColor: colors.border,
+      padding: 24,
+      marginHorizontal: 20,
+      marginTop: 24,
+    },
+    coupleRow: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      justifyContent: 'space-between',
+    },
+    avatarCol: {
+      alignItems: 'center',
+      gap: 10,
+      width: AVATAR_SIZE + 10,
+    },
+    avatar: {
+      width: AVATAR_SIZE,
+      height: AVATAR_SIZE,
+      borderRadius: AVATAR_SIZE / 2,
+      borderWidth: 2,
+      borderColor: colors.border,
+    },
+    avatarPlaceholder: {
+      backgroundColor: colors.surfaceAlt,
+      alignItems: 'center',
+      justifyContent: 'center',
+    },
+    name: {
+      textAlign: 'center',
+    },
+    connector: {
+      flex: 1,
+      alignItems: 'center',
+      gap: 8,
+      paddingHorizontal: 4,
+    },
+    dotsRow: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      justifyContent: 'center',
+      gap: 6,
+    },
+    dot: {
+      width: 5,
+      height: 5,
+      borderRadius: 2.5,
+      backgroundColor: colors.accent,
+    },
+    heartCenter: {
+      marginHorizontal: 4,
+    },
+    since: {
+      textAlign: 'center',
+    },
 
-  // Anniversary Section
-  section: {
-    marginTop: 32,
-    paddingHorizontal: 20,
-  },
-  sectionLabel: {
-    textTransform: 'uppercase',
-    letterSpacing: 1,
-    marginBottom: 16,
-  },
-  anniversaryView: {
-    backgroundColor: Colors.surface,
-    borderRadius: 16,
-    borderWidth: 1,
-    borderColor: Colors.border,
-    padding: 20,
-    gap: 14,
-  },
-  dateDisplay: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 10,
-  },
-  editBtn: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 6,
-    alignSelf: 'flex-start',
-  },
-  setDateBtn: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 10,
-    paddingVertical: 8,
-  },
+    // Anniversary Section
+    section: {
+      marginTop: 32,
+      paddingHorizontal: 20,
+    },
+    sectionLabel: {
+      textTransform: 'uppercase',
+      letterSpacing: 1,
+      marginBottom: 16,
+    },
+    anniversaryView: {
+      backgroundColor: colors.surface,
+      borderRadius: 16,
+      borderWidth: 1,
+      borderColor: colors.border,
+      padding: 20,
+      gap: 14,
+    },
+    dateDisplay: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: 10,
+    },
+    editBtn: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: 6,
+      alignSelf: 'flex-start',
+    },
+    setDateBtn: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: 10,
+      paddingVertical: 8,
+    },
 
-  // Edit Mode
-  editContainer: {
-    backgroundColor: Colors.surface,
-    borderRadius: 16,
-    borderWidth: 1,
-    borderColor: Colors.border,
-    padding: 20,
-    gap: 16,
-  },
-  inputsRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    gap: 8,
-  },
-  dateInput: {
-    backgroundColor: Colors.surfaceAlt,
-    borderRadius: 12,
-    borderWidth: 1,
-    borderColor: Colors.border,
-    paddingVertical: 14,
-    width: 56,
-    fontFamily: 'Inter_700Bold',
-    color: Colors.textPrimary,
-    textAlign: 'center',
-  },
-  yearInput: {
-    width: 80,
-  },
-  saveBtn: {
-    backgroundColor: Colors.accent,
-    borderRadius: 14,
-    paddingVertical: 16,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  secondaryActions: {
-    flexDirection: 'row',
-    justifyContent: 'center',
-    gap: 24,
-  },
-  textBtn: {
-    paddingVertical: 4,
-  },
+    // Edit Mode
+    editContainer: {
+      backgroundColor: colors.surface,
+      borderRadius: 16,
+      borderWidth: 1,
+      borderColor: colors.border,
+      padding: 20,
+      gap: 16,
+    },
+    inputsRow: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      justifyContent: 'center',
+      gap: 8,
+    },
+    dateInput: {
+      backgroundColor: colors.surfaceAlt,
+      borderRadius: 12,
+      borderWidth: 1,
+      borderColor: colors.border,
+      paddingVertical: 14,
+      width: 56,
+      fontFamily: 'Inter_700Bold',
+      color: colors.textPrimary,
+      textAlign: 'center',
+    },
+    yearInput: {
+      width: 80,
+    },
+    saveBtn: {
+      backgroundColor: colors.accent,
+      borderRadius: 14,
+      paddingVertical: 16,
+      alignItems: 'center',
+      justifyContent: 'center',
+    },
+    secondaryActions: {
+      flexDirection: 'row',
+      justifyContent: 'center',
+      gap: 24,
+    },
+    textBtn: {
+      paddingVertical: 4,
+    },
 
-  // Unlink
-  unlinkSection: {
-    marginTop: 40,
-    paddingHorizontal: 20,
-    marginBottom: 40,
-  },
-  backdrop: {
-    flex: 1,
-    backgroundColor: 'rgba(0,0,0,0.7)',
-    justifyContent: 'flex-end',
-    paddingHorizontal: 16,
-    paddingBottom: 32,
-  },
-  modalCard: {
-    backgroundColor: Colors.surface,
-    borderRadius: 20,
-    padding: 28,
-    borderWidth: 1,
-    borderColor: Colors.border,
-    alignItems: 'center',
-  },
-  iconWrap: {
-    width: 56,
-    height: 56,
-    borderRadius: 28,
-    backgroundColor: 'rgba(255,59,92,0.12)',
-    alignItems: 'center',
-    justifyContent: 'center',
-    marginBottom: 20,
-  },
-  modalTitle: {
-    letterSpacing: -0.3,
-    textAlign: 'center',
-    marginBottom: 10,
-  },
-  modalBody: {
-    textAlign: 'center',
-    marginBottom: 28,
-    maxWidth: 280,
-  },
-  modalActions: {
-    width: '100%',
-    gap: 10,
-  },
-});
+    // Unlink
+    unlinkSection: {
+      marginTop: 40,
+      paddingHorizontal: 20,
+      marginBottom: 40,
+    },
+    backdrop: {
+      flex: 1,
+      backgroundColor: 'rgba(0,0,0,0.7)',
+      justifyContent: 'flex-end',
+      paddingHorizontal: 16,
+      paddingBottom: 32,
+    },
+    modalCard: {
+      backgroundColor: colors.surface,
+      borderRadius: 20,
+      padding: 28,
+      borderWidth: 1,
+      borderColor: colors.border,
+      alignItems: 'center',
+    },
+    iconWrap: {
+      width: 56,
+      height: 56,
+      borderRadius: 28,
+      backgroundColor: 'rgba(255,59,92,0.12)',
+      alignItems: 'center',
+      justifyContent: 'center',
+      marginBottom: 20,
+    },
+    modalTitle: {
+      letterSpacing: -0.3,
+      textAlign: 'center',
+      marginBottom: 10,
+    },
+    modalBody: {
+      textAlign: 'center',
+      marginBottom: 28,
+      maxWidth: 280,
+    },
+    modalActions: {
+      width: '100%',
+      gap: 10,
+    },
+  });
+}

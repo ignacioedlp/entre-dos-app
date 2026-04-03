@@ -1,5 +1,5 @@
 import { View, StyleSheet, Dimensions } from 'react-native';
-import { useEffect } from 'react';
+import { useEffect, useMemo } from 'react';
 import { useRouter } from 'expo-router';
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 import { LinearGradient } from 'expo-linear-gradient';
@@ -14,7 +14,8 @@ import { useTranslation } from 'react-i18next';
 import { LogoWithName } from '../../components/ui/Logo';
 import { Button } from '../../components/ui/Button';
 import { GameCard, GameCardData } from '../../components/cards/GameCard';
-import { Colors } from '../../constants/colors';
+import { useColors } from '@/context/ThemeContext';
+import { ThemeColors } from '../../constants/colors';
 
 const { width: W, height: H } = Dimensions.get('window');
 
@@ -84,6 +85,8 @@ export default function WelcomeScreen() {
   const insets = useSafeAreaInsets();
   const { t } = useTranslation('auth');
   const { t: tCommon } = useTranslation('common');
+  const colors = useColors();
+  const styles = useMemo(() => createStyles(colors), [colors]);
 
   return (
     <SafeAreaView style={styles.root}>
@@ -101,7 +104,7 @@ export default function WelcomeScreen() {
       ))}
 
       <LinearGradient
-        colors={['transparent', Colors.background]}
+        colors={['transparent', colors.background]}
         style={[styles.vignette]}
         pointerEvents="none"
       />
@@ -122,32 +125,33 @@ export default function WelcomeScreen() {
   );
 }
 
-const styles = StyleSheet.create({
-  root: {
-    flex: 1,
-    backgroundColor: Colors.background,
-  },
-  vignette: {
-    position: 'absolute',
-    bottom: 0,
-    left: 0,
-    right: 0,
-    height: H * 0.38,
-  },
-  logoArea: {
-    position: 'absolute',
-    top: 0,
-    left: 0,
-    paddingHorizontal: 20,
-    zIndex: 10,
-  },
-  ctaArea: {
-    position: 'absolute',
-    bottom: 0,
-    left: 0,
-    right: 0,
-    paddingHorizontal: 24,
-    zIndex: 10,
-    gap: 10,
-  },
-});
+const createStyles = (colors: ThemeColors) =>
+  StyleSheet.create({
+    root: {
+      flex: 1,
+      backgroundColor: colors.background,
+    },
+    vignette: {
+      position: 'absolute',
+      bottom: 0,
+      left: 0,
+      right: 0,
+      height: H * 0.38,
+    },
+    logoArea: {
+      position: 'absolute',
+      top: 0,
+      left: 0,
+      paddingHorizontal: 20,
+      zIndex: 10,
+    },
+    ctaArea: {
+      position: 'absolute',
+      bottom: 0,
+      left: 0,
+      right: 0,
+      paddingHorizontal: 24,
+      zIndex: 10,
+      gap: 10,
+    },
+  });

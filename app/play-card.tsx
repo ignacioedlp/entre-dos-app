@@ -1,4 +1,4 @@
-import { useRef } from 'react';
+import { useRef, useMemo } from 'react';
 import { View, StyleSheet } from 'react-native';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -6,7 +6,8 @@ import { Toast } from 'toastify-react-native';
 import { useQueryClient } from '@tanstack/react-query';
 import { useTranslation } from 'react-i18next';
 
-import { Colors, RarityKey, rarityColor } from '../constants/colors';
+import { RarityKey, rarityColor, ThemeColors } from '../constants/colors';
+import { useColors } from '../context/ThemeContext';
 import { DeckCard, DeckResponse, apiPlayCard } from '../lib/api';
 import { SwipeToConfirm } from '../components/ui/SwipeToConfirm';
 import { Typography } from '../components/ui/Typography';
@@ -25,6 +26,8 @@ export default function CardDetailSheet() {
   const queryClient = useQueryClient();
   const playing = useRef(false);
   const { t } = useTranslation('home');
+  const colors = useColors();
+  const styles = useMemo(() => createStyles(colors), [colors]);
 
   async function handleConfirm(cardId: string) {
     if (playing.current) return;
@@ -57,7 +60,12 @@ export default function CardDetailSheet() {
     return (
       <View style={[styles.root, { paddingBottom: insets.bottom + 24 }]}>
         <View style={styles.handle} />
-        <Typography variant="body" baseFontSize={15} color={Colors.textSecondary} style={styles.errorText}>
+        <Typography
+          variant="body"
+          baseFontSize={15}
+          color={colors.textSecondary}
+          style={styles.errorText}
+        >
           {t('playCard.errorLoad')}
         </Typography>
       </View>
@@ -82,10 +90,21 @@ export default function CardDetailSheet() {
       </View>
 
       <View style={styles.body}>
-        <Typography variant="swissTitle" baseFontSize={32} baseLineHeight={34} color={cardBg} style={styles.cardTitle}>
+        <Typography
+          variant="swissTitle"
+          baseFontSize={32}
+          baseLineHeight={34}
+          color={cardBg}
+          style={styles.cardTitle}
+        >
           {card.title}
         </Typography>
-        <Typography variant="body" baseFontSize={12} baseLineHeight={18} style={styles.cardDescription}>
+        <Typography
+          variant="body"
+          baseFontSize={12}
+          baseLineHeight={18}
+          style={styles.cardDescription}
+        >
           {card.description}
         </Typography>
       </View>
@@ -93,7 +112,7 @@ export default function CardDetailSheet() {
       <View style={styles.footer}>
         {isPlayed ? (
           <View style={styles.playedBanner}>
-            <Typography variant="bodyBold" baseFontSize={15} color={Colors.textSecondary}>
+            <Typography variant="bodyBold" baseFontSize={15} color={colors.textSecondary}>
               {t('playCard.played')}
             </Typography>
           </View>
@@ -105,51 +124,53 @@ export default function CardDetailSheet() {
   );
 }
 
-const styles = StyleSheet.create({
-  root: {
-    flex: 1,
-    backgroundColor: Colors.surface,
-    paddingTop: 12,
-  },
-  handle: {
-    width: 36,
-    height: 4,
-    borderRadius: 2,
-    backgroundColor: Colors.border,
-    alignSelf: 'center',
-    marginBottom: 20,
-  },
-  title: {
-    letterSpacing: -0.5,
-  },
-  header: {
-    paddingHorizontal: 24,
-    gap: 20,
-  },
-  body: {
-    paddingHorizontal: 24,
-    paddingTop: 24,
-    gap: 10,
-    flex: 1,
-  },
-  cardTitle: {
-    letterSpacing: -0.5,
-  },
-  cardDescription: {
-    textTransform: 'uppercase',
-  },
-  footer: {
-    paddingHorizontal: 24,
-    gap: 12,
-  },
-  playedBanner: {
-    backgroundColor: Colors.surfaceAlt,
-    borderRadius: 12,
-    paddingVertical: 16,
-    alignItems: 'center',
-  },
-  errorText: {
-    textAlign: 'center',
-    marginTop: 40,
-  },
-});
+function createStyles(colors: ThemeColors) {
+  return StyleSheet.create({
+    root: {
+      flex: 1,
+      backgroundColor: colors.surface,
+      paddingTop: 12,
+    },
+    handle: {
+      width: 36,
+      height: 4,
+      borderRadius: 2,
+      backgroundColor: colors.border,
+      alignSelf: 'center',
+      marginBottom: 20,
+    },
+    title: {
+      letterSpacing: -0.5,
+    },
+    header: {
+      paddingHorizontal: 24,
+      gap: 20,
+    },
+    body: {
+      paddingHorizontal: 24,
+      paddingTop: 24,
+      gap: 10,
+      flex: 1,
+    },
+    cardTitle: {
+      letterSpacing: -0.5,
+    },
+    cardDescription: {
+      textTransform: 'uppercase',
+    },
+    footer: {
+      paddingHorizontal: 24,
+      gap: 12,
+    },
+    playedBanner: {
+      backgroundColor: colors.surfaceAlt,
+      borderRadius: 12,
+      paddingVertical: 16,
+      alignItems: 'center',
+    },
+    errorText: {
+      textAlign: 'center',
+      marginTop: 40,
+    },
+  });
+}

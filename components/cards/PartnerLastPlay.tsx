@@ -123,8 +123,16 @@ export function PartnerLastPlay({ play }: PartnerLastPlayProps) {
 
       <View style={styles.inner}>
         <View style={styles.top}>
-          <Typography variant="cardLabel" color={fg}>{categoryLabel}</Typography>
-          <Typography variant="cardTitle" color={fg} baseFontSize={20} baseLineHeight={24} numberOfLines={2}>
+          <Typography variant="cardLabel" color={fg}>
+            {categoryLabel}
+          </Typography>
+          <Typography
+            variant="cardTitle"
+            color={fg}
+            baseFontSize={20}
+            baseLineHeight={24}
+            numberOfLines={2}
+          >
             {play.title}
           </Typography>
           <Typography variant="cardLabel" color={fg} numberOfLines={3}>

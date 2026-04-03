@@ -1,11 +1,12 @@
+import { useMemo, useState } from 'react';
 import { View, StyleSheet, Pressable, Modal } from 'react-native';
-import { useState } from 'react';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { useTranslation } from 'react-i18next';
 
-import { Colors } from '@/constants/colors';
+import { ThemeColors } from '@/constants/colors';
+import { useColors } from '@/context/ThemeContext';
 import { Button } from '@/components/ui/Button';
 import { useAuth } from '@/context/AuthContext';
 import { useRevenueCat } from '@/context/RevenueCatContext';
@@ -22,6 +23,8 @@ export default function SettingsScreen() {
   const [deleteVisible, setDeleteVisible] = useState(false);
   const [deleteLoading, setDeleteLoading] = useState(false);
   const { t } = useTranslation('settings');
+  const colors = useColors();
+  const styles = useMemo(() => createStyles(colors), [colors]);
 
   async function handleRestore() {
     try {
@@ -62,6 +65,11 @@ export default function SettingsScreen() {
       label: t('menu.fontSize'),
       route: '/settings/font-size',
       icon: 'text-outline',
+    },
+    {
+      label: t('menu.theme'),
+      route: '/settings/theme',
+      icon: 'color-palette-outline',
     },
     {
       label: t('menu.country'),
@@ -111,7 +119,7 @@ export default function SettingsScreen() {
     <View style={[styles.root, { paddingTop: insets.top + 20 }]}>
       <View style={styles.header}>
         <Pressable onPress={() => router.back()} style={styles.backBtn}>
-          <Ionicons name="arrow-back" size={22} color={Colors.background} />
+          <Ionicons name="arrow-back" size={22} color={colors.background} />
         </Pressable>
         <Typography variant="heading" style={styles.headerTitle}>
           {t('title')}
@@ -126,8 +134,8 @@ export default function SettingsScreen() {
               style={styles.row}
               onPress={() => (item.onPress ? item.onPress() : router.push(item.route as any))}
             >
-              <Ionicons name={item.icon as any} size={20} color={Colors.textMuted} />
-              <Typography variant="label" color={Colors.textMuted}>
+              <Ionicons name={item.icon as any} size={20} color={colors.textMuted} />
+              <Typography variant="label" color={colors.textMuted}>
                 {item.label}
               </Typography>
             </Pressable>
@@ -137,7 +145,7 @@ export default function SettingsScreen() {
         <View style={[styles.footer, { paddingBottom: insets.bottom + 16 }]}>
           <Button label={t('signOut')} onPress={() => setLogoutVisible(true)} variant="accent" />
           <Pressable onPress={() => setDeleteVisible(true)} style={styles.deleteAccountBtn}>
-            <Typography variant="label" color={Colors.pasion} style={styles.deleteAccountLabel}>
+            <Typography variant="label" color={colors.pasion} style={styles.deleteAccountLabel}>
               {t('deleteAccount')}
             </Typography>
           </Pressable>
@@ -155,13 +163,19 @@ export default function SettingsScreen() {
         <View style={styles.backdrop}>
           <View style={styles.card}>
             <View style={styles.iconWrap}>
-              <Ionicons name="log-out-outline" size={28} color={Colors.pasion} />
+              <Ionicons name="log-out-outline" size={28} color={colors.pasion} />
             </View>
 
             <Typography variant="heading" baseFontSize={20} style={styles.modalTitle}>
               {t('signOutConfirmTitle')}
             </Typography>
-            <Typography variant="body" baseFontSize={14} baseLineHeight={21} color={Colors.textSecondary} style={styles.modalBody}>
+            <Typography
+              variant="body"
+              baseFontSize={14}
+              baseLineHeight={21}
+              color={colors.textSecondary}
+              style={styles.modalBody}
+            >
               {t('signOutConfirmMessage')}
             </Typography>
 
@@ -195,13 +209,19 @@ export default function SettingsScreen() {
         <View style={styles.backdrop}>
           <View style={styles.card}>
             <View style={[styles.iconWrap, styles.deleteIconWrap]}>
-              <Ionicons name="trash-outline" size={28} color={Colors.pasion} />
+              <Ionicons name="trash-outline" size={28} color={colors.pasion} />
             </View>
 
             <Typography variant="heading" baseFontSize={20} style={styles.modalTitle}>
               {t('deleteAccountConfirmTitle')}
             </Typography>
-            <Typography variant="body" baseFontSize={14} baseLineHeight={21} color={Colors.textSecondary} style={styles.modalBody}>
+            <Typography
+              variant="body"
+              baseFontSize={14}
+              baseLineHeight={21}
+              color={colors.textSecondary}
+              style={styles.modalBody}
+            >
               {t('deleteAccountConfirmMessage')}
             </Typography>
 
@@ -238,92 +258,94 @@ export default function SettingsScreen() {
   );
 }
 
-const styles = StyleSheet.create({
-  root: {
-    flex: 1,
-    backgroundColor: Colors.background,
-  },
-  header: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    paddingHorizontal: 20,
-    gap: 20,
-    paddingVertical: 14,
-    marginBottom: 8,
-  },
-  backBtn: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
-    backgroundColor: Colors.textPrimary,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  headerTitle: {
-    color: Colors.textPrimary,
-  },
-  content: {
-    flex: 1,
-    justifyContent: 'space-between',
-  },
-  row: {
-    paddingVertical: 18,
-    paddingHorizontal: 20,
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 12,
-  },
-  footer: {
-    paddingHorizontal: 20,
-    paddingTop: 16,
-  },
-  backdrop: {
-    flex: 1,
-    backgroundColor: 'rgba(0,0,0,0.7)',
-    justifyContent: 'flex-end',
-    paddingHorizontal: 16,
-    paddingBottom: 32,
-  },
-  card: {
-    backgroundColor: Colors.surface,
-    borderRadius: 20,
-    padding: 28,
-    borderWidth: 1,
-    borderColor: Colors.border,
-    alignItems: 'center',
-  },
-  iconWrap: {
-    width: 56,
-    height: 56,
-    borderRadius: 28,
-    backgroundColor: 'rgba(255,59,92,0.12)',
-    alignItems: 'center',
-    justifyContent: 'center',
-    marginBottom: 20,
-  },
-  modalTitle: {
-    letterSpacing: -0.3,
-    textAlign: 'center',
-    marginBottom: 10,
-  },
-  modalBody: {
-    textAlign: 'center',
-    marginBottom: 28,
-    maxWidth: 280,
-  },
-  actions: {
-    width: '100%',
-    gap: 10,
-  },
-  deleteAccountBtn: {
-    alignItems: 'center',
-    paddingVertical: 12,
-    marginTop: 4,
-  },
-  deleteAccountLabel: {
-    opacity: 0.7,
-  },
-  deleteIconWrap: {
-    backgroundColor: 'rgba(255,59,92,0.12)',
-  },
-});
+function createStyles(colors: ThemeColors) {
+  return StyleSheet.create({
+    root: {
+      flex: 1,
+      backgroundColor: colors.background,
+    },
+    header: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      paddingHorizontal: 20,
+      gap: 20,
+      paddingVertical: 14,
+      marginBottom: 8,
+    },
+    backBtn: {
+      width: 40,
+      height: 40,
+      borderRadius: 20,
+      backgroundColor: colors.textPrimary,
+      alignItems: 'center',
+      justifyContent: 'center',
+    },
+    headerTitle: {
+      color: colors.textPrimary,
+    },
+    content: {
+      flex: 1,
+      justifyContent: 'space-between',
+    },
+    row: {
+      paddingVertical: 18,
+      paddingHorizontal: 20,
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: 12,
+    },
+    footer: {
+      paddingHorizontal: 20,
+      paddingTop: 16,
+    },
+    backdrop: {
+      flex: 1,
+      backgroundColor: 'rgba(0,0,0,0.7)',
+      justifyContent: 'flex-end',
+      paddingHorizontal: 16,
+      paddingBottom: 32,
+    },
+    card: {
+      backgroundColor: colors.surface,
+      borderRadius: 20,
+      padding: 28,
+      borderWidth: 1,
+      borderColor: colors.border,
+      alignItems: 'center',
+    },
+    iconWrap: {
+      width: 56,
+      height: 56,
+      borderRadius: 28,
+      backgroundColor: 'rgba(255,59,92,0.12)',
+      alignItems: 'center',
+      justifyContent: 'center',
+      marginBottom: 20,
+    },
+    modalTitle: {
+      letterSpacing: -0.3,
+      textAlign: 'center',
+      marginBottom: 10,
+    },
+    modalBody: {
+      textAlign: 'center',
+      marginBottom: 28,
+      maxWidth: 280,
+    },
+    actions: {
+      width: '100%',
+      gap: 10,
+    },
+    deleteAccountBtn: {
+      alignItems: 'center',
+      paddingVertical: 12,
+      marginTop: 4,
+    },
+    deleteAccountLabel: {
+      opacity: 0.7,
+    },
+    deleteIconWrap: {
+      backgroundColor: 'rgba(255,59,92,0.12)',
+    },
+  });
+}
