@@ -1,4 +1,4 @@
-import { View, Text, StyleSheet, Pressable } from 'react-native';
+import { View, StyleSheet, Pressable } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
@@ -10,6 +10,7 @@ import { apiUpdateLocale } from '@/lib/api';
 import i18n from '@/i18n';
 import { useTranslation } from 'react-i18next';
 import { LANGUAGES } from '@/lib/countries';
+import { Typography } from '@/components/ui/Typography';
 
 export default function LanguageScreen() {
   const insets = useSafeAreaInsets();
@@ -40,7 +41,9 @@ export default function LanguageScreen() {
         <Pressable onPress={() => router.back()} style={styles.backBtn}>
           <Ionicons name="arrow-back" size={22} color={Colors.background} />
         </Pressable>
-        <Text style={styles.headerTitle}>{t('language.title')}</Text>
+        <Typography variant="heading" style={styles.headerTitle}>
+          {t('language.title')}
+        </Typography>
       </View>
 
       {LANGUAGES.map((lang, idx) => {
@@ -53,7 +56,9 @@ export default function LanguageScreen() {
             style={[styles.row, idx === 0 && styles.rowFirst, loading && styles.rowDisabled]}
           >
             {lang.flag}
-            <Text style={styles.label}>{lang.label}</Text>
+            <Typography variant="bodyBold" style={styles.label}>
+              {lang.label}
+            </Typography>
             {isSelected && <Ionicons name="checkmark-circle" size={22} color={Colors.accent} />}
           </Pressable>
         );
@@ -84,9 +89,6 @@ const styles = StyleSheet.create({
     borderRadius: 25,
   },
   headerTitle: {
-    fontFamily: 'Inter_900Black',
-    fontSize: 28,
-    letterSpacing: -0.5,
     color: Colors.textPrimary,
   },
   row: {
@@ -105,13 +107,8 @@ const styles = StyleSheet.create({
   rowDisabled: {
     opacity: 0.5,
   },
-  flag: {
-    fontSize: 24,
-  },
   label: {
     flex: 1,
-    fontFamily: 'Inter_700Bold',
-    fontSize: 16,
     color: Colors.textPrimary,
   },
 });

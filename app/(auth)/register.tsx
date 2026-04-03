@@ -1,6 +1,5 @@
 import {
   View,
-  Text,
   TextInput,
   StyleSheet,
   Pressable,
@@ -20,6 +19,8 @@ import { Logo } from '../../components/ui/Logo';
 import { Button } from '../../components/ui/Button';
 import { Colors } from '../../constants/colors';
 import { useAuth } from '../../context/AuthContext';
+import { Typography } from '../../components/ui/Typography';
+import { useScaledFontSize } from '../../context/FontScaleContext';
 
 export default function RegisterScreen() {
   const insets = useSafeAreaInsets();
@@ -30,6 +31,7 @@ export default function RegisterScreen() {
   const [googleLoading, setGoogleLoading] = useState(false);
   const { register, googleLogin } = useAuth();
   const { t } = useTranslation('auth');
+  const inputFontSize = useScaledFontSize(16);
 
   const schema = z
     .object({
@@ -92,16 +94,20 @@ export default function RegisterScreen() {
           </View>
 
           <View style={styles.content}>
-            <Text style={styles.title}>{t('register.title')}</Text>
-            <Text style={styles.subtitle}>{t('register.subtitle')}</Text>
+            <Typography variant="swissTitle" baseFontSize={40} baseLineHeight={40} style={styles.title}>
+              {t('register.title')}
+            </Typography>
+            <Typography variant="body" color={Colors.textSecondary} style={styles.subtitle}>
+              {t('register.subtitle')}
+            </Typography>
 
-            <Text style={styles.label}>{t('register.email')}</Text>
+            <Typography variant="body" baseFontSize={14}>{t('register.email')}</Typography>
             <Controller
               control={control}
               name="email"
               render={({ field: { onChange, onBlur, value } }) => (
                 <TextInput
-                  style={[styles.input, errors.email && styles.inputError]}
+                  style={[styles.input, { fontSize: inputFontSize }, errors.email && styles.inputError]}
                   placeholder={t('register.emailPlaceholder')}
                   placeholderTextColor={Colors.textMuted}
                   keyboardType="email-address"
@@ -113,9 +119,13 @@ export default function RegisterScreen() {
                 />
               )}
             />
-            {errors.email && <Text style={styles.errorText}>{errors.email.message}</Text>}
+            {errors.email && (
+              <Typography variant="caption" color={Colors.pasion} style={styles.errorText}>
+                {errors.email.message}
+              </Typography>
+            )}
 
-            <Text style={[styles.label, styles.labelSpaced]}>{t('register.password')}</Text>
+            <Typography variant="body" baseFontSize={14} style={styles.labelSpaced}>{t('register.password')}</Typography>
             <Controller
               control={control}
               name="password"
@@ -125,6 +135,7 @@ export default function RegisterScreen() {
                     style={[
                       styles.input,
                       styles.passwordInput,
+                      { fontSize: inputFontSize },
                       errors.password && styles.inputError,
                     ]}
                     placeholder={t('register.passwordPlaceholder')}
@@ -150,9 +161,13 @@ export default function RegisterScreen() {
                 </View>
               )}
             />
-            {errors.password && <Text style={styles.errorText}>{errors.password.message}</Text>}
+            {errors.password && (
+              <Typography variant="caption" color={Colors.pasion} style={styles.errorText}>
+                {errors.password.message}
+              </Typography>
+            )}
 
-            <Text style={[styles.label, styles.labelSpaced]}>{t('register.passwordConfirm')}</Text>
+            <Typography variant="body" baseFontSize={14} style={styles.labelSpaced}>{t('register.passwordConfirm')}</Typography>
             <Controller
               control={control}
               name="confirmPassword"
@@ -162,6 +177,7 @@ export default function RegisterScreen() {
                     style={[
                       styles.input,
                       styles.passwordInput,
+                      { fontSize: inputFontSize },
                       errors.confirmPassword && styles.inputError,
                     ]}
                     placeholder={t('register.passwordPlaceholder')}
@@ -188,12 +204,20 @@ export default function RegisterScreen() {
               )}
             />
             {errors.confirmPassword && (
-              <Text style={styles.errorText}>{errors.confirmPassword.message}</Text>
+              <Typography variant="caption" color={Colors.pasion} style={styles.errorText}>
+                {errors.confirmPassword.message}
+              </Typography>
             )}
 
-            {apiError && <Text style={[styles.errorText, styles.apiError]}>{apiError}</Text>}
+            {apiError && (
+              <Typography variant="caption" color={Colors.pasion} style={styles.apiError}>
+                {apiError}
+              </Typography>
+            )}
 
-            <Text style={styles.termsAndConditions}>{t('register.termsAndConditions')}</Text>
+            <Typography variant="caption" color={Colors.textSecondary} style={styles.termsAndConditions}>
+              {t('register.termsAndConditions')}
+            </Typography>
           </View>
         </ScrollView>
 
@@ -206,7 +230,9 @@ export default function RegisterScreen() {
 
           <View style={styles.divider}>
             <View style={styles.dividerLine} />
-            <Text style={styles.dividerText}>{t('register.or')}</Text>
+            <Typography variant="caption" color={Colors.textMuted}>
+              {t('register.or')}
+            </Typography>
             <View style={styles.dividerLine} />
           </View>
 
@@ -216,16 +242,18 @@ export default function RegisterScreen() {
             disabled={googleLoading || isSubmitting}
           >
             <AntDesign name="google" size={18} color="#1a1a1a" />
-            <Text style={styles.googleLabel}>
+            <Typography variant="button" color="#1a1a1a">
               {googleLoading ? t('register.submitting') : t('register.google')}
-            </Text>
+            </Typography>
           </Pressable>
 
           <Pressable style={styles.loginLink} onPress={() => router.replace('/(auth)/login')}>
-            <Text style={styles.loginLinkText}>
+            <Typography variant="body" baseFontSize={14} color={Colors.textSecondary}>
               {t('register.hasAccount')}
-              <Text style={styles.loginLinkAccent}>{t('register.signInLink')}</Text>
-            </Text>
+              <Typography variant="bodyBold" baseFontSize={14} color={Colors.accent} style={styles.loginLinkAccent}>
+                {t('register.signInLink')}
+              </Typography>
+            </Typography>
           </Pressable>
         </View>
       </View>
@@ -255,31 +283,14 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   title: {
-    fontFamily: 'Inter_900Black',
-    fontSize: 40,
-    lineHeight: 40,
-    textTransform: 'uppercase',
-    letterSpacing: -1.5,
-    color: Colors.textPrimary,
     marginBottom: 12,
+    letterSpacing: -1.5,
   },
   termsAndConditions: {
-    fontFamily: 'Inter_400Regular',
-    fontSize: 12,
-    color: Colors.textSecondary,
     marginTop: 16,
   },
   subtitle: {
-    fontFamily: 'Inter_400Regular',
-    fontSize: 16,
-    lineHeight: 24,
-    color: Colors.textSecondary,
     marginBottom: 32,
-  },
-  label: {
-    fontFamily: 'Inter_400Regular',
-    fontSize: 14,
-    color: Colors.textPrimary,
   },
   labelSpaced: {
     marginTop: 24,
@@ -288,7 +299,6 @@ const styles = StyleSheet.create({
     paddingHorizontal: 18,
     paddingVertical: 16,
     fontFamily: 'Inter_400Regular',
-    fontSize: 16,
     color: Colors.textPrimary,
     borderBottomWidth: 1,
     borderColor: '#EDF1F3',
@@ -310,9 +320,6 @@ const styles = StyleSheet.create({
     paddingHorizontal: 8,
   },
   errorText: {
-    fontFamily: 'Inter_400Regular',
-    fontSize: 13,
-    color: Colors.pasion,
     marginTop: 8,
   },
   apiError: {
@@ -332,11 +339,6 @@ const styles = StyleSheet.create({
     height: 1,
     backgroundColor: Colors.border,
   },
-  dividerText: {
-    fontFamily: 'Inter_400Regular',
-    fontSize: 13,
-    color: Colors.textMuted,
-  },
   googleButton: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -350,24 +352,11 @@ const styles = StyleSheet.create({
     opacity: 0.85,
     transform: [{ scale: 0.98 }],
   },
-  googleLabel: {
-    fontFamily: 'Inter_700Bold',
-    fontSize: 16,
-    letterSpacing: 0.3,
-    color: '#1a1a1a',
-  },
   loginLink: {
     alignSelf: 'center',
     paddingVertical: 8,
   },
-  loginLinkText: {
-    fontFamily: 'Inter_400Regular',
-    fontSize: 14,
-    color: Colors.textSecondary,
-  },
   loginLinkAccent: {
-    fontFamily: 'Inter_700Bold',
-    color: Colors.accent,
     textDecorationLine: 'underline',
   },
 });

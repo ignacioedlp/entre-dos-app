@@ -1,6 +1,5 @@
 import {
   View,
-  Text,
   SectionList,
   StyleSheet,
   TouchableOpacity,
@@ -15,6 +14,7 @@ import { NotificationCard } from '@/components/notifications/notification-card';
 import { useNotificationList } from '@/hooks/use-notification-list';
 import { Colors } from '@/constants/colors';
 import { useTranslation } from 'react-i18next';
+import { Typography } from '@/components/ui/Typography';
 
 export default function NotificationsScreen() {
   const insets = useSafeAreaInsets();
@@ -29,26 +29,14 @@ export default function NotificationsScreen() {
   };
 
   return (
-    // <View style={[styles.root, { paddingTop: insets.top }]}>
-    //   <View style={styles.header}>
-    //     <TouchableOpacity onPress={() => router.back()} style={styles.backBtn} activeOpacity={0.7}>
-    //       <Ionicons name="arrow-back" size={22} color={Colors.textPrimary} />
-    //     </TouchableOpacity>
-    //     <Text style={styles.headerTitle}>NOTIFICACIONES</Text>
-    //     {hasUnread ? (
-    //       <TouchableOpacity onPress={markAllRead} activeOpacity={0.7}>
-    //         <Text style={styles.markAll}>Leer todo</Text>
-    //       </TouchableOpacity>
-    //     ) : (
-    //       <View style={styles.backBtn} />
-    //     )}
-    //   </View>
     <View style={[styles.root, { paddingTop: insets.top + 20 }]}>
       <View style={styles.header}>
         <Pressable onPress={() => router.back()} style={styles.backBtn}>
           <Ionicons name="arrow-back" size={22} color={Colors.background} />
         </Pressable>
-        <Text style={styles.headerTitle}>{t('title')}</Text>
+        <Typography variant="heading" style={styles.headerTitle}>
+          {t('title')}
+        </Typography>
       </View>
       {isLoading ? (
         <View style={styles.centered}>
@@ -57,8 +45,12 @@ export default function NotificationsScreen() {
       ) : groups.length === 0 ? (
         <View style={styles.centered}>
           <Ionicons name="notifications-off-outline" size={48} color={Colors.textMuted} />
-          <Text style={styles.emptyTitle}>{t('empty')}</Text>
-          <Text style={styles.emptyBody}>{t('emptyDescription')}</Text>
+          <Typography variant="swissTitle" baseFontSize={18} style={styles.emptyTitle}>
+            {t('empty')}
+          </Typography>
+          <Typography variant="body" baseFontSize={14} baseLineHeight={20} color={Colors.textSecondary} style={styles.emptyBody}>
+            {t('emptyDescription')}
+          </Typography>
         </View>
       ) : (
         <SectionList
@@ -72,7 +64,9 @@ export default function NotificationsScreen() {
                 }}
               >
                 <TouchableOpacity onPress={markAllRead} activeOpacity={0.7}>
-                  <Text style={styles.markAll}>{t('readAll')}</Text>
+                  <Typography variant="label" color={Colors.pasion} style={styles.markAll}>
+                    {t('readAll')}
+                  </Typography>
                 </TouchableOpacity>
               </View>
             ) : null
@@ -83,7 +77,9 @@ export default function NotificationsScreen() {
           refreshing={isLoading}
           contentContainerStyle={styles.listContent}
           renderSectionHeader={({ section: { title } }) => (
-            <Text style={styles.sectionHeader}>{BUCKET_LABELS[title] ?? title}</Text>
+            <Typography variant="cardLabel" color={Colors.textMuted} style={styles.sectionHeader}>
+              {BUCKET_LABELS[title] ?? title}
+            </Typography>
           )}
           renderItem={({ item }) => (
             <NotificationCard
@@ -122,15 +118,9 @@ const styles = StyleSheet.create({
     borderRadius: 25,
   },
   headerTitle: {
-    fontFamily: 'Inter_900Black',
-    fontSize: 28,
-    letterSpacing: -0.5,
     color: Colors.textPrimary,
   },
   markAll: {
-    fontFamily: 'Inter_700Bold',
-    fontSize: 13,
-    color: Colors.pasion,
     textAlign: 'right',
     width: 60,
   },
@@ -142,16 +132,9 @@ const styles = StyleSheet.create({
     paddingHorizontal: 40,
   },
   emptyTitle: {
-    fontFamily: 'Inter_900Black',
-    fontSize: 18,
-    color: Colors.textPrimary,
     textAlign: 'center',
   },
   emptyBody: {
-    fontFamily: 'Inter_400Regular',
-    fontSize: 14,
-    lineHeight: 20,
-    color: Colors.textSecondary,
     textAlign: 'center',
   },
   listContent: {
@@ -159,11 +142,8 @@ const styles = StyleSheet.create({
     paddingBottom: 32,
   },
   sectionHeader: {
-    fontFamily: 'Inter_900Black',
-    fontSize: 11,
+    opacity: 1,
     letterSpacing: 2,
-    color: Colors.textMuted,
-    textTransform: 'uppercase',
     paddingHorizontal: 24,
     paddingTop: 16,
     paddingBottom: 8,

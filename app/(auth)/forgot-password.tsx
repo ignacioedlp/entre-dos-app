@@ -1,4 +1,4 @@
-import { View, Text, TextInput, StyleSheet, Pressable } from 'react-native';
+import { View, TextInput, StyleSheet, Pressable } from 'react-native';
 import { useState } from 'react';
 import { useForm, Controller } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -11,6 +11,8 @@ import { Button } from '../../components/ui/Button';
 import { Colors } from '../../constants/colors';
 import { apiForgotPassword } from '../../lib/api';
 import { AxiosError } from 'axios';
+import { Typography } from '../../components/ui/Typography';
+import { useScaledFontSize } from '../../context/FontScaleContext';
 
 export default function ForgotPasswordScreen() {
   const insets = useSafeAreaInsets();
@@ -18,6 +20,7 @@ export default function ForgotPasswordScreen() {
   const [apiError, setApiError] = useState<string | null>(null);
   const [sent, setSent] = useState(false);
   const { t } = useTranslation('auth');
+  const inputFontSize = useScaledFontSize(16);
 
   const schema = z.object({
     email: z.string().email(t('forgotPassword.errorEmail')),
@@ -53,21 +56,27 @@ export default function ForgotPasswordScreen() {
       </View>
 
       <View style={styles.content}>
-        <Text style={styles.title}>{t('forgotPassword.title')}</Text>
+        <Typography variant="swissTitle" baseFontSize={40} baseLineHeight={40} style={styles.title}>
+          {t('forgotPassword.title')}
+        </Typography>
 
         {sent ? (
-          <Text style={styles.subtitle}>{t('forgotPassword.successMessage')}</Text>
+          <Typography variant="body" color={Colors.textSecondary} style={styles.subtitle}>
+            {t('forgotPassword.successMessage')}
+          </Typography>
         ) : (
           <>
-            <Text style={styles.subtitle}>{t('forgotPassword.subtitle')}</Text>
+            <Typography variant="body" color={Colors.textSecondary} style={styles.subtitle}>
+              {t('forgotPassword.subtitle')}
+            </Typography>
 
-            <Text style={styles.label}>{t('forgotPassword.email')}</Text>
+            <Typography variant="body" baseFontSize={14}>{t('forgotPassword.email')}</Typography>
             <Controller
               control={control}
               name="email"
               render={({ field: { onChange, onBlur, value } }) => (
                 <TextInput
-                  style={[styles.input, errors.email && styles.inputError]}
+                  style={[styles.input, { fontSize: inputFontSize }, errors.email && styles.inputError]}
                   placeholder={t('forgotPassword.emailPlaceholder')}
                   placeholderTextColor={Colors.textMuted}
                   keyboardType="email-address"
@@ -79,9 +88,17 @@ export default function ForgotPasswordScreen() {
                 />
               )}
             />
-            {errors.email && <Text style={styles.errorText}>{errors.email.message}</Text>}
+            {errors.email && (
+              <Typography variant="caption" color={Colors.pasion} style={styles.errorText}>
+                {errors.email.message}
+              </Typography>
+            )}
 
-            {apiError && <Text style={styles.errorText}>{apiError}</Text>}
+            {apiError && (
+              <Typography variant="caption" color={Colors.pasion} style={styles.errorText}>
+                {apiError}
+              </Typography>
+            )}
           </>
         )}
       </View>
@@ -96,7 +113,9 @@ export default function ForgotPasswordScreen() {
         )}
 
         <Pressable style={styles.backLink} onPress={() => router.back()}>
-          <Text style={styles.backLinkText}>{t('forgotPassword.backToLogin')}</Text>
+          <Typography variant="body" baseFontSize={14} color={Colors.textSecondary} style={styles.backLinkText}>
+            {t('forgotPassword.backToLogin')}
+          </Typography>
         </Pressable>
       </View>
     </View>
@@ -116,31 +135,16 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   title: {
-    fontFamily: 'Inter_900Black',
-    fontSize: 40,
-    lineHeight: 40,
-    textTransform: 'uppercase',
-    letterSpacing: -1.5,
-    color: Colors.textPrimary,
     marginBottom: 12,
+    letterSpacing: -1.5,
   },
   subtitle: {
-    fontFamily: 'Inter_400Regular',
-    fontSize: 16,
-    lineHeight: 24,
-    color: Colors.textSecondary,
     marginBottom: 32,
-  },
-  label: {
-    fontFamily: 'Inter_400Regular',
-    fontSize: 14,
-    color: Colors.textPrimary,
   },
   input: {
     paddingHorizontal: 18,
     paddingVertical: 16,
     fontFamily: 'Inter_400Regular',
-    fontSize: 16,
     color: Colors.textPrimary,
     borderBottomWidth: 1,
     borderColor: '#EDF1F3',
@@ -149,9 +153,6 @@ const styles = StyleSheet.create({
     borderColor: Colors.pasion,
   },
   errorText: {
-    fontFamily: 'Inter_400Regular',
-    fontSize: 13,
-    color: Colors.pasion,
     marginTop: 8,
   },
   ctaArea: {
@@ -163,9 +164,6 @@ const styles = StyleSheet.create({
     paddingVertical: 8,
   },
   backLinkText: {
-    fontFamily: 'Inter_400Regular',
-    fontSize: 14,
-    color: Colors.textSecondary,
     textDecorationLine: 'underline',
   },
 });

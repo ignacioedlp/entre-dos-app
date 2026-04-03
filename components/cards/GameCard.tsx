@@ -3,6 +3,7 @@ import Animated from 'react-native-reanimated';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Ionicons } from '@expo/vector-icons';
 import { rarityColor, rarityTextColor, RarityKey } from '../../constants/colors';
+import { Typography } from '../ui/Typography';
 
 export interface EventBadgeData {
   icon: string;
@@ -75,25 +76,42 @@ export function GameCard({ card, width = 160, rotation = 0, style }: GameCardPro
               width: '100%',
             }}
           >
-            <Animated.Text style={[styles.label, { color: fg }]}>{card.label}</Animated.Text>
+            <Typography variant="cardLabel" color={fg}>{card.label}</Typography>
 
             {card.event && (
               <Animated.View style={[styles.badge, { borderColor: card.event.color + '55' }]}>
-                <Animated.Text style={[styles.badgeText, { color: card.event.color }]}>
+                <Typography
+                  variant="cardLabel"
+                  color={card.event.color}
+                  baseFontSize={9}
+                  style={{ opacity: 1, letterSpacing: 1.5 }}
+                >
                   {card.event.name}
-                </Animated.Text>
+                </Typography>
               </Animated.View>
             )}
           </Animated.View>
-          <Animated.Text style={[styles.title, { color: fg }]} numberOfLines={4}>
+          <Typography
+            variant="cardTitle"
+            color={fg}
+            baseFontSize={24}
+            baseLineHeight={28}
+            numberOfLines={4}
+          >
             {card.title}
-          </Animated.Text>
+          </Typography>
         </Animated.View>
 
         {/* Card subtitle — bottom */}
-        <Animated.Text style={[styles.description, { color: fg }]} numberOfLines={4}>
+        <Typography
+          variant="body"
+          color={fg}
+          baseFontSize={14}
+          baseLineHeight={18}
+          numberOfLines={4}
+        >
           {card.description}
-        </Animated.Text>
+        </Typography>
       </Animated.View>
     </Animated.View>
   );
@@ -105,7 +123,6 @@ const styles = StyleSheet.create({
     overflow: 'hidden',
     padding: 18,
   },
-
   badge: {
     borderWidth: 1,
     borderRadius: 4,
@@ -114,20 +131,6 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     alignSelf: 'flex-start',
-  },
-  badgeText: {
-    fontFamily: 'Inter_900Black',
-    fontSize: 9,
-    letterSpacing: 1.5,
-    textTransform: 'uppercase',
-  },
-  eventIcon: {
-    fontSize: 14,
-  },
-  eventName: {
-    fontSize: 10,
-    fontFamily: 'Inter_600SemiBold',
-    letterSpacing: 0.3,
   },
   packIconContainer: {
     ...StyleSheet.absoluteFillObject,
@@ -138,24 +141,5 @@ const styles = StyleSheet.create({
   inner: {
     flex: 1,
     justifyContent: 'space-between',
-  },
-  label: {
-    fontFamily: 'Inter_900Black',
-    fontSize: 10,
-    letterSpacing: 2.5,
-    textTransform: 'uppercase',
-    opacity: 0.5,
-  },
-  title: {
-    fontFamily: 'Inter_900Black',
-    fontSize: 24,
-    lineHeight: 28,
-    textTransform: 'uppercase',
-    letterSpacing: -0.5,
-  },
-  description: {
-    fontFamily: 'Inter_400Regular',
-    fontSize: 14,
-    lineHeight: 18,
   },
 });

@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
-import { Modal, View, Text, StyleSheet, Platform } from 'react-native';
+import { Modal, View, StyleSheet, Platform } from 'react-native';
 import * as Notifications from 'expo-notifications';
 import { useTranslation } from 'react-i18next';
 
@@ -8,6 +8,7 @@ import { useNotifications } from '@/hooks/use-notifications';
 import { Button } from '@/components/ui/Button';
 import { Colors } from '@/constants/colors';
 import { Ionicons } from '@expo/vector-icons';
+import { Typography } from '@/components/ui/Typography';
 
 export function NotificationSetup() {
   const { user } = useAuth();
@@ -58,8 +59,12 @@ export function NotificationSetup() {
             <Ionicons name="notifications" size={28} color={Colors.pasion} />
           </View>
 
-          <Text style={styles.title}>{t('setup.title')}</Text>
-          <Text style={styles.body}>{t('setup.body')}</Text>
+          <Typography variant="heading" baseFontSize={20} style={styles.title}>
+            {t('setup.title')}
+          </Typography>
+          <Typography variant="body" baseFontSize={14} baseLineHeight={21} color={Colors.textSecondary} style={styles.body}>
+            {t('setup.body')}
+          </Typography>
 
           <View style={styles.actions}>
             <Button label={t('setup.enable')} onPress={handleEnable} variant="accent" />
@@ -97,18 +102,11 @@ const styles = StyleSheet.create({
     marginBottom: 20,
   },
   title: {
-    fontFamily: 'Inter_900Black',
-    fontSize: 20,
     letterSpacing: -0.3,
-    color: Colors.textPrimary,
     textAlign: 'center',
     marginBottom: 10,
   },
   body: {
-    fontFamily: 'Inter_400Regular',
-    fontSize: 14,
-    lineHeight: 21,
-    color: Colors.textSecondary,
     textAlign: 'center',
     marginBottom: 28,
     maxWidth: 280,

@@ -17,7 +17,15 @@
     "privacy": "PRIVACY POLICY",
     "faq": "FAQ",
     "subscription": "MANAGE SUBSCRIPTION",
-    "restorePurchases": "RESTORE PURCHASES"
+    "restorePurchases": "RESTORE PURCHASES",
+    "fontSize": "FONT SIZE"
+  },
+  "fontSize": {
+    "title": "FONT SIZE.",
+    "small": "Small",
+    "default": "Default",
+    "large": "Large",
+    "extraLarge": "Extra Large"
   },
   "notifications": {
     "title": "NOTIFICATIONS.",

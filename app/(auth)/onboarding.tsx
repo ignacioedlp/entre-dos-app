@@ -1,7 +1,6 @@
 import { useState } from 'react';
 import {
   View,
-  Text,
   StyleSheet,
   TextInput,
   Keyboard,
@@ -22,6 +21,8 @@ import { useAuth } from '../../context/AuthContext';
 import { apiCompleteOnboarding } from '@/lib/api';
 import i18n from '@/i18n';
 import { SUPPORTED_COUNTRIES, LANGUAGES } from '@/lib/countries';
+import { Typography } from '../../components/ui/Typography';
+import { useScaledFontSize } from '../../context/FontScaleContext';
 
 const STEPS = [
   { icon: 'calendar-outline' as const, key: 'Step1' },
@@ -33,6 +34,7 @@ export default function OnboardingScreen() {
   const insets = useSafeAreaInsets();
   const { user, updateProfile } = useAuth();
   const { t, i18n: languageI18n } = useTranslation('auth');
+  const inputFontSize = useScaledFontSize(18);
 
   const [step, setStep] = useState(0);
   const [displayName, setDisplayName] = useState(user?.displayName ?? '');
@@ -85,11 +87,15 @@ export default function OnboardingScreen() {
         <View style={styles.content}>
           {step === 0 && (
             <Animated.View entering={FadeInDown.duration(400)} style={styles.stepContainer}>
-              <Text style={styles.title}>{t('onboarding.nameTitle')}</Text>
-              <Text style={styles.subtitle}>{t('onboarding.nameSubtitle')}</Text>
+              <Typography variant="swissTitle" baseFontSize={40} baseLineHeight={40} style={styles.title}>
+                {t('onboarding.nameTitle')}
+              </Typography>
+              <Typography variant="body" color={Colors.textSecondary} style={styles.subtitle}>
+                {t('onboarding.nameSubtitle')}
+              </Typography>
 
               <TextInput
-                style={styles.input}
+                style={[styles.input, { fontSize: inputFontSize }]}
                 value={displayName}
                 onChangeText={setDisplayName}
                 placeholder={t('onboarding.namePlaceholder')}
@@ -106,8 +112,12 @@ export default function OnboardingScreen() {
 
           {step === 1 && (
             <Animated.View entering={FadeInDown.duration(400)} style={styles.stepContainer}>
-              <Text style={styles.title}>{t('onboarding.countryTitle')}</Text>
-              <Text style={styles.subtitle}>{t('onboarding.countrySubtitle')}</Text>
+              <Typography variant="swissTitle" baseFontSize={40} baseLineHeight={40} style={styles.title}>
+                {t('onboarding.countryTitle')}
+              </Typography>
+              <Typography variant="body" color={Colors.textSecondary} style={styles.subtitle}>
+                {t('onboarding.countrySubtitle')}
+              </Typography>
 
               <View style={styles.countryGrid}>
                 {SUPPORTED_COUNTRIES.map((supportedCountry) => {
@@ -118,23 +128,33 @@ export default function OnboardingScreen() {
                       onPress={() => setCountry(supportedCountry.code)}
                       style={[styles.countryCard, isSelected && styles.countryCardSelected]}
                     >
-                      <Text style={styles.countryFlag}>{supportedCountry.flag}</Text>
-                      <Text style={styles.countryLabel}>{getCountryName(supportedCountry)}</Text>
+                      <Typography variant="body" baseFontSize={26} style={styles.countryFlag}>
+                        {supportedCountry.flag}
+                      </Typography>
+                      <Typography variant="bodyBold" baseFontSize={14} style={styles.countryLabel}>
+                        {getCountryName(supportedCountry)}
+                      </Typography>
                     </Pressable>
                   );
                 })}
               </View>
 
               <Pressable style={styles.skipCountryButton} onPress={handleContinue}>
-                <Text style={styles.skipCountryText}>{t('onboarding.countrySkip')}</Text>
+                <Typography variant="body" baseFontSize={14} color={Colors.textMuted}>
+                  {t('onboarding.countrySkip')}
+                </Typography>
               </Pressable>
             </Animated.View>
           )}
 
           {step === 2 && (
             <Animated.View entering={FadeInDown.duration(400)} style={styles.stepContainer}>
-              <Text style={styles.title}>{t('onboarding.languageTitle')}</Text>
-              <Text style={styles.subtitle}>{t('onboarding.languageSubtitle')}</Text>
+              <Typography variant="swissTitle" baseFontSize={40} baseLineHeight={40} style={styles.title}>
+                {t('onboarding.languageTitle')}
+              </Typography>
+              <Typography variant="body" color={Colors.textSecondary} style={styles.subtitle}>
+                {t('onboarding.languageSubtitle')}
+              </Typography>
 
               <View style={styles.languageList}>
                 {LANGUAGES.map((lang) => {
@@ -146,7 +166,9 @@ export default function OnboardingScreen() {
                       style={[styles.languageRow, isSelected && styles.languageRowSelected]}
                     >
                       {lang.flag}
-                      <Text style={styles.languageLabel}>{lang.label}</Text>
+                      <Typography variant="bodyBold" baseFontSize={17} style={styles.languageLabel}>
+                        {lang.label}
+                      </Typography>
                       {isSelected && (
                         <Ionicons name="checkmark-circle" size={22} color={Colors.accent} />
                       )}
@@ -159,7 +181,9 @@ export default function OnboardingScreen() {
 
           {step === 3 && (
             <Animated.View entering={FadeInDown.duration(400)} style={styles.stepContainer}>
-              <Text style={styles.title}>{t('onboarding.explainTitle')}</Text>
+              <Typography variant="swissTitle" baseFontSize={40} baseLineHeight={40} style={styles.title}>
+                {t('onboarding.explainTitle')}
+              </Typography>
 
               <View style={styles.explainList}>
                 {STEPS.map((s, idx) => (
@@ -172,18 +196,22 @@ export default function OnboardingScreen() {
                       <Ionicons name={s.icon} size={24} color={Colors.accent} />
                     </View>
                     <View style={styles.explainText}>
-                      <Text style={styles.explainItemTitle}>
+                      <Typography variant="bodyBold" baseFontSize={16}>
                         {t(`onboarding.explainStep${idx + 1}Title` as any)}
-                      </Text>
-                      <Text style={styles.explainItemBody}>
+                      </Typography>
+                      <Typography variant="body" baseFontSize={14} baseLineHeight={20} color={Colors.textSecondary}>
                         {t(`onboarding.explainStep${idx + 1}` as any)}
-                      </Text>
+                      </Typography>
                     </View>
                   </Animated.View>
                 ))}
               </View>
 
-              {error && <Text style={styles.errorText}>{error}</Text>}
+              {error && (
+                <Typography variant="caption" color={Colors.pasion} style={styles.errorText}>
+                  {error}
+                </Typography>
+              )}
             </Animated.View>
           )}
         </View>
@@ -247,19 +275,10 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   title: {
-    fontFamily: 'Inter_900Black',
-    fontSize: 40,
-    lineHeight: 40,
-    textTransform: 'uppercase',
-    letterSpacing: -1.5,
-    color: Colors.textPrimary,
     marginBottom: 12,
+    letterSpacing: -1.5,
   },
   subtitle: {
-    fontFamily: 'Inter_400Regular',
-    fontSize: 16,
-    lineHeight: 24,
-    color: Colors.textSecondary,
     marginBottom: 40,
   },
   input: {
@@ -270,7 +289,6 @@ const styles = StyleSheet.create({
     paddingHorizontal: 20,
     paddingVertical: 18,
     fontFamily: 'Inter_400Regular',
-    fontSize: 18,
     color: Colors.textPrimary,
   },
   languageList: {
@@ -297,9 +315,6 @@ const styles = StyleSheet.create({
   },
   languageLabel: {
     flex: 1,
-    fontFamily: 'Inter_700Bold',
-    fontSize: 17,
-    color: Colors.textPrimary,
   },
   countryGrid: {
     flexDirection: 'row',
@@ -327,12 +342,10 @@ const styles = StyleSheet.create({
     elevation: 4,
   },
   countryFlag: {
-    fontSize: 26,
+    textTransform: 'none',
+    letterSpacing: 0,
   },
   countryLabel: {
-    fontFamily: 'Inter_700Bold',
-    fontSize: 14,
-    color: Colors.textPrimary,
     textAlign: 'center',
   },
   skipCountryButton: {
@@ -340,11 +353,6 @@ const styles = StyleSheet.create({
     marginTop: 16,
     paddingVertical: 8,
     paddingHorizontal: 10,
-  },
-  skipCountryText: {
-    fontFamily: 'Inter_400Regular',
-    fontSize: 14,
-    color: Colors.textMuted,
   },
   explainList: {
     gap: 20,
@@ -369,21 +377,7 @@ const styles = StyleSheet.create({
     flex: 1,
     gap: 4,
   },
-  explainItemTitle: {
-    fontFamily: 'Inter_700Bold',
-    fontSize: 16,
-    color: Colors.textPrimary,
-  },
-  explainItemBody: {
-    fontFamily: 'Inter_400Regular',
-    fontSize: 14,
-    lineHeight: 20,
-    color: Colors.textSecondary,
-  },
   errorText: {
-    fontFamily: 'Inter_400Regular',
-    fontSize: 13,
-    color: Colors.pasion,
     marginTop: 16,
   },
   ctaArea: {

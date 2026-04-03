@@ -1,6 +1,5 @@
 import {
   View,
-  Text,
   StyleSheet,
   ScrollView,
   ActivityIndicator,
@@ -14,6 +13,7 @@ import { Colors } from '../../constants/colors';
 import { apiGetPacks, apiGetEntitlements } from '../../lib/api';
 import { useTranslation } from 'react-i18next';
 import { useRevenueCat } from '../../context/RevenueCatContext';
+import { Typography } from '@/components/ui/Typography';
 
 const CARD_PADDING = 24;
 
@@ -32,7 +32,6 @@ export default function PacksScreen() {
     queryFn: apiGetEntitlements,
   });
 
-  // Premium if either the client SDK says so (own purchase) or backend says so (shared from partner)
   const isPremium = isSubscribed || entitlements?.premium === true;
 
   const packs = data?.packs.sort((a, b) => Number(b.isBase) - Number(a.isBase)) ?? [];
@@ -40,9 +39,17 @@ export default function PacksScreen() {
   return (
     <View style={[styles.root, { paddingTop: insets.top + 20 }]}>
       <View style={styles.header}>
-        <Text style={styles.title}>{t('packs.title')}</Text>
-        <Text style={styles.subtitle}>{t('packs.subtitle')}</Text>
-        {isPremium && <Text style={styles.subscribedBadge}>{t('packs.subscribed')}</Text>}
+        <Typography variant="heading" style={styles.title}>
+          {t('packs.title')}
+        </Typography>
+        <Typography variant="body" baseFontSize={15} baseLineHeight={22} color={Colors.textSecondary}>
+          {t('packs.subtitle')}
+        </Typography>
+        {isPremium && (
+          <Typography variant="label" color={Colors.accent} style={styles.subscribedBadge}>
+            {t('packs.subscribed')}
+          </Typography>
+        )}
       </View>
 
       {isLoading ? (
@@ -62,7 +69,6 @@ export default function PacksScreen() {
             />
           }
         >
-          {/* First two packs side by side */}
           {packs.length >= 2 && (
             <View style={styles.row}>
               <PackCard pack={packs[0]} half isPremium={isPremium} />
@@ -70,7 +76,6 @@ export default function PacksScreen() {
             </View>
           )}
           {packs.length === 1 && <PackCard pack={packs[0]} isPremium={isPremium} />}
-          {/* Remaining packs full width */}
           {packs.slice(2).map((pack) => (
             <PackCard key={pack.id} pack={pack} isPremium={isPremium} />
           ))}
@@ -90,23 +95,10 @@ const styles = StyleSheet.create({
     marginBottom: 24,
   },
   title: {
-    fontFamily: 'Inter_900Black',
-    fontSize: 28,
-    letterSpacing: -0.5,
-    color: Colors.textPrimary,
     marginBottom: 8,
   },
-  subtitle: {
-    fontFamily: 'Inter_400Regular',
-    fontSize: 15,
-    lineHeight: 22,
-    color: Colors.textSecondary,
-  },
   subscribedBadge: {
-    fontFamily: 'Inter_700Bold',
-    fontSize: 12,
     letterSpacing: 1,
-    color: Colors.accent,
     marginTop: 8,
   },
   centered: {

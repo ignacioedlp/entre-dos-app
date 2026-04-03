@@ -1,5 +1,6 @@
-import { Pressable, Text, StyleSheet, ViewStyle } from 'react-native';
+import { Pressable, StyleSheet, ViewStyle } from 'react-native';
 import { Colors } from '../../constants/colors';
+import { Typography } from './Typography';
 
 interface ButtonProps {
   label: string;
@@ -26,7 +27,9 @@ export function Button({ label, onPress, variant = 'accent', style, disabled }: 
       accessibilityRole="button"
       accessibilityLabel={label}
     >
-      <Text style={[styles.label, isAccent ? styles.labelAccent : styles.labelGhost]}>{label}</Text>
+      <Typography variant="button" color={isAccent ? '#ffffff' : Colors.textSecondary}>
+        {label}
+      </Typography>
     </Pressable>
   );
 }
@@ -57,16 +60,5 @@ const styles = StyleSheet.create({
   },
   disabled: {
     opacity: 0.4,
-  },
-  label: {
-    fontFamily: 'Inter_700Bold',
-    fontSize: 16,
-    letterSpacing: 0.3,
-  },
-  labelAccent: {
-    color: '#ffffff',
-  },
-  labelGhost: {
-    color: Colors.textSecondary,
   },
 });

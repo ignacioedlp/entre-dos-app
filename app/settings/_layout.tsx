@@ -19,6 +19,7 @@ export default function SettingLayout() {
       }}
     >
       <Stack.Screen name="country" />
+      <Stack.Screen name="font-size" />
       <Stack.Screen name="terms" options={FORMSHEET_OPTIONS} />
       <Stack.Screen name="privacy" options={FORMSHEET_OPTIONS} />
       <Stack.Screen name="faq" options={FORMSHEET_OPTIONS} />

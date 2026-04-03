@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { StyleSheet, View, Pressable, Text } from 'react-native';
+import { StyleSheet, View, Pressable } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
 import { useTranslation } from 'react-i18next';
@@ -9,6 +9,7 @@ import { useAuth } from '../../context/AuthContext';
 import { api } from '../../lib/api';
 import { Toast } from 'toastify-react-native';
 import { SUPPORTED_COUNTRIES } from '../../lib/countries';
+import { Typography } from '@/components/ui/Typography';
 
 export default function CountrySettingsScreen() {
   const insets = useSafeAreaInsets();
@@ -49,7 +50,9 @@ export default function CountrySettingsScreen() {
         <Pressable onPress={() => router.back()} style={styles.backBtn}>
           <Ionicons name="arrow-back" size={22} color={Colors.background} />
         </Pressable>
-        <Text style={styles.headerTitle}>{t('country.title')}</Text>
+        <Typography variant="heading" style={styles.headerTitle}>
+          {t('country.title')}
+        </Typography>
       </View>
 
       {SUPPORTED_COUNTRIES.map((country, idx) => {
@@ -62,7 +65,9 @@ export default function CountrySettingsScreen() {
             style={[styles.row, idx === 0 && styles.rowFirst, isLoading && styles.rowDisabled]}
           >
             {country.flag}
-            <Text style={styles.label}>{getCountryName(country)}</Text>
+            <Typography variant="bodyBold" style={styles.label}>
+              {getCountryName(country)}
+            </Typography>
             {isSelected && <Ionicons name="checkmark-circle" size={22} color={Colors.accent} />}
           </Pressable>
         );
@@ -93,9 +98,6 @@ const styles = StyleSheet.create({
     borderRadius: 25,
   },
   headerTitle: {
-    fontFamily: 'Inter_900Black',
-    fontSize: 28,
-    letterSpacing: -0.5,
     color: Colors.textPrimary,
   },
   row: {
@@ -114,13 +116,8 @@ const styles = StyleSheet.create({
   rowDisabled: {
     opacity: 0.5,
   },
-  flag: {
-    fontSize: 24,
-  },
   label: {
     flex: 1,
-    fontFamily: 'Inter_700Bold',
-    fontSize: 16,
     color: Colors.textPrimary,
   },
 });

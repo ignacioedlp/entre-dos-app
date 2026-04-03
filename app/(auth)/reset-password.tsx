@@ -1,6 +1,5 @@
 import {
   View,
-  Text,
   TextInput,
   StyleSheet,
   Pressable,
@@ -21,6 +20,8 @@ import { Button } from '../../components/ui/Button';
 import { Colors } from '../../constants/colors';
 import { useAuth } from '../../context/AuthContext';
 import { AxiosError } from 'axios';
+import { Typography } from '../../components/ui/Typography';
+import { useScaledFontSize } from '../../context/FontScaleContext';
 
 export default function ResetPasswordScreen() {
   const insets = useSafeAreaInsets();
@@ -31,6 +32,7 @@ export default function ResetPasswordScreen() {
   const [apiError, setApiError] = useState<string | null>(null);
   const { resetPassword } = useAuth();
   const { t } = useTranslation('auth');
+  const inputFontSize = useScaledFontSize(16);
 
   const schema = z
     .object({
@@ -57,12 +59,18 @@ export default function ResetPasswordScreen() {
           <Logo size="lg" />
         </View>
         <View style={styles.content}>
-          <Text style={styles.title}>{t('resetPassword.title')}</Text>
-          <Text style={styles.subtitle}>{t('resetPassword.errorInvalidToken')}</Text>
+          <Typography variant="swissTitle" baseFontSize={40} baseLineHeight={40} style={styles.title}>
+            {t('resetPassword.title')}
+          </Typography>
+          <Typography variant="body" color={Colors.textSecondary} style={styles.subtitle}>
+            {t('resetPassword.errorInvalidToken')}
+          </Typography>
         </View>
         <View style={[styles.ctaArea, { paddingBottom: insets.bottom + 24 }]}>
           <Pressable style={styles.backLink} onPress={() => router.replace('/(auth)/login')}>
-            <Text style={styles.backLinkText}>{t('forgotPassword.backToLogin')}</Text>
+            <Typography variant="body" baseFontSize={14} color={Colors.textSecondary} style={styles.backLinkText}>
+              {t('forgotPassword.backToLogin')}
+            </Typography>
           </Pressable>
         </View>
       </View>
@@ -104,10 +112,14 @@ export default function ResetPasswordScreen() {
           </View>
 
           <View style={styles.content}>
-            <Text style={styles.title}>{t('resetPassword.title')}</Text>
-            <Text style={styles.subtitle}>{t('resetPassword.subtitle')}</Text>
+            <Typography variant="swissTitle" baseFontSize={40} baseLineHeight={40} style={styles.title}>
+              {t('resetPassword.title')}
+            </Typography>
+            <Typography variant="body" color={Colors.textSecondary} style={styles.subtitle}>
+              {t('resetPassword.subtitle')}
+            </Typography>
 
-            <Text style={styles.label}>{t('resetPassword.password')}</Text>
+            <Typography variant="body" baseFontSize={14}>{t('resetPassword.password')}</Typography>
             <Controller
               control={control}
               name="password"
@@ -117,6 +129,7 @@ export default function ResetPasswordScreen() {
                     style={[
                       styles.input,
                       styles.passwordInput,
+                      { fontSize: inputFontSize },
                       errors.password && styles.inputError,
                     ]}
                     placeholder={t('resetPassword.passwordPlaceholder')}
@@ -142,11 +155,15 @@ export default function ResetPasswordScreen() {
                 </View>
               )}
             />
-            {errors.password && <Text style={styles.errorText}>{errors.password.message}</Text>}
+            {errors.password && (
+              <Typography variant="caption" color={Colors.pasion} style={styles.errorText}>
+                {errors.password.message}
+              </Typography>
+            )}
 
-            <Text style={[styles.label, styles.labelSpaced]}>
+            <Typography variant="body" baseFontSize={14} style={styles.labelSpaced}>
               {t('resetPassword.passwordConfirm')}
-            </Text>
+            </Typography>
             <Controller
               control={control}
               name="confirmPassword"
@@ -156,6 +173,7 @@ export default function ResetPasswordScreen() {
                     style={[
                       styles.input,
                       styles.passwordInput,
+                      { fontSize: inputFontSize },
                       errors.confirmPassword && styles.inputError,
                     ]}
                     placeholder={t('resetPassword.passwordPlaceholder')}
@@ -182,10 +200,16 @@ export default function ResetPasswordScreen() {
               )}
             />
             {errors.confirmPassword && (
-              <Text style={styles.errorText}>{errors.confirmPassword.message}</Text>
+              <Typography variant="caption" color={Colors.pasion} style={styles.errorText}>
+                {errors.confirmPassword.message}
+              </Typography>
             )}
 
-            {apiError && <Text style={[styles.errorText, styles.apiError]}>{apiError}</Text>}
+            {apiError && (
+              <Typography variant="caption" color={Colors.pasion} style={styles.apiError}>
+                {apiError}
+              </Typography>
+            )}
           </View>
         </ScrollView>
 
@@ -223,25 +247,11 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   title: {
-    fontFamily: 'Inter_900Black',
-    fontSize: 40,
-    lineHeight: 40,
-    textTransform: 'uppercase',
-    letterSpacing: -1.5,
-    color: Colors.textPrimary,
     marginBottom: 12,
+    letterSpacing: -1.5,
   },
   subtitle: {
-    fontFamily: 'Inter_400Regular',
-    fontSize: 16,
-    lineHeight: 24,
-    color: Colors.textSecondary,
     marginBottom: 32,
-  },
-  label: {
-    fontFamily: 'Inter_400Regular',
-    fontSize: 14,
-    color: Colors.textPrimary,
   },
   labelSpaced: {
     marginTop: 24,
@@ -250,7 +260,6 @@ const styles = StyleSheet.create({
     paddingHorizontal: 18,
     paddingVertical: 16,
     fontFamily: 'Inter_400Regular',
-    fontSize: 16,
     color: Colors.textPrimary,
     borderBottomWidth: 1,
     borderColor: '#EDF1F3',
@@ -272,9 +281,6 @@ const styles = StyleSheet.create({
     paddingHorizontal: 8,
   },
   errorText: {
-    fontFamily: 'Inter_400Regular',
-    fontSize: 13,
-    color: Colors.pasion,
     marginTop: 8,
   },
   apiError: {
@@ -289,9 +295,6 @@ const styles = StyleSheet.create({
     paddingVertical: 8,
   },
   backLinkText: {
-    fontFamily: 'Inter_400Regular',
-    fontSize: 14,
-    color: Colors.textSecondary,
     textDecorationLine: 'underline',
   },
 });

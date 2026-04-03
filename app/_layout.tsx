@@ -15,6 +15,7 @@ import {
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { AuthProvider } from '../context/AuthContext';
 import { RevenueCatProvider } from '../context/RevenueCatContext';
+import { FontScaleProvider } from '../context/FontScaleContext';
 import ToastManager from 'toastify-react-native';
 import { SuccessToast, ErrorToast, WarnToast, InfoToast } from '../components/ui/CustomToast';
 import * as Notifications from 'expo-notifications';
@@ -86,6 +87,7 @@ function RootLayout() {
         <QueryClientProvider client={queryClient}>
           <AuthProvider>
             <RevenueCatProvider>
+              <FontScaleProvider>
               <NotificationSetup />
               <StatusBar style="light" />
               <Stack screenOptions={{ headerShown: false }}>
@@ -123,6 +125,7 @@ function RootLayout() {
                 position="top"
                 topOffset={56}
               />
+              </FontScaleProvider>
             </RevenueCatProvider>
           </AuthProvider>
         </QueryClientProvider>

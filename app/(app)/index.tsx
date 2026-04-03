@@ -1,7 +1,6 @@
 import { useRef, useEffect } from 'react';
 import {
   View,
-  Text,
   StyleSheet,
   Dimensions,
   ActivityIndicator,
@@ -39,6 +38,7 @@ import { Colors } from '../../constants/colors';
 import { useAuth } from '../../context/AuthContext';
 import { apiGetDeck, apiGetHistory, DeckCard } from '../../lib/api';
 import { useNotificationList } from '../../hooks/use-notification-list';
+import { Typography } from '../../components/ui/Typography';
 
 const { width: SCREEN_WIDTH } = Dimensions.get('window');
 const HOME_AUTO_REFRESH_MS = 30_000;
@@ -164,7 +164,7 @@ export default function HomeScreen() {
   return (
     <View style={[styles.root, { paddingTop: insets.top + 20 }]}>
       <View style={styles.header}>
-        <Text style={styles.greeting}>{t('screen.greeting')}</Text>
+        <Typography variant="heading" style={styles.greeting}>{t('screen.greeting')}</Typography>
         <View style={styles.headerActions}>
           <Pressable onPress={() => router.push('/notifications')}>
             <Ionicons name="notifications-outline" size={24} color={Colors.textPrimary} />
@@ -180,9 +180,9 @@ export default function HomeScreen() {
           </View>
         ) : showNeverDealt ? (
           <View style={styles.empty}>
-            <Text style={styles.emoji}>🃏</Text>
-            <Text style={styles.emptyTitle}>{t('screen.emptyTitle')}</Text>
-            <Text style={styles.emptyBody}>{t('screen.emptyDescription')}</Text>
+            <Typography variant="heading" baseFontSize={48} style={styles.emoji}>🃏</Typography>
+            <Typography variant="swissTitle" style={styles.emptyTitle}>{t('screen.emptyTitle')}</Typography>
+            <Typography variant="body" baseFontSize={15} baseLineHeight={22} color={Colors.textSecondary} style={styles.emptyBody}>{t('screen.emptyDescription')}</Typography>
           </View>
         ) : showAllPlayed ? (
           <AllPlayedState />
@@ -191,7 +191,7 @@ export default function HomeScreen() {
             {partnerLastPlay && <PartnerLastPlay play={partnerLastPlay} />}
             <View style={styles.container}>
               <View style={styles.sectionHeader}>
-                <Text style={styles.sectionTitle}>{t('screen.deckTitle')}</Text>
+                <Typography variant="cardLabel" color={Colors.textMuted} style={{ opacity: 1, letterSpacing: 2.5 }}>{t('screen.deckTitle')}</Typography>
               </View>
               <View style={styles.divider} />
             </View>
@@ -215,7 +215,7 @@ export default function HomeScreen() {
             </GestureDetector>
 
             <View style={styles.hint}>
-              <Text style={styles.hintText}>{t('screen.deckHint')}</Text>
+              <Typography variant="body" baseFontSize={14} baseLineHeight={20} color={Colors.textSecondary} style={styles.hintText}>{t('screen.deckHint')}</Typography>
               <View style={styles.chevrons}>
                 <Animated.View style={chevron1Style}>
                   <Ionicons name="chevron-down" size={18} color={Colors.textMuted} />
@@ -285,18 +285,7 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     marginBottom: 12,
   },
-  sectionTitle: {
-    fontFamily: 'Inter_900Black',
-    fontSize: 11,
-    letterSpacing: 2.5,
-    textTransform: 'uppercase',
-    color: Colors.textMuted,
-  },
   greeting: {
-    fontFamily: 'Inter_900Black',
-    fontSize: 28,
-    letterSpacing: -0.5,
-    color: Colors.textPrimary,
     marginBottom: 8,
   },
   centered: {
@@ -312,22 +301,14 @@ const styles = StyleSheet.create({
     paddingHorizontal: 24,
   },
   emoji: {
-    fontSize: 48,
     marginBottom: 8,
+    textTransform: 'none',
+    letterSpacing: 0,
   },
   emptyTitle: {
-    fontFamily: 'Inter_900Black',
-    fontSize: 22,
-    textTransform: 'uppercase',
-    letterSpacing: -0.5,
-    color: Colors.textPrimary,
     textAlign: 'center',
   },
   emptyBody: {
-    fontFamily: 'Inter_400Regular',
-    fontSize: 15,
-    lineHeight: 22,
-    color: Colors.textSecondary,
     textAlign: 'center',
     maxWidth: 280,
   },
@@ -352,10 +333,6 @@ const styles = StyleSheet.create({
     paddingHorizontal: 48,
   },
   hintText: {
-    fontFamily: 'Inter_400Regular',
-    fontSize: 14,
-    lineHeight: 20,
-    color: Colors.textSecondary,
     textAlign: 'center',
     marginBottom: 10,
   },

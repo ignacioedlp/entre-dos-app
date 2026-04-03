@@ -1,4 +1,4 @@
-import { View, Text, StyleSheet, Pressable, Modal } from 'react-native';
+import { View, StyleSheet, Pressable, Modal } from 'react-native';
 import { useState } from 'react';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
@@ -11,6 +11,7 @@ import { useAuth } from '@/context/AuthContext';
 import { useRevenueCat } from '@/context/RevenueCatContext';
 import { Toast } from 'toastify-react-native';
 import { apiDeleteAccount } from '@/lib/api';
+import { Typography } from '@/components/ui/Typography';
 
 export default function SettingsScreen() {
   const insets = useSafeAreaInsets();
@@ -56,6 +57,11 @@ export default function SettingsScreen() {
       label: t('menu.language'),
       route: '/settings/language',
       icon: 'language-outline',
+    },
+    {
+      label: t('menu.fontSize'),
+      route: '/settings/font-size',
+      icon: 'text-outline',
     },
     {
       label: t('menu.country'),
@@ -107,7 +113,9 @@ export default function SettingsScreen() {
         <Pressable onPress={() => router.back()} style={styles.backBtn}>
           <Ionicons name="arrow-back" size={22} color={Colors.background} />
         </Pressable>
-        <Text style={styles.headerTitle}>{t('title')}</Text>
+        <Typography variant="heading" style={styles.headerTitle}>
+          {t('title')}
+        </Typography>
       </View>
 
       <View style={styles.content}>
@@ -119,7 +127,9 @@ export default function SettingsScreen() {
               onPress={() => (item.onPress ? item.onPress() : router.push(item.route as any))}
             >
               <Ionicons name={item.icon as any} size={20} color={Colors.textMuted} />
-              <Text style={styles.rowLabel}>{item.label}</Text>
+              <Typography variant="label" color={Colors.textMuted}>
+                {item.label}
+              </Typography>
             </Pressable>
           ))}
         </View>
@@ -127,7 +137,9 @@ export default function SettingsScreen() {
         <View style={[styles.footer, { paddingBottom: insets.bottom + 16 }]}>
           <Button label={t('signOut')} onPress={() => setLogoutVisible(true)} variant="accent" />
           <Pressable onPress={() => setDeleteVisible(true)} style={styles.deleteAccountBtn}>
-            <Text style={styles.deleteAccountLabel}>{t('deleteAccount')}</Text>
+            <Typography variant="label" color={Colors.pasion} style={styles.deleteAccountLabel}>
+              {t('deleteAccount')}
+            </Typography>
           </Pressable>
         </View>
       </View>
@@ -146,8 +158,12 @@ export default function SettingsScreen() {
               <Ionicons name="log-out-outline" size={28} color={Colors.pasion} />
             </View>
 
-            <Text style={styles.modalTitle}>{t('signOutConfirmTitle')}</Text>
-            <Text style={styles.modalBody}>{t('signOutConfirmMessage')}</Text>
+            <Typography variant="heading" baseFontSize={20} style={styles.modalTitle}>
+              {t('signOutConfirmTitle')}
+            </Typography>
+            <Typography variant="body" baseFontSize={14} baseLineHeight={21} color={Colors.textSecondary} style={styles.modalBody}>
+              {t('signOutConfirmMessage')}
+            </Typography>
 
             <View style={styles.actions}>
               <Button
@@ -182,8 +198,12 @@ export default function SettingsScreen() {
               <Ionicons name="trash-outline" size={28} color={Colors.pasion} />
             </View>
 
-            <Text style={styles.modalTitle}>{t('deleteAccountConfirmTitle')}</Text>
-            <Text style={styles.modalBody}>{t('deleteAccountConfirmMessage')}</Text>
+            <Typography variant="heading" baseFontSize={20} style={styles.modalTitle}>
+              {t('deleteAccountConfirmTitle')}
+            </Typography>
+            <Typography variant="body" baseFontSize={14} baseLineHeight={21} color={Colors.textSecondary} style={styles.modalBody}>
+              {t('deleteAccountConfirmMessage')}
+            </Typography>
 
             <View style={styles.actions}>
               <Button
@@ -240,9 +260,6 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   headerTitle: {
-    fontFamily: 'Inter_900Black',
-    fontSize: 28,
-    letterSpacing: -0.5,
     color: Colors.textPrimary,
   },
   content: {
@@ -255,12 +272,6 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     gap: 12,
-  },
-  rowLabel: {
-    fontFamily: 'Inter_700Bold',
-    fontSize: 13,
-    letterSpacing: 0.8,
-    color: Colors.textMuted,
   },
   footer: {
     paddingHorizontal: 20,
@@ -291,18 +302,11 @@ const styles = StyleSheet.create({
     marginBottom: 20,
   },
   modalTitle: {
-    fontFamily: 'Inter_900Black',
-    fontSize: 20,
     letterSpacing: -0.3,
-    color: Colors.textPrimary,
     textAlign: 'center',
     marginBottom: 10,
   },
   modalBody: {
-    fontFamily: 'Inter_400Regular',
-    fontSize: 14,
-    lineHeight: 21,
-    color: Colors.textSecondary,
     textAlign: 'center',
     marginBottom: 28,
     maxWidth: 280,
@@ -317,10 +321,6 @@ const styles = StyleSheet.create({
     marginTop: 4,
   },
   deleteAccountLabel: {
-    fontFamily: 'Inter_700Bold',
-    fontSize: 12,
-    letterSpacing: 0.8,
-    color: Colors.pasion,
     opacity: 0.7,
   },
   deleteIconWrap: {

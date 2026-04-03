@@ -1,7 +1,8 @@
 import React from 'react';
-import { View, Text, Pressable, StyleSheet } from 'react-native';
+import { View, Pressable, StyleSheet } from 'react-native';
 import { useTranslation } from 'react-i18next';
 import { Colors } from '@/constants/colors';
+import { Typography } from '@/components/ui/Typography';
 
 export interface NotificationItem {
   id: string;
@@ -44,15 +45,26 @@ export function NotificationCard({
 
       <View style={styles.topRow}>
         <View style={[styles.categoryPill, { borderColor: categoryColor }]}>
-          <Text style={[styles.categoryText, { color: categoryColor }]}>{categoryLabel}</Text>
+          <Typography variant="cardLabel" color={categoryColor} baseFontSize={9} style={{ opacity: 1, letterSpacing: 1.2 }}>
+            {categoryLabel}
+          </Typography>
         </View>
-        <Text style={styles.time}>{item.time}</Text>
+        <Typography variant="caption" color={Colors.textMuted}>
+          {item.time}
+        </Typography>
       </View>
 
-      <Text style={[styles.title, isUnread && styles.titleUnread]}>{item.title}</Text>
-      <Text style={styles.message} numberOfLines={2}>
+      <Typography
+        variant="bodyBold"
+        baseFontSize={14}
+        color={isUnread ? Colors.textPrimary : Colors.textSecondary}
+        style={styles.title}
+      >
+        {item.title}
+      </Typography>
+      <Typography variant="body" baseFontSize={13} baseLineHeight={18} color={Colors.textMuted} numberOfLines={2}>
         {item.message}
-      </Text>
+      </Typography>
     </Pressable>
   );
 }
@@ -65,7 +77,6 @@ const styles = StyleSheet.create({
     borderBottomWidth: 1,
     borderBottomColor: Colors.border,
   },
-
   cardPressed: {
     opacity: 0.75,
   },
@@ -90,29 +101,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 6,
     paddingVertical: 2,
   },
-  categoryText: {
-    fontFamily: 'Inter_700Bold',
-    fontSize: 9,
-    letterSpacing: 1.2,
-  },
-  time: {
-    fontFamily: 'Inter_400Regular',
-    fontSize: 12,
-    color: Colors.textMuted,
-  },
   title: {
-    fontFamily: 'Inter_700Bold',
-    fontSize: 14,
-    color: Colors.textSecondary,
     marginBottom: 4,
-  },
-  titleUnread: {
-    color: Colors.textPrimary,
-  },
-  message: {
-    fontFamily: 'Inter_400Regular',
-    fontSize: 13,
-    lineHeight: 18,
-    color: Colors.textMuted,
   },
 });

@@ -17,7 +17,15 @@
     "privacy": "POLÍTICAS DE PRIVACIDAD",
     "faq": "PREGUNTAS FRECUENTES",
     "subscription": "GESTIONAR SUSCRIPCIÓN",
-    "restorePurchases": "RESTAURAR COMPRAS"
+    "restorePurchases": "RESTAURAR COMPRAS",
+    "fontSize": "TAMAÑO DE FUENTE"
+  },
+  "fontSize": {
+    "title": "TAMAÑO DE FUENTE.",
+    "small": "Pequeño",
+    "default": "Predeterminado",
+    "large": "Grande",
+    "extraLarge": "Muy grande"
   },
   "notifications": {
     "title": "NOTIFICACIONES.",
