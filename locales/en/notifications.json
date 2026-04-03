@@ -17,7 +17,8 @@
   "category": {
     "played": "Played",
     "system": "System",
-    "deck_reset": "Deck reset"
+    "deck_reset": "Deck reset",
+    "event_cards": "Event"
   },
   "alert": {
     "disabledTitle": "Notifications Disabled",

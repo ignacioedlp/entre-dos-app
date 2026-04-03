@@ -96,6 +96,11 @@ export function RevenueCatProvider({ children }: { children: ReactNode }) {
     }
 
     async function init() {
+      if (process.env.EXPO_PUBLIC_PURCHASES_ENABLED === 'false') {
+        setLoading(false);
+        return;
+      }
+
       try {
         if (!configuredRef.current) {
           if (__DEV__) {

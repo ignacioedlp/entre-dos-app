@@ -1,3 +1,5 @@
+import * as Sentry from '@sentry/react-native';
+import { vexo } from 'vexo-analytics';
 import { useEffect } from 'react';
 import { Stack } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
@@ -13,6 +15,7 @@ import {
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { AuthProvider } from '../context/AuthContext';
 import { RevenueCatProvider } from '../context/RevenueCatContext';
+import { FontScaleProvider } from '../context/FontScaleContext';
 import ToastManager from 'toastify-react-native';
 import { SuccessToast, ErrorToast, WarnToast, InfoToast } from '../components/ui/CustomToast';
 import * as Notifications from 'expo-notifications';
@@ -24,6 +27,14 @@ const toastConfig = {
   warn: (props: any) => <WarnToast {...props} />,
   info: (props: any) => <InfoToast {...props} />,
 };
+
+Sentry.init({
+  dsn: process.env.EXPO_PUBLIC_SENTRY_DSN,
+  tracesSampleRate: 1.0,
+  enabled: !__DEV__,
+});
+
+vexo(process.env.EXPO_PUBLIC_VEXO_API_KEY!);
 
 SplashScreen.preventAutoHideAsync();
 
@@ -39,7 +50,7 @@ Notifications.setNotificationHandler({
   }),
 });
 
-export default function RootLayout() {
+function RootLayout() {
   const [fontsLoaded, fontError] = useFonts({
     Inter_400Regular,
     Inter_700Bold,
@@ -76,6 +87,7 @@ export default function RootLayout() {
         <QueryClientProvider client={queryClient}>
           <AuthProvider>
             <RevenueCatProvider>
+              <FontScaleProvider>
               <NotificationSetup />
               <StatusBar style="light" />
               <Stack screenOptions={{ headerShown: false }}>
@@ -113,6 +125,7 @@ export default function RootLayout() {
                 position="top"
                 topOffset={56}
               />
+              </FontScaleProvider>
             </RevenueCatProvider>
           </AuthProvider>
         </QueryClientProvider>
@@ -120,3 +133,5 @@ export default function RootLayout() {
     </GestureHandlerRootView>
   );
 }
+
+export default Sentry.wrap(RootLayout);

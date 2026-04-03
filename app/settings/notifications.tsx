@@ -1,4 +1,4 @@
-import { View, Text, StyleSheet, Pressable } from 'react-native';
+import { View, StyleSheet, Pressable } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
 import { Ionicons, MaterialIcons } from '@expo/vector-icons';
@@ -7,6 +7,7 @@ import { useTranslation } from 'react-i18next';
 import { Colors } from '@/constants/colors';
 import { Toggle } from '@/components/ui/toggle';
 import { useNotifications } from '@/hooks/use-notifications';
+import { Typography } from '@/components/ui/Typography';
 
 export default function NotificationsScreen() {
   const insets = useSafeAreaInsets();
@@ -20,9 +21,10 @@ export default function NotificationsScreen() {
         <Pressable onPress={() => router.back()} style={styles.backBtn}>
           <Ionicons name="arrow-back" size={22} color={Colors.background} />
         </Pressable>
-        <Text style={styles.headerTitle}>{t('notifications.title')}</Text>
+        <Typography variant="heading" style={styles.headerTitle}>
+          {t('notifications.title')}
+        </Typography>
       </View>
-      {/* Notifications toggle */}
       <View
         style={{
           flexDirection: 'row',
@@ -47,24 +49,12 @@ export default function NotificationsScreen() {
           <MaterialIcons name="notifications-none" size={20} color={Colors.pasion} />
         </View>
         <View style={{ flex: 1 }}>
-          <Text
-            style={{
-              fontFamily: 'Inter_700Bold',
-              fontSize: 16,
-              color: Colors.textPrimary,
-            }}
-          >
+          <Typography variant="bodyBold">
             {t('notifications.toggleLabel')}
-          </Text>
-          <Text
-            style={{
-              color: Colors.textSecondary,
-              marginTop: 1,
-              maxWidth: '90%',
-            }}
-          >
+          </Typography>
+          <Typography variant="body" color={Colors.textSecondary} style={{ marginTop: 1, maxWidth: '90%' }}>
             {t('notifications.toggleDescription')}
-          </Text>
+          </Typography>
         </View>
         <Toggle value={isEnabled} onToggle={() => (isEnabled ? disable() : enable())} />
       </View>
@@ -94,9 +84,6 @@ const styles = StyleSheet.create({
     borderRadius: 25,
   },
   headerTitle: {
-    fontFamily: 'Inter_900Black',
-    fontSize: 28,
-    letterSpacing: -0.5,
     color: Colors.textPrimary,
   },
 });

@@ -1,5 +1,5 @@
 import { useRef } from 'react';
-import { View, Text, StyleSheet } from 'react-native';
+import { View, StyleSheet } from 'react-native';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Toast } from 'toastify-react-native';
@@ -9,6 +9,7 @@ import { useTranslation } from 'react-i18next';
 import { Colors, RarityKey, rarityColor } from '../constants/colors';
 import { DeckCard, DeckResponse, apiPlayCard } from '../lib/api';
 import { SwipeToConfirm } from '../components/ui/SwipeToConfirm';
+import { Typography } from '../components/ui/Typography';
 
 const RARITY_MAP: Record<string, RarityKey> = {
   common: 'comun',
@@ -30,7 +31,6 @@ export default function CardDetailSheet() {
     playing.current = true;
     try {
       await apiPlayCard(cardId);
-      // Update cache immediately so the card disappears from the carousel
       queryClient.setQueryData<DeckResponse>(['deck'], (old) => {
         if (!old) return old;
         return {
@@ -57,7 +57,9 @@ export default function CardDetailSheet() {
     return (
       <View style={[styles.root, { paddingBottom: insets.bottom + 24 }]}>
         <View style={styles.handle} />
-        <Text style={styles.errorText}>{t('playCard.errorLoad')}</Text>
+        <Typography variant="body" baseFontSize={15} color={Colors.textSecondary} style={styles.errorText}>
+          {t('playCard.errorLoad')}
+        </Typography>
       </View>
     );
   }
@@ -68,25 +70,32 @@ export default function CardDetailSheet() {
 
   return (
     <View style={[styles.root, { paddingBottom: insets.bottom + 24 }]}>
-      {/* Drag handle */}
       <View style={styles.handle} />
 
       <View style={styles.header}>
-        <Text style={styles.title}>{t('playCard.title')}</Text>
-        <Text style={styles.description}>{t('playCard.description')}</Text>
+        <Typography variant="heading" baseFontSize={24} baseLineHeight={28} style={styles.title}>
+          {t('playCard.title')}
+        </Typography>
+        <Typography variant="body" baseFontSize={14} baseLineHeight={20}>
+          {t('playCard.description')}
+        </Typography>
       </View>
 
-      {/* Description */}
       <View style={styles.body}>
-        <Text style={[styles.cardTitle, { color: cardBg }]}>{card.title}</Text>
-        <Text style={styles.cardDescription}>{card.description}</Text>
+        <Typography variant="swissTitle" baseFontSize={32} baseLineHeight={34} color={cardBg} style={styles.cardTitle}>
+          {card.title}
+        </Typography>
+        <Typography variant="body" baseFontSize={12} baseLineHeight={18} style={styles.cardDescription}>
+          {card.description}
+        </Typography>
       </View>
 
-      {/* CTA */}
       <View style={styles.footer}>
         {isPlayed ? (
           <View style={styles.playedBanner}>
-            <Text style={styles.playedBannerText}>{t('playCard.played')}</Text>
+            <Typography variant="bodyBold" baseFontSize={15} color={Colors.textSecondary}>
+              {t('playCard.played')}
+            </Typography>
           </View>
         ) : (
           <SwipeToConfirm onConfirm={() => handleConfirm(card.id)} />
@@ -110,53 +119,8 @@ const styles = StyleSheet.create({
     alignSelf: 'center',
     marginBottom: 20,
   },
-  colorBlock: {
-    marginHorizontal: 20,
-    borderRadius: 20,
-    padding: 24,
-    gap: 10,
-  },
-  categoryBadge: {
-    fontFamily: 'Inter_900Black',
-    fontSize: 10,
-    letterSpacing: 2.5,
-    textTransform: 'uppercase',
-    opacity: 0.6,
-  },
   title: {
-    fontFamily: 'Inter_900Black',
-    fontSize: 24,
-    lineHeight: 28,
     letterSpacing: -0.5,
-    color: Colors.textPrimary,
-  },
-  description: {
-    fontFamily: 'Inter_400Regular',
-    fontSize: 14,
-    lineHeight: 20,
-    color: Colors.textPrimary,
-  },
-  cardTitle: {
-    fontFamily: 'Inter_900Black',
-    fontSize: 32,
-    lineHeight: 34,
-    textTransform: 'uppercase',
-    letterSpacing: -0.5,
-  },
-  rarityRow: {
-    flexDirection: 'row',
-    marginTop: 4,
-  },
-  rarityPill: {
-    borderRadius: 100,
-    paddingHorizontal: 10,
-    paddingVertical: 4,
-  },
-  rarityPillText: {
-    fontFamily: 'Inter_700Bold',
-    fontSize: 10,
-    letterSpacing: 1.5,
-    textTransform: 'uppercase',
   },
   header: {
     paddingHorizontal: 24,
@@ -168,18 +132,11 @@ const styles = StyleSheet.create({
     gap: 10,
     flex: 1,
   },
-  cardDescription: {
-    fontFamily: 'Inter_400Regular',
-    textTransform: 'uppercase',
-    fontSize: 12,
-    lineHeight: 18,
-    color: Colors.textPrimary,
+  cardTitle: {
+    letterSpacing: -0.5,
   },
-  expiry: {
-    fontFamily: 'Inter_400Regular',
-    fontSize: 13,
-    color: Colors.textMuted,
-    marginTop: 4,
+  cardDescription: {
+    textTransform: 'uppercase',
   },
   footer: {
     paddingHorizontal: 24,
@@ -191,24 +148,7 @@ const styles = StyleSheet.create({
     paddingVertical: 16,
     alignItems: 'center',
   },
-  playedBannerText: {
-    fontFamily: 'Inter_700Bold',
-    fontSize: 15,
-    color: Colors.textSecondary,
-  },
-  dismissBtn: {
-    alignItems: 'center',
-    paddingVertical: 8,
-  },
-  dismissText: {
-    fontFamily: 'Inter_400Regular',
-    fontSize: 15,
-    color: Colors.textMuted,
-  },
   errorText: {
-    fontFamily: 'Inter_400Regular',
-    fontSize: 15,
-    color: Colors.textSecondary,
     textAlign: 'center',
     marginTop: 40,
   },

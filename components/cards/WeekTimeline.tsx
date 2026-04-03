@@ -1,9 +1,10 @@
 import moment from 'moment';
-import { View, Text, StyleSheet } from 'react-native';
+import { View, StyleSheet } from 'react-native';
 import { useTranslation } from 'react-i18next';
 
 import { CardHistoryItem } from '../../lib/api';
 import { Colors, RarityKey, rarityColor, rarityGlow } from '../../constants/colors';
+import { Typography } from '../ui/Typography';
 
 const RARITY_MAP: Record<string, RarityKey> = {
   common: 'comun',
@@ -102,30 +103,65 @@ function TimelineEntry({
 
       <View style={[styles.rightCol, isLast ? styles.rightColLast : null]}>
         <View style={styles.metaRow}>
-          <Text style={styles.timeText}>{timeStr}</Text>
-          <Text style={styles.metaSep}> · </Text>
-          <Text style={[styles.playerText, isMine && styles.playerTextMine]}>{playerLabel}</Text>
+          <Typography variant="caption" color={Colors.textMuted} style={{ textTransform: 'capitalize' }}>
+            {timeStr}
+          </Typography>
+          <Typography variant="caption" color={Colors.textMuted}>
+            {' · '}
+          </Typography>
+          <Typography
+            variant="caption"
+            color={isMine ? Colors.accent : Colors.textSecondary}
+            style={{ fontFamily: 'Inter_700Bold', fontWeight: '700' }}
+          >
+            {playerLabel}
+          </Typography>
         </View>
 
         <View style={styles.badgeRow}>
           <View style={styles.badge}>
-            <Text style={styles.badgeText}>{categoryLabel}</Text>
+            <Typography variant="cardLabel" baseFontSize={9} style={{ opacity: 1, letterSpacing: 1.5 }} color={Colors.textMuted}>
+              {categoryLabel}
+            </Typography>
           </View>
           <View style={[styles.badge, { borderColor: dotColor + '55' }]}>
-            <Text style={[styles.badgeText, { color: dotColor }]}>{rarityLabel}</Text>
+            <Typography variant="cardLabel" baseFontSize={9} style={{ opacity: 1, letterSpacing: 1.5 }} color={dotColor}>
+              {rarityLabel}
+            </Typography>
           </View>
+          {play.event && (
+            <View style={[styles.badge, { borderColor: play.event.color + '55' }]}>
+              <Typography variant="cardLabel" baseFontSize={9} style={{ opacity: 1, letterSpacing: 1.5 }} color={play.event.color}>
+                {play.event.name}
+              </Typography>
+            </View>
+          )}
         </View>
 
-        <Text style={styles.cardTitle} numberOfLines={2}>
+        <Typography
+          variant="swissTitle"
+          baseFontSize={15}
+          baseLineHeight={19}
+          color={Colors.textPrimary}
+          numberOfLines={2}
+          style={styles.cardTitle}
+        >
           {play.title}
-        </Text>
+        </Typography>
 
         {play.description ? (
-          <Text style={styles.noteText} numberOfLines={3}>
+          <Typography
+            variant="body"
+            baseFontSize={13}
+            baseLineHeight={18}
+            color={Colors.textSecondary}
+            numberOfLines={3}
+            style={styles.noteText}
+          >
             {'"'}
             {play.description}
             {'"'}
-          </Text>
+          </Typography>
         ) : null}
       </View>
     </View>
@@ -138,11 +174,13 @@ export function WeekTimeline({ plays, isLoading, currentUserId }: WeekTimelinePr
   return (
     <View style={styles.container}>
       <View style={styles.sectionHeader}>
-        <Text style={styles.sectionTitle}>{t('weekTimeline.title')}</Text>
+        <Typography variant="cardLabel" color={Colors.textMuted} style={{ opacity: 1, letterSpacing: 2.5 }}>
+          {t('weekTimeline.title')}
+        </Typography>
         {!isLoading && plays.length > 0 && (
-          <Text style={styles.sectionCount}>
+          <Typography variant="caption" color={Colors.textSecondary}>
             {t('weekTimeline.played', { count: plays.length })}
-          </Text>
+          </Typography>
         )}
       </View>
 
@@ -155,7 +193,9 @@ export function WeekTimeline({ plays, isLoading, currentUserId }: WeekTimelinePr
           <SkeletonRow />
         </>
       ) : plays.length === 0 ? (
-        <Text style={styles.emptyText}>{t('weekTimeline.empty')}</Text>
+        <Typography variant="body" baseFontSize={14} color={Colors.textMuted} style={styles.emptyText}>
+          {t('weekTimeline.empty')}
+        </Typography>
       ) : (
         plays.map((play, i) => (
           <TimelineEntry
@@ -182,27 +222,12 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     marginBottom: 12,
   },
-  sectionTitle: {
-    fontFamily: 'Inter_900Black',
-    fontSize: 11,
-    letterSpacing: 2.5,
-    textTransform: 'uppercase',
-    color: Colors.textMuted,
-  },
-  sectionCount: {
-    fontFamily: 'Inter_400Regular',
-    fontSize: 12,
-    color: Colors.textSecondary,
-  },
   divider: {
     height: 1,
     backgroundColor: Colors.border,
     marginBottom: 20,
   },
   emptyText: {
-    fontFamily: 'Inter_400Regular',
-    fontSize: 14,
-    color: Colors.textMuted,
     textAlign: 'center',
     paddingVertical: 24,
   },
@@ -239,25 +264,6 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     flexWrap: 'wrap',
   },
-  timeText: {
-    fontFamily: 'Inter_400Regular',
-    fontSize: 12,
-    color: Colors.textMuted,
-    textTransform: 'capitalize',
-  },
-  metaSep: {
-    fontFamily: 'Inter_400Regular',
-    fontSize: 12,
-    color: Colors.textMuted,
-  },
-  playerText: {
-    fontFamily: 'Inter_700Bold',
-    fontSize: 12,
-    color: Colors.textSecondary,
-  },
-  playerTextMine: {
-    color: Colors.accent,
-  },
   badgeRow: {
     flexDirection: 'row',
     gap: 6,
@@ -270,27 +276,11 @@ const styles = StyleSheet.create({
     paddingHorizontal: 6,
     paddingVertical: 2,
   },
-  badgeText: {
-    fontFamily: 'Inter_900Black',
-    fontSize: 9,
-    letterSpacing: 1.5,
-    textTransform: 'uppercase',
-    color: Colors.textMuted,
-  },
   cardTitle: {
-    fontFamily: 'Inter_900Black',
-    fontSize: 15,
-    letterSpacing: -0.3,
-    textTransform: 'uppercase',
-    color: Colors.textPrimary,
-    lineHeight: 19,
     marginTop: 2,
+    letterSpacing: -0.3,
   },
   noteText: {
-    fontFamily: 'Inter_400Regular',
-    fontSize: 13,
-    lineHeight: 18,
-    color: Colors.textSecondary,
     fontStyle: 'italic',
     marginTop: 2,
   },

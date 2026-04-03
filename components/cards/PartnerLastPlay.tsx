@@ -1,5 +1,5 @@
 import { useEffect } from 'react';
-import { View, Text, StyleSheet, Dimensions } from 'react-native';
+import { View, StyleSheet, Dimensions } from 'react-native';
 import Animated, {
   useSharedValue,
   useAnimatedStyle,
@@ -15,6 +15,7 @@ import { useTranslation } from 'react-i18next';
 
 import { RarityKey, rarityColor, rarityGlow, rarityTextColor } from '../../constants/colors';
 import { CardHistoryItem } from '../../lib/api';
+import { Typography } from '../ui/Typography';
 
 const { width: SCREEN_WIDTH } = Dimensions.get('window');
 const SHEEN_W = 72;
@@ -122,21 +123,25 @@ export function PartnerLastPlay({ play }: PartnerLastPlayProps) {
 
       <View style={styles.inner}>
         <View style={styles.top}>
-          <Text style={[styles.label, { color: fg }]}>{categoryLabel}</Text>
-          <Text style={[styles.title, { color: fg }]} numberOfLines={2}>
+          <Typography variant="cardLabel" color={fg}>{categoryLabel}</Typography>
+          <Typography variant="cardTitle" color={fg} baseFontSize={20} baseLineHeight={24} numberOfLines={2}>
             {play.title}
-          </Text>
-          <Text style={[styles.label, { color: fg }]} numberOfLines={3}>
+          </Typography>
+          <Typography variant="cardLabel" color={fg} numberOfLines={3}>
             {play.description}
-          </Text>
+          </Typography>
         </View>
 
         <View style={[styles.footer, { borderTopColor: `${fg}30` }]}>
-          <Text style={[styles.playerName, { color: fg }]}>
+          <Typography variant="label" color={fg} baseFontSize={13}>
             {play.userName ?? t('home:partnerLastPlay.partner')}
-          </Text>
-          <Text style={[styles.footerSep, { color: fg }]}> · </Text>
-          <Text style={[styles.footerTime, { color: fg }]}>{timeAgo(play.playedAt)}</Text>
+          </Typography>
+          <Typography variant="body" color={fg} baseFontSize={13} style={{ opacity: 0.5 }}>
+            {' · '}
+          </Typography>
+          <Typography variant="body" color={fg} baseFontSize={13} style={{ opacity: 0.65 }}>
+            {timeAgo(play.playedAt)}
+          </Typography>
           <View style={styles.spacer} />
           <Animated.View style={heartStyle}>
             <Ionicons name="heart" size={18} color={fg} />
@@ -167,39 +172,11 @@ const styles = StyleSheet.create({
   top: {
     gap: 6,
   },
-  label: {
-    fontFamily: 'Inter_900Black',
-    fontSize: 10,
-    letterSpacing: 2.5,
-    textTransform: 'uppercase',
-    opacity: 0.5,
-  },
-  title: {
-    fontFamily: 'Inter_900Black',
-    fontSize: 20,
-    lineHeight: 24,
-    textTransform: 'uppercase',
-    letterSpacing: -0.5,
-  },
   footer: {
     flexDirection: 'row',
     alignItems: 'center',
     borderTopWidth: 1,
     paddingTop: 12,
-  },
-  playerName: {
-    fontFamily: 'Inter_700Bold',
-    fontSize: 13,
-  },
-  footerSep: {
-    fontFamily: 'Inter_400Regular',
-    fontSize: 13,
-    opacity: 0.5,
-  },
-  footerTime: {
-    fontFamily: 'Inter_400Regular',
-    fontSize: 13,
-    opacity: 0.65,
   },
   spacer: {
     flex: 1,

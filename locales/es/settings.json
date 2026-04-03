@@ -11,12 +11,21 @@
   "menu": {
     "notifications": "NOTIFICACIONES",
     "language": "IDIOMA",
+    "country": "PAÍS",
     "relationship": "MI RELACIÓN",
     "terms": "TÉRMINOS Y CONDICIONES",
     "privacy": "POLÍTICAS DE PRIVACIDAD",
     "faq": "PREGUNTAS FRECUENTES",
     "subscription": "GESTIONAR SUSCRIPCIÓN",
-    "restorePurchases": "RESTAURAR COMPRAS"
+    "restorePurchases": "RESTAURAR COMPRAS",
+    "fontSize": "TAMAÑO DE FUENTE"
+  },
+  "fontSize": {
+    "title": "TAMAÑO DE FUENTE.",
+    "small": "Pequeño",
+    "default": "Predeterminado",
+    "large": "Grande",
+    "extraLarge": "Muy grande"
   },
   "notifications": {
     "title": "NOTIFICACIONES.",
@@ -175,5 +184,14 @@
         "answer": "Andá a Configuración > Eliminar cuenta. Tu cuenta será eliminada en 7 días y podrás cancelar la solicitud iniciando sesión antes de ese plazo."
       }
     ]
-  }
+  },
+  "country": {
+    "title": "País",
+    "description": "Usamos tu país para mostrarte eventos en la fecha correcta.",
+    "saved": "País guardado",
+    "saved_description": "Tu país ha sido actualizado correctamente.",
+    "saveError": "No se pudo guardar el país. Por favor, inténtalo de nuevo."
+  },
+  "error": "Error",
+  "error_try_again": "Algo salió mal. Intentá de nuevo."
 }

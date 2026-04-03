@@ -1,6 +1,5 @@
 import {
   View,
-  Text,
   StyleSheet,
   Pressable,
   TextInput,
@@ -22,11 +21,14 @@ import { useMutation } from '@tanstack/react-query';
 import { useAuth } from '@/context/AuthContext';
 import { apiUpdateDisplayName } from '@/lib/api';
 import { useAvatarUpload } from '@/hooks/useAvatarUpload';
+import { Typography } from '@/components/ui/Typography';
+import { useScaledFontSize } from '@/context/FontScaleContext';
 
 export default function ProfileScreen() {
   const insets = useSafeAreaInsets();
   const { t } = useTranslation('settings');
   const { user, updateProfile } = useAuth();
+  const inputFontSize = useScaledFontSize(18);
 
   const [editing, setEditing] = useState(false);
   const [nameValue, setNameValue] = useState('');
@@ -79,7 +81,9 @@ export default function ProfileScreen() {
     >
       {/* Header */}
       <View style={styles.header}>
-        <Text style={styles.headerTitle}>{t('profile.title')}</Text>
+        <Typography variant="heading" style={styles.headerTitle}>
+          {t('profile.title')}
+        </Typography>
         <Pressable onPress={() => router.push('/settings')}>
           <Ionicons name="settings-outline" size={24} color={Colors.textPrimary} />
         </Pressable>
@@ -110,15 +114,15 @@ export default function ProfileScreen() {
         {/* Name below avatar */}
         {!editing ? (
           <Pressable onPress={startEditing} style={styles.nameUnderAvatar}>
-            <Text style={styles.nameText} numberOfLines={1}>
+            <Typography variant="bodyBold" baseFontSize={20}>
               {user?.displayName || t('profile.namePlaceholder')}
-            </Text>
+            </Typography>
             <Ionicons name="pencil" size={16} color={Colors.textSecondary} />
           </Pressable>
         ) : (
           <View style={styles.editContainerInline}>
             <TextInput
-              style={styles.nameInputInline}
+              style={[styles.nameInputInline, { fontSize: inputFontSize }]}
               value={nameValue}
               onChangeText={setNameValue}
               placeholder={t('profile.namePlaceholder')}
@@ -142,11 +146,15 @@ export default function ProfileScreen() {
                 {mutation.isPending ? (
                   <ActivityIndicator color="#fff" size="small" />
                 ) : (
-                  <Text style={styles.saveBtnText}>{t('profile.save')}</Text>
+                  <Typography variant="button" color="#ffffff">
+                    {t('profile.save')}
+                  </Typography>
                 )}
               </Pressable>
               <Pressable onPress={cancelEditing} style={styles.cancelBtn}>
-                <Text style={styles.cancelBtnText}>{t('profile.cancel')}</Text>
+                <Typography variant="body" baseFontSize={14} color={Colors.textSecondary}>
+                  {t('profile.cancel')}
+                </Typography>
               </Pressable>
             </View>
           </View>
@@ -169,9 +177,6 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
   },
   headerTitle: {
-    fontFamily: 'Inter_900Black',
-    fontSize: 28,
-    letterSpacing: -0.5,
     color: Colors.textPrimary,
   },
 
@@ -227,11 +232,6 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     gap: 8,
   },
-  nameText: {
-    fontFamily: 'Inter_700Bold',
-    fontSize: 20,
-    color: Colors.textPrimary,
-  },
 
   // Edit mode inline
   editContainerInline: {
@@ -248,7 +248,6 @@ const styles = StyleSheet.create({
     paddingVertical: 12,
     paddingHorizontal: 16,
     fontFamily: 'Inter_700Bold',
-    fontSize: 18,
     color: Colors.textPrimary,
     width: '100%',
   },
@@ -265,45 +264,8 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
   },
-  saveBtnText: {
-    fontFamily: 'Inter_700Bold',
-    fontSize: 16,
-    color: '#ffffff',
-  },
   cancelBtn: {
     alignItems: 'center',
     paddingVertical: 4,
-  },
-  cancelBtnText: {
-    fontFamily: 'Inter_400Regular',
-    fontSize: 14,
-    color: Colors.textSecondary,
-  },
-
-  // Stats
-  statRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 16,
-  },
-  statIconWrap: {
-    width: 48,
-    height: 48,
-    borderRadius: 24,
-    backgroundColor: 'rgba(255, 59, 92, 0.12)',
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  statNumber: {
-    fontFamily: 'Inter_900Black',
-    fontSize: 28,
-    color: Colors.textPrimary,
-    letterSpacing: -0.5,
-  },
-  statCaption: {
-    fontFamily: 'Inter_400Regular',
-    fontSize: 13,
-    color: Colors.textSecondary,
-    marginTop: 2,
   },
 });

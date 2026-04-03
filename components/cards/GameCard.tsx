@@ -3,6 +3,13 @@ import Animated from 'react-native-reanimated';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Ionicons } from '@expo/vector-icons';
 import { rarityColor, rarityTextColor, RarityKey } from '../../constants/colors';
+import { Typography } from '../ui/Typography';
+
+export interface EventBadgeData {
+  icon: string;
+  name: string;
+  color: string;
+}
 
 export interface GameCardData {
   rarity: RarityKey;
@@ -10,6 +17,7 @@ export interface GameCardData {
   title: string; // e.g. "MASAJE 10 MINUTOS"
   description?: string;
   packIcon?: string;
+  event?: EventBadgeData | null;
 }
 
 interface GameCardProps {
@@ -58,16 +66,52 @@ export function GameCard({ card, width = 160, rotation = 0, style }: GameCardPro
       <Animated.View style={styles.inner}>
         {/* Rarity label */}
         <Animated.View style={{ gap: 10 }}>
-          <Animated.Text style={[styles.label, { color: fg }]}>{card.label}</Animated.Text>
-          <Animated.Text style={[styles.title, { color: fg }]} numberOfLines={4}>
+          {/* Event badge — top-left corner */}
+          <Animated.View
+            style={{
+              flexDirection: 'row',
+              alignItems: 'center',
+              justifyContent: 'space-between',
+              gap: 8,
+              width: '100%',
+            }}
+          >
+            <Typography variant="cardLabel" color={fg}>{card.label}</Typography>
+
+            {card.event && (
+              <Animated.View style={[styles.badge, { borderColor: card.event.color + '55' }]}>
+                <Typography
+                  variant="cardLabel"
+                  color={card.event.color}
+                  baseFontSize={9}
+                  style={{ opacity: 1, letterSpacing: 1.5 }}
+                >
+                  {card.event.name}
+                </Typography>
+              </Animated.View>
+            )}
+          </Animated.View>
+          <Typography
+            variant="cardTitle"
+            color={fg}
+            baseFontSize={24}
+            baseLineHeight={28}
+            numberOfLines={4}
+          >
             {card.title}
-          </Animated.Text>
+          </Typography>
         </Animated.View>
 
         {/* Card subtitle — bottom */}
-        <Animated.Text style={[styles.description, { color: fg }]} numberOfLines={4}>
+        <Typography
+          variant="body"
+          color={fg}
+          baseFontSize={14}
+          baseLineHeight={18}
+          numberOfLines={4}
+        >
           {card.description}
-        </Animated.Text>
+        </Typography>
       </Animated.View>
     </Animated.View>
   );
@@ -79,6 +123,15 @@ const styles = StyleSheet.create({
     overflow: 'hidden',
     padding: 18,
   },
+  badge: {
+    borderWidth: 1,
+    borderRadius: 4,
+    paddingHorizontal: 6,
+    paddingVertical: 2,
+    flexDirection: 'row',
+    alignItems: 'center',
+    alignSelf: 'flex-start',
+  },
   packIconContainer: {
     ...StyleSheet.absoluteFillObject,
     alignItems: 'center',
@@ -88,24 +141,5 @@ const styles = StyleSheet.create({
   inner: {
     flex: 1,
     justifyContent: 'space-between',
-  },
-  label: {
-    fontFamily: 'Inter_900Black',
-    fontSize: 10,
-    letterSpacing: 2.5,
-    textTransform: 'uppercase',
-    opacity: 0.5,
-  },
-  title: {
-    fontFamily: 'Inter_900Black',
-    fontSize: 24,
-    lineHeight: 28,
-    textTransform: 'uppercase',
-    letterSpacing: -0.5,
-  },
-  description: {
-    fontFamily: 'Inter_400Regular',
-    fontSize: 14,
-    lineHeight: 18,
   },
 });

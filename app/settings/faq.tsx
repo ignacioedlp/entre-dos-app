@@ -1,10 +1,11 @@
 import { useState } from 'react';
-import { View, Text, StyleSheet, ScrollView, Pressable } from 'react-native';
+import { View, StyleSheet, ScrollView, Pressable } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { useTranslation } from 'react-i18next';
 
 import { Colors } from '@/constants/colors';
+import { Typography } from '@/components/ui/Typography';
 
 export default function FaqScreen() {
   const insets = useSafeAreaInsets();
@@ -28,21 +29,29 @@ export default function FaqScreen() {
         contentContainerStyle={[styles.scrollContent, { paddingBottom: insets.bottom + 24 }]}
         showsVerticalScrollIndicator={false}
       >
-        <Text style={styles.title}>{t('faq.title')}</Text>
+        <Typography variant="heading" baseFontSize={24} style={styles.title}>
+          {t('faq.title')}
+        </Typography>
 
         {items.map((item, index) => {
           const isOpen = openIndex === index;
           return (
             <Pressable key={index} onPress={() => toggle(index)} style={styles.item}>
               <View style={styles.questionRow}>
-                <Text style={styles.question}>{item.question}</Text>
+                <Typography variant="bodyBold" baseFontSize={14} style={styles.question}>
+                  {item.question}
+                </Typography>
                 <Ionicons
                   name={isOpen ? 'chevron-up' : 'chevron-down'}
                   size={18}
                   color={Colors.textMuted}
                 />
               </View>
-              {isOpen && <Text style={styles.answer}>{item.answer}</Text>}
+              {isOpen && (
+                <Typography variant="body" baseFontSize={13} baseLineHeight={20} color={Colors.textSecondary} style={styles.answer}>
+                  {item.answer}
+                </Typography>
+              )}
             </Pressable>
           );
         })}
@@ -69,10 +78,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 24,
   },
   title: {
-    fontFamily: 'Inter_900Black',
-    fontSize: 24,
     letterSpacing: -0.5,
-    color: Colors.textPrimary,
     marginBottom: 24,
   },
   item: {
@@ -88,15 +94,9 @@ const styles = StyleSheet.create({
   },
   question: {
     flex: 1,
-    fontFamily: 'Inter_700Bold',
-    fontSize: 14,
     color: Colors.textPrimary,
   },
   answer: {
-    fontFamily: 'Inter_400Regular',
-    fontSize: 13,
-    lineHeight: 20,
-    color: Colors.textSecondary,
     marginTop: 10,
   },
 });

@@ -1,8 +1,9 @@
-import { View, Text, StyleSheet, TouchableOpacity, Dimensions } from 'react-native';
+import { View, StyleSheet, TouchableOpacity, Dimensions } from 'react-native';
 import { useTranslation } from 'react-i18next';
 
 import { Pack } from '../../lib/api';
 import { useRevenueCat } from '../../context/RevenueCatContext';
+import { Typography } from '../ui/Typography';
 
 const { width: SCREEN_WIDTH } = Dimensions.get('window');
 const CARD_GAP = 12;
@@ -84,19 +85,23 @@ export function PackCard({ pack, half, isPremium }: PackCardProps) {
 
   return (
     <View style={[styles.card, { backgroundColor: theme.bg, width: cardWidth }]}>
-      <Text style={[styles.priceLabel, { color: theme.subText }]}>{formatPrice(pack.isBase)}</Text>
-      <Text style={[styles.packName, { color: theme.text }]}>{pack.name.toUpperCase()}</Text>
-      <Text style={[styles.packSubtitle, { color: theme.subText }]}>
+      <Typography variant="label" color={theme.subText} style={styles.priceLabel}>
+        {formatPrice(pack.isBase)}
+      </Typography>
+      <Typography variant="swissTitle" color={theme.text} baseFontSize={18} style={styles.packName}>
+        {pack.name.toUpperCase()}
+      </Typography>
+      <Typography variant="label" color={theme.subText} style={styles.packSubtitle}>
         {pack.subtitle.toUpperCase()}
-      </Text>
+      </Typography>
 
       <View style={styles.cardSpacer} />
 
-      <Text style={[styles.packQuote, { color: theme.subText }]}>
+      <Typography variant="body" color={theme.subText} baseFontSize={13} baseLineHeight={18} style={styles.packQuote}>
         {'"'}
         {pack.description}
         {'"'}
-      </Text>
+      </Typography>
 
       {!pack.isBase && !isPremium && (
         <TouchableOpacity
@@ -104,9 +109,9 @@ export function PackCard({ pack, half, isPremium }: PackCardProps) {
           activeOpacity={0.85}
           onPress={handleSubscribe}
         >
-          <Text style={[styles.buyButtonText, { color: theme.btnText }]}>
+          <Typography variant="cardLabel" color={theme.btnText} style={{ opacity: 1, letterSpacing: 1.5 }}>
             {t('packs.subscribe')}
-          </Text>
+          </Typography>
         </TouchableOpacity>
       )}
     </View>
@@ -120,33 +125,22 @@ const styles = StyleSheet.create({
     minHeight: 220,
   },
   priceLabel: {
-    fontFamily: 'Inter_700Bold',
-    fontSize: 11,
-    letterSpacing: 1.5,
-    textTransform: 'uppercase',
     marginBottom: 6,
+    letterSpacing: 1.5,
   },
   packName: {
-    fontFamily: 'Inter_900Black',
-    fontSize: 18,
     letterSpacing: -0.5,
     lineHeight: 28,
     marginBottom: 4,
   },
   packSubtitle: {
-    fontFamily: 'Inter_700Bold',
-    fontSize: 10,
     letterSpacing: 2,
-    textTransform: 'uppercase',
   },
   cardSpacer: {
     flex: 1,
     minHeight: 24,
   },
   packQuote: {
-    fontFamily: 'Inter_400Regular',
-    fontSize: 13,
-    lineHeight: 18,
     fontStyle: 'italic',
     marginBottom: 16,
   },
@@ -154,10 +148,5 @@ const styles = StyleSheet.create({
     borderRadius: 100,
     paddingVertical: 12,
     alignItems: 'center',
-  },
-  buyButtonText: {
-    fontFamily: 'Inter_900Black',
-    fontSize: 10,
-    letterSpacing: 1.5,
   },
 });

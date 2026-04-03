@@ -123,6 +123,28 @@ export interface DeckCard {
   category: 'date' | 'action' | 'home';
   rarity: 'common' | 'rare' | 'epic' | 'legendary';
   packIcon?: string;
+  event?: EventBadge | null;
+}
+
+export interface EventBadge {
+  id: string;
+  slug: string;
+  name: string;
+  icon: string;
+  color: string;
+}
+
+export interface ActiveEvent extends EventBadge {
+  type: 'recurring' | 'special';
+  is_active: boolean;
+  premium_only: boolean;
+  bonus_card_count: number;
+  description: string;
+}
+
+export interface ActiveEventsResponse {
+  countryEvents: ActiveEvent[];
+  globalEvents: ActiveEvent[];
 }
 
 export interface DeckResponse {
@@ -131,6 +153,11 @@ export interface DeckResponse {
 
 export async function apiGetDeck(): Promise<DeckResponse> {
   const res = await api.get<DeckResponse>('/deck');
+  return res.data;
+}
+
+export async function apiGetActiveEvents(): Promise<ActiveEventsResponse> {
+  const res = await api.get<ActiveEventsResponse>('/events/active');
   return res.data;
 }
 
@@ -148,6 +175,7 @@ export interface CardHistoryItem {
   playedAt: string;
   title: string;
   description: string;
+  event?: EventBadge | null;
   category: 'date' | 'action' | 'home';
   rarity: 'common' | 'rare' | 'epic' | 'legendary';
 }
@@ -263,11 +291,13 @@ export async function apiUpdateDisplayName(displayName: string): Promise<Profile
 
 export async function apiCompleteOnboarding(
   displayName: string,
-  locale: 'es' | 'en'
+  locale: 'es' | 'en',
+  country?: string | null
 ): Promise<ProfileData> {
   const res = await api.put<{ profile: ProfileData }>('/profiles/me', {
     displayName,
     locale,
+    ...(country ? { country } : {}),
     onboardingCompleted: true,
   });
   return res.data.profile;

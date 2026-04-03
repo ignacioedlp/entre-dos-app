@@ -39,13 +39,27 @@
           "color": "#FF3B5C"
         }
       ],
-      "@react-native-google-signin/google-signin"
+      "@react-native-google-signin/google-signin",
+      [
+        "@sentry/react-native/expo",
+        {
+          "organization": "tofidev",
+          "project": "react-native",
+          "url": "https://sentry.io/"
+        }
+      ]
     ],
     "extra": {
       "router": {},
       "eas": {
         "projectId": "71438918-3d0f-4833-b171-672af43d53d0"
       }
+    },
+    "runtimeVersion": {
+      "policy": "appVersion"
+    },
+    "updates": {
+      "url": "https://u.expo.dev/71438918-3d0f-4833-b171-672af43d53d0"
     }
   }
 }

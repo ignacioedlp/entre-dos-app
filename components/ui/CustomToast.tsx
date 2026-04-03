@@ -1,7 +1,8 @@
 import React from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, Animated } from 'react-native';
+import { View, StyleSheet, TouchableOpacity, Animated } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { Colors } from '../../constants/colors';
+import { Typography } from './Typography';
 
 const SUCCESS_COLOR = '#4ade80';
 const ERROR_COLOR = Colors.accent; // #FF3B5C
@@ -49,14 +50,18 @@ const ToastCard = ({
       {/* Text */}
       <View style={styles.textWrap}>
         {text1 ? (
-          <Text style={styles.title} numberOfLines={2}>
+          <Typography variant="bodyBold" color="#fff" style={styles.title} numberOfLines={2}>
             {text1}
-          </Text>
+          </Typography>
         ) : null}
         {text2 ? (
-          <Text style={styles.subtitle} numberOfLines={2}>
+          <Typography
+            variant="caption"
+            color="rgba(255,255,255,0.8)"
+            numberOfLines={2}
+          >
             {text2}
-          </Text>
+          </Typography>
         ) : null}
       </View>
 
@@ -134,16 +139,8 @@ const styles = StyleSheet.create({
     gap: 2,
   },
   title: {
-    fontFamily: 'Inter_700Bold',
     fontSize: 14,
-    color: '#fff',
     letterSpacing: 0.1,
-  },
-  subtitle: {
-    fontFamily: 'Inter_400Regular',
-    fontSize: 12,
-    color: 'rgba(255,255,255,0.8)',
-    lineHeight: 18,
   },
   closeBtn: {
     padding: 2,

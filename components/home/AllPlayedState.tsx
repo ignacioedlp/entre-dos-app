@@ -1,9 +1,10 @@
 import { useState, useEffect, useMemo } from 'react';
-import { View, Text, StyleSheet } from 'react-native';
+import { View, StyleSheet } from 'react-native';
 import moment from 'moment';
 import { useTranslation } from 'react-i18next';
 
 import { Colors } from '../../constants/colors';
+import { Typography } from '../ui/Typography';
 
 function getNextMondayUTC(): moment.Moment {
   const now = moment.utc();
@@ -39,12 +40,22 @@ export function AllPlayedState() {
 
   return (
     <View style={styles.empty}>
-      <Text style={styles.emoji}>🎉</Text>
-      <Text style={styles.emptyTitle}>{t('allPlayed.title')}</Text>
-      <Text style={styles.emptyBody}>{t('allPlayed.body')}</Text>
+      <Typography variant="heading" baseFontSize={48} style={styles.emoji}>
+        🎉
+      </Typography>
+      <Typography variant="swissTitle" style={styles.emptyTitle}>
+        {t('allPlayed.title')}
+      </Typography>
+      <Typography variant="body" baseFontSize={15} baseLineHeight={22} color={Colors.textSecondary} style={styles.emptyBody}>
+        {t('allPlayed.body')}
+      </Typography>
       <View style={styles.countdownBox}>
-        <Text style={styles.countdownLabel}>{t('allPlayed.countdown')}</Text>
-        <Text style={styles.countdownValue}>{countdown}</Text>
+        <Typography variant="cardLabel" color={Colors.textMuted} style={{ opacity: 1, letterSpacing: 2 }}>
+          {t('allPlayed.countdown')}
+        </Typography>
+        <Typography variant="heading" baseFontSize={36} style={styles.countdownValue}>
+          {countdown}
+        </Typography>
       </View>
     </View>
   );
@@ -59,22 +70,14 @@ const styles = StyleSheet.create({
     paddingHorizontal: 24,
   },
   emoji: {
-    fontSize: 48,
     marginBottom: 8,
+    textTransform: 'none',
+    letterSpacing: 0,
   },
   emptyTitle: {
-    fontFamily: 'Inter_900Black',
-    fontSize: 22,
-    textTransform: 'uppercase',
-    letterSpacing: -0.5,
-    color: Colors.textPrimary,
     textAlign: 'center',
   },
   emptyBody: {
-    fontFamily: 'Inter_400Regular',
-    fontSize: 15,
-    lineHeight: 22,
-    color: Colors.textSecondary,
     textAlign: 'center',
     maxWidth: 280,
   },
@@ -84,17 +87,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     gap: 6,
   },
-  countdownLabel: {
-    fontFamily: 'Inter_700Bold',
-    fontSize: 10,
-    letterSpacing: 2,
-    color: Colors.textMuted,
-    textTransform: 'uppercase',
-  },
   countdownValue: {
-    fontFamily: 'Inter_900Black',
-    fontSize: 36,
     letterSpacing: -1,
-    color: Colors.textPrimary,
   },
 });

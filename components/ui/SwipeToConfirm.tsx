@@ -86,6 +86,7 @@ const styles = StyleSheet.create({
     position: 'absolute',
     right: 120,
     fontFamily: 'Inter_700Bold',
+    fontWeight: '700',
     fontSize: 13,
     letterSpacing: 2,
     color: Colors.textMuted,

@@ -1,4 +1,4 @@
-import { View, Text, TextInput, StyleSheet, Pressable, Modal } from 'react-native';
+import { View, TextInput, StyleSheet, Pressable, Modal } from 'react-native';
 import { useState } from 'react';
 import { useForm, Controller } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -14,6 +14,8 @@ import { useAuth, DeletionPendingError } from '../../context/AuthContext';
 import { apiCancelDeletion } from '../../lib/api';
 import { setToken, setProfile } from '../../lib/storage';
 import i18n from '@/i18n';
+import { Typography } from '../../components/ui/Typography';
+import { useScaledFontSize } from '../../context/FontScaleContext';
 
 export default function LoginScreen() {
   const insets = useSafeAreaInsets();
@@ -28,6 +30,7 @@ export default function LoginScreen() {
   const [cancellingDeletion, setCancellingDeletion] = useState(false);
   const { login, googleLogin, updateProfile } = useAuth();
   const { t } = useTranslation('auth');
+  const inputFontSize = useScaledFontSize(16);
 
   const schema = z.object({
     email: z.string().email(t('login.errorEmail')),
@@ -113,16 +116,20 @@ export default function LoginScreen() {
       </View>
 
       <View style={styles.content}>
-        <Text style={styles.title}>{t('login.title')}</Text>
-        <Text style={styles.subtitle}>{t('login.subtitle')}</Text>
+        <Typography variant="swissTitle" baseFontSize={40} baseLineHeight={40} style={styles.title}>
+          {t('login.title')}
+        </Typography>
+        <Typography variant="body" color={Colors.textSecondary} style={styles.subtitle}>
+          {t('login.subtitle')}
+        </Typography>
 
-        <Text style={styles.label}>{t('login.email')}</Text>
+        <Typography variant="body" baseFontSize={14}>{t('login.email')}</Typography>
         <Controller
           control={control}
           name="email"
           render={({ field: { onChange, onBlur, value } }) => (
             <TextInput
-              style={[styles.input, errors.email && styles.inputError]}
+              style={[styles.input, { fontSize: inputFontSize }, errors.email && styles.inputError]}
               placeholder={t('login.emailPlaceholder')}
               placeholderTextColor={Colors.textMuted}
               keyboardType="email-address"
@@ -134,16 +141,20 @@ export default function LoginScreen() {
             />
           )}
         />
-        {errors.email && <Text style={styles.errorText}>{errors.email.message}</Text>}
+        {errors.email && (
+          <Typography variant="caption" color={Colors.pasion} style={styles.errorText}>
+            {errors.email.message}
+          </Typography>
+        )}
 
-        <Text style={[styles.label, styles.labelPassword]}>{t('login.password')}</Text>
+        <Typography variant="body" baseFontSize={14} style={styles.labelPassword}>{t('login.password')}</Typography>
         <Controller
           control={control}
           name="password"
           render={({ field: { onChange, onBlur, value } }) => (
             <View style={styles.passwordWrapper}>
               <TextInput
-                style={[styles.input, styles.passwordInput, errors.password && styles.inputError]}
+                style={[styles.input, styles.passwordInput, { fontSize: inputFontSize }, errors.password && styles.inputError]}
                 placeholder={t('login.passwordPlaceholder')}
                 placeholderTextColor={Colors.textMuted}
                 secureTextEntry={!showPassword}
@@ -158,22 +169,28 @@ export default function LoginScreen() {
                 style={styles.eyeButton}
                 hitSlop={8}
               >
-                <Feather
-                  name={showPassword ? 'eye-off' : 'eye'}
-                  size={20}
-                  color={Colors.textMuted}
-                />
+                <Feather name={showPassword ? 'eye-off' : 'eye'} size={20} color={Colors.textMuted} />
               </Pressable>
             </View>
           )}
         />
-        {errors.password && <Text style={styles.errorText}>{errors.password.message}</Text>}
+        {errors.password && (
+          <Typography variant="caption" color={Colors.pasion} style={styles.errorText}>
+            {errors.password.message}
+          </Typography>
+        )}
 
         <Pressable style={styles.forgotLink} onPress={() => router.push('/(auth)/forgot-password')}>
-          <Text style={styles.forgotText}>{t('login.forgotPassword')}</Text>
+          <Typography variant="caption" color={Colors.textSecondary} style={styles.forgotText}>
+            {t('login.forgotPassword')}
+          </Typography>
         </Pressable>
 
-        {apiError && <Text style={styles.errorText}>{apiError}</Text>}
+        {apiError && (
+          <Typography variant="caption" color={Colors.pasion} style={styles.errorText}>
+            {apiError}
+          </Typography>
+        )}
       </View>
 
       <View style={[styles.ctaArea, { paddingBottom: insets.bottom + 24 }]}>
@@ -185,7 +202,9 @@ export default function LoginScreen() {
 
         <View style={styles.divider}>
           <View style={styles.dividerLine} />
-          <Text style={styles.dividerText}>{t('login.or')}</Text>
+          <Typography variant="caption" color={Colors.textMuted}>
+            {t('login.or')}
+          </Typography>
           <View style={styles.dividerLine} />
         </View>
 
@@ -195,16 +214,18 @@ export default function LoginScreen() {
           disabled={googleLoading || isSubmitting}
         >
           <AntDesign name="google" size={18} color="#1a1a1a" />
-          <Text style={styles.googleLabel}>
+          <Typography variant="button" color="#1a1a1a">
             {googleLoading ? t('login.submitting') : t('login.google')}
-          </Text>
+          </Typography>
         </Pressable>
 
         <Pressable style={styles.registerLink} onPress={() => router.push('/(auth)/register')}>
-          <Text style={styles.registerLinkText}>
+          <Typography variant="body" baseFontSize={14} color={Colors.textSecondary}>
             {t('login.noAccount')}
-            <Text style={styles.registerLinkAccent}>{t('login.registerLink')}</Text>
-          </Text>
+            <Typography variant="bodyBold" baseFontSize={14} color={Colors.accent} style={styles.registerLinkAccent}>
+              {t('login.registerLink')}
+            </Typography>
+          </Typography>
         </Pressable>
       </View>
 
@@ -221,10 +242,12 @@ export default function LoginScreen() {
             <View style={styles.iconWrap}>
               <Ionicons name="warning-outline" size={28} color={Colors.pasion} />
             </View>
-            <Text style={styles.modalTitle}>{t('login.deletionPendingTitle')}</Text>
-            <Text style={styles.modalBody}>
+            <Typography variant="heading" baseFontSize={20} style={styles.modalTitle}>
+              {t('login.deletionPendingTitle')}
+            </Typography>
+            <Typography variant="body" baseFontSize={14} baseLineHeight={21} color={Colors.textSecondary} style={styles.modalBody}>
               {t('login.deletionPendingMessage', { date: deletionPending?.scheduledFor })}
-            </Text>
+            </Typography>
             <View style={styles.modalActions}>
               <Button
                 label={t('login.cancelDeletion')}
@@ -259,25 +282,11 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   title: {
-    fontFamily: 'Inter_900Black',
-    fontSize: 40,
-    lineHeight: 40,
-    textTransform: 'uppercase',
-    letterSpacing: -1.5,
-    color: Colors.textPrimary,
     marginBottom: 12,
+    letterSpacing: -1.5,
   },
   subtitle: {
-    fontFamily: 'Inter_400Regular',
-    fontSize: 16,
-    lineHeight: 24,
-    color: Colors.textSecondary,
     marginBottom: 32,
-  },
-  label: {
-    fontFamily: 'Inter_400Regular',
-    fontSize: 14,
-    color: Colors.textPrimary,
   },
   labelPassword: {
     marginTop: 24,
@@ -286,7 +295,6 @@ const styles = StyleSheet.create({
     paddingHorizontal: 18,
     paddingVertical: 16,
     fontFamily: 'Inter_400Regular',
-    fontSize: 16,
     color: Colors.textPrimary,
     borderBottomWidth: 1,
     borderColor: '#EDF1F3',
@@ -312,15 +320,9 @@ const styles = StyleSheet.create({
     marginTop: 12,
   },
   forgotText: {
-    fontFamily: 'Inter_400Regular',
-    fontSize: 13,
-    color: Colors.textSecondary,
     textDecorationLine: 'underline',
   },
   errorText: {
-    fontFamily: 'Inter_400Regular',
-    fontSize: 13,
-    color: Colors.pasion,
     marginTop: 8,
   },
   ctaArea: {
@@ -337,11 +339,6 @@ const styles = StyleSheet.create({
     height: 1,
     backgroundColor: Colors.border,
   },
-  dividerText: {
-    fontFamily: 'Inter_400Regular',
-    fontSize: 13,
-    color: Colors.textMuted,
-  },
   googleButton: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -355,24 +352,11 @@ const styles = StyleSheet.create({
     opacity: 0.85,
     transform: [{ scale: 0.98 }],
   },
-  googleLabel: {
-    fontFamily: 'Inter_700Bold',
-    fontSize: 16,
-    letterSpacing: 0.3,
-    color: '#1a1a1a',
-  },
   registerLink: {
     alignSelf: 'center',
     paddingVertical: 8,
   },
-  registerLinkText: {
-    fontFamily: 'Inter_400Regular',
-    fontSize: 14,
-    color: Colors.textSecondary,
-  },
   registerLinkAccent: {
-    fontFamily: 'Inter_700Bold',
-    color: Colors.accent,
     textDecorationLine: 'underline',
   },
   backdrop: {
@@ -400,18 +384,11 @@ const styles = StyleSheet.create({
     marginBottom: 20,
   },
   modalTitle: {
-    fontFamily: 'Inter_900Black',
-    fontSize: 20,
     letterSpacing: -0.3,
-    color: Colors.textPrimary,
     textAlign: 'center',
     marginBottom: 10,
   },
   modalBody: {
-    fontFamily: 'Inter_400Regular',
-    fontSize: 14,
-    lineHeight: 21,
-    color: Colors.textSecondary,
     textAlign: 'center',
     marginBottom: 28,
     maxWidth: 280,

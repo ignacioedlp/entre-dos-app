@@ -1,6 +1,6 @@
 import { createMMKV } from 'react-native-mmkv';
 
-export const storage = createMMKV({ id: 'haven-auth' });
+export const storage = createMMKV({ id: 'entre-dos-auth' });
 
 const TOKEN_KEY = 'auth.token';
 const PROFILE_KEY = 'auth.profile';
@@ -12,6 +12,7 @@ export interface ProfileData {
   coupleId: string | null;
   coupleCode: string;
   locale: 'es' | 'en';
+  country: string | null;
   pushNotifications: boolean;
   onboardingCompleted: boolean;
 }

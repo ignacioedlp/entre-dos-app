@@ -1,6 +1,7 @@
-import { View, Text, StyleSheet } from 'react-native';
+import { View, StyleSheet } from 'react-native';
 import Svg, { Path } from 'react-native-svg';
 import { Colors } from '../../constants/colors';
+import { Typography } from './Typography';
 
 interface LogoProps {
   size?: 'sm' | 'md' | 'lg';
@@ -29,9 +30,10 @@ export function LogoWithName({ size = 'md' }: LogoProps) {
 
   return (
     <View style={styles.container}>
-      {/* "S" shaped logo — matches the card back icon on the landing */}
       <Logo size={size} />
-      <Text style={[styles.wordmark, { fontSize: text }]}>ENTRE DOS</Text>
+      <Typography variant="swissTitle" style={{ fontSize: text }}>
+        ENTRE DOS
+      </Typography>
     </View>
   );
 }
@@ -41,11 +43,5 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     gap: 8,
-  },
-  wordmark: {
-    fontFamily: 'Inter_900Black',
-    color: Colors.textPrimary,
-    letterSpacing: -0.5,
-    textTransform: 'uppercase',
   },
 });

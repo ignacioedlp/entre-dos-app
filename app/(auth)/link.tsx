@@ -1,14 +1,15 @@
 import { useState, useRef, useEffect } from 'react';
 import {
   View,
-  Text,
   StyleSheet,
   Share,
   TextInput,
   Keyboard,
   TouchableWithoutFeedback,
+  TouchableOpacity,
   ActivityIndicator,
 } from 'react-native';
+import * as Clipboard from 'expo-clipboard';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useQuery, useMutation } from '@tanstack/react-query';
 import { router } from 'expo-router';
@@ -18,6 +19,7 @@ import { Button } from '../../components/ui/Button';
 import { Colors } from '../../constants/colors';
 import { useAuth } from '../../context/AuthContext';
 import { apiGetCoupleStatus, apiLinkCouple } from '@/lib/api';
+import { Typography } from '../../components/ui/Typography';
 
 export default function WaitingScreen() {
   const insets = useSafeAreaInsets();
@@ -78,6 +80,17 @@ export default function WaitingScreen() {
     }
   };
 
+  const handlePaste = async () => {
+    const text = await Clipboard.getStringAsync();
+    const cleaned = text
+      .replace(/[^a-zA-Z0-9]/g, '')
+      .toUpperCase()
+      .slice(0, 6);
+    if (cleaned.length > 0) {
+      handleCodeChange(cleaned);
+    }
+  };
+
   const switchToJoin = () => {
     setMode('join');
     setTimeout(() => inputRef.current?.focus(), 100);
@@ -99,8 +112,12 @@ export default function WaitingScreen() {
           </View>
 
           <View style={styles.content}>
-            <Text style={styles.title}>{t('link.joinTitle')}</Text>
-            <Text style={styles.subtitle}>{t('link.joinSubtitle')}</Text>
+            <Typography variant="swissTitle" baseFontSize={40} baseLineHeight={40} style={styles.title}>
+              {t('link.joinTitle')}
+            </Typography>
+            <Typography variant="body" color={Colors.textSecondary} style={styles.subtitle}>
+              {t('link.joinSubtitle')}
+            </Typography>
 
             <TextInput
               ref={inputRef}
@@ -119,13 +136,25 @@ export default function WaitingScreen() {
                     key={i}
                     style={[styles.digitBox, code.length === i && styles.digitBoxActive]}
                   >
-                    <Text style={styles.digitText}>{code[i] ?? ''}</Text>
+                    <Typography variant="heading" baseFontSize={28} style={styles.digitText}>
+                      {code[i] ?? ''}
+                    </Typography>
                   </View>
                 ))}
               </View>
             </TouchableWithoutFeedback>
 
-            {joinError && <Text style={styles.errorText}>{joinError}</Text>}
+            <TouchableOpacity onPress={handlePaste} style={styles.pasteBtn}>
+              <Typography variant="body" baseFontSize={14} color={Colors.accent}>
+                {t('link.paste')}
+              </Typography>
+            </TouchableOpacity>
+
+            {joinError && (
+              <Typography variant="caption" color={Colors.pasion} style={styles.errorText}>
+                {joinError}
+              </Typography>
+            )}
           </View>
 
           <View style={[styles.ctaArea, { paddingBottom: insets.bottom + 24 }]}>
@@ -154,14 +183,20 @@ export default function WaitingScreen() {
 
       <View style={styles.content}>
         <View style={styles.spinnerWrapper}>
-          <Text style={styles.title}>{t('link.shareTitle')}</Text>
+          <Typography variant="swissTitle" baseFontSize={40} baseLineHeight={40} style={styles.title}>
+            {t('link.shareTitle')}
+          </Typography>
           <ActivityIndicator size="large" color={Colors.accent} style={styles.spinner} />
         </View>
 
-        <Text style={styles.subtitle}>{t('link.shareSubtitle')}</Text>
+        <Typography variant="body" color={Colors.textSecondary} style={styles.subtitle}>
+          {t('link.shareSubtitle')}
+        </Typography>
 
         <View style={styles.codeBox}>
-          <Text style={styles.code}>{coupleCode}</Text>
+          <Typography variant="heading" baseFontSize={42} style={styles.code}>
+            {coupleCode}
+          </Typography>
         </View>
       </View>
 
@@ -191,19 +226,10 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   title: {
-    fontFamily: 'Inter_900Black',
-    fontSize: 40,
-    lineHeight: 40,
-    textTransform: 'uppercase',
-    letterSpacing: -1.5,
-    color: Colors.textPrimary,
     marginBottom: 12,
+    letterSpacing: -1.5,
   },
   subtitle: {
-    fontFamily: 'Inter_400Regular',
-    fontSize: 16,
-    lineHeight: 24,
-    color: Colors.textSecondary,
     marginBottom: 40,
   },
   codeBox: {
@@ -215,10 +241,7 @@ const styles = StyleSheet.create({
     borderColor: Colors.border,
   },
   code: {
-    fontFamily: 'Inter_900Black',
-    fontSize: 42,
     letterSpacing: 10,
-    color: Colors.textPrimary,
     textTransform: 'uppercase',
   },
   hiddenInput: {
@@ -250,14 +273,15 @@ const styles = StyleSheet.create({
     elevation: 6,
   },
   digitText: {
-    fontFamily: 'Inter_900Black',
-    fontSize: 28,
-    color: Colors.textPrimary,
+    letterSpacing: 0,
+  },
+  pasteBtn: {
+    alignSelf: 'center',
+    marginTop: 16,
+    paddingVertical: 6,
+    paddingHorizontal: 20,
   },
   errorText: {
-    fontFamily: 'Inter_400Regular',
-    fontSize: 13,
-    color: Colors.pasion,
     marginTop: 12,
   },
   ctaArea: {
