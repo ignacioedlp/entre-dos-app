@@ -7,9 +7,10 @@ import {
   useRef,
   ReactNode,
 } from 'react';
+import { Platform } from 'react-native';
 import Purchases, { LOG_LEVEL, CustomerInfo } from 'react-native-purchases';
 import RevenueCatUI from 'react-native-purchases-ui';
-import { router } from 'expo-router';
+import * as Sentry from '@sentry/react-native';
 import { useAuth } from './AuthContext';
 
 const ENTITLEMENT_ID = 'Passion';
@@ -31,8 +32,8 @@ interface RevenueCatContextValue {
   entitlementData: EntitlementData | null;
   customerInfo: CustomerInfo | null;
   loading: boolean;
-  presentPaywall: () => void;
-  presentPaywallIfNeeded: () => void;
+  presentPaywall: () => Promise<void>;
+  presentPaywallIfNeeded: () => Promise<void>;
   presentCustomerCenter: () => Promise<void>;
   restorePurchases: () => Promise<CustomerInfo>;
 }
@@ -82,6 +83,48 @@ export function RevenueCatProvider({ children }: { children: ReactNode }) {
     setIsSubscribed(checkEntitlement(info));
   }
 
+  const ensureRevenueCatReady = useCallback(async () => {
+    if (configuredRef.current) return;
+
+    const keyName = Platform.select({
+      android: 'EXPO_PUBLIC_RC_API_KEY_ANDROID',
+      ios: 'EXPO_PUBLIC_RC_API_IOS',
+      default: 'EXPO_PUBLIC_RC_API_KEY',
+    });
+
+    const apiKey =
+      Platform.select({
+        android: process.env.EXPO_PUBLIC_RC_API_KEY_ANDROID,
+        ios: process.env.EXPO_PUBLIC_RC_API_IOS,
+        default: process.env.EXPO_PUBLIC_RC_API_KEY,
+      }) ?? process.env.EXPO_PUBLIC_RC_API_KEY;
+
+    if (!apiKey) {
+      Sentry.captureMessage('Missing RevenueCat API key for current platform', {
+        level: 'error',
+        tags: {
+          area: 'subscriptions',
+          flow: 'ensureRevenueCatReady',
+          platform: Platform.OS,
+        },
+      });
+      throw new Error(`Missing ${keyName}`);
+    }
+
+    if (__DEV__) {
+      Purchases.setLogLevel(LOG_LEVEL.VERBOSE);
+    }
+
+    Purchases.configure({ apiKey });
+
+    if (user?.userId) {
+      const { customerInfo } = await Purchases.logIn(user.userId);
+      updateFromCustomerInfo(customerInfo);
+    }
+
+    configuredRef.current = true;
+  }, [user]);
+
   useEffect(() => {
     if (!user) {
       if (configuredRef.current) {
@@ -102,20 +145,13 @@ export function RevenueCatProvider({ children }: { children: ReactNode }) {
       }
 
       try {
-        if (!configuredRef.current) {
-          if (__DEV__) {
-            Purchases.setLogLevel(LOG_LEVEL.VERBOSE);
-          }
-          Purchases.configure({
-            apiKey: process.env.EXPO_PUBLIC_RC_API_KEY!,
-          });
-          configuredRef.current = true;
-        }
-
-        const { customerInfo } = await Purchases.logIn(user!.userId);
-        updateFromCustomerInfo(customerInfo);
+        await ensureRevenueCatReady();
         await fetchEntitlementData();
       } catch (e) {
+        Sentry.captureException(e, {
+          tags: { area: 'subscriptions', flow: 'init' },
+          extra: { platform: Platform.OS },
+        });
         console.warn('RevenueCat init failed:', e);
       } finally {
         setLoading(false);
@@ -123,7 +159,7 @@ export function RevenueCatProvider({ children }: { children: ReactNode }) {
     }
 
     init();
-  }, [user, token, fetchEntitlementData]);
+  }, [user, token, fetchEntitlementData, ensureRevenueCatReady]);
 
   // Listen for real-time subscription changes
   useEffect(() => {
@@ -139,14 +175,91 @@ export function RevenueCatProvider({ children }: { children: ReactNode }) {
     };
   }, [user]);
 
-  const presentPaywall = useCallback(() => {
-    router.push('/paywall');
-  }, []);
+  const presentPaywall = useCallback(async (): Promise<void> => {
+    await ensureRevenueCatReady();
 
-  const presentPaywallIfNeeded = useCallback(() => {
-    if (checkEntitlement(customerInfo)) return;
-    router.push('/paywall');
-  }, [customerInfo]);
+    try {
+      await RevenueCatUI.presentPaywall({
+        displayCloseButton: true,
+      });
+    } catch (e) {
+      Sentry.captureException(e, {
+        tags: { area: 'subscriptions', flow: 'presentPaywall' },
+        extra: { platform: Platform.OS },
+      });
+      throw e;
+    }
+  }, [ensureRevenueCatReady]);
+
+  const presentPaywallIfNeeded = useCallback(async (): Promise<void> => {
+    try {
+      await ensureRevenueCatReady();
+
+      const result = await RevenueCatUI.presentPaywallIfNeeded({
+        requiredEntitlementIdentifier: ENTITLEMENT_ID,
+        displayCloseButton: true,
+      });
+
+      if (result === RevenueCatUI.PAYWALL_RESULT.NOT_PRESENTED) {
+        Sentry.captureMessage('RevenueCat paywall returned NOT_PRESENTED on subscribe tap', {
+          level: 'warning',
+          tags: {
+            area: 'subscriptions',
+            flow: 'presentPaywallIfNeeded',
+          },
+          extra: {
+            entitlementId: ENTITLEMENT_ID,
+            hasCustomerInfo: customerInfo != null,
+          },
+        });
+
+        await RevenueCatUI.presentPaywall({
+          displayCloseButton: true,
+        });
+      }
+
+      if (result === RevenueCatUI.PAYWALL_RESULT.ERROR) {
+        Sentry.captureMessage('RevenueCat paywall returned ERROR result', {
+          level: 'error',
+          tags: {
+            area: 'subscriptions',
+            flow: 'presentPaywallIfNeeded',
+          },
+          extra: {
+            entitlementId: ENTITLEMENT_ID,
+          },
+        });
+      }
+    } catch (e) {
+      Sentry.captureException(e, {
+        tags: {
+          area: 'subscriptions',
+          flow: 'presentPaywallIfNeeded',
+        },
+        extra: {
+          entitlementId: ENTITLEMENT_ID,
+        },
+      });
+
+      console.warn('RevenueCat presentPaywallIfNeeded failed, falling back to presentPaywall:', e);
+      try {
+        await RevenueCatUI.presentPaywall({
+          displayCloseButton: true,
+        });
+      } catch (fallbackError) {
+        Sentry.captureException(fallbackError, {
+          tags: {
+            area: 'subscriptions',
+            flow: 'presentPaywallFallback',
+          },
+          extra: {
+            entitlementId: ENTITLEMENT_ID,
+          },
+        });
+        throw fallbackError;
+      }
+    }
+  }, [customerInfo, ensureRevenueCatReady]);
 
   const presentCustomerCenter = useCallback(async (): Promise<void> => {
     await RevenueCatUI.presentCustomerCenter();

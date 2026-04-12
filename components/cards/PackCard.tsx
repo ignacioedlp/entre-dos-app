@@ -1,5 +1,7 @@
 import { View, StyleSheet, TouchableOpacity, Dimensions } from 'react-native';
 import { useTranslation } from 'react-i18next';
+import { Toast } from 'toastify-react-native';
+import * as Sentry from '@sentry/react-native';
 
 import { Pack } from '../../lib/api';
 import { useRevenueCat } from '../../context/RevenueCatContext';
@@ -80,7 +82,21 @@ export function PackCard({ pack, half, isPremium }: PackCardProps) {
   }
 
   async function handleSubscribe() {
-    await presentPaywallIfNeeded();
+    try {
+      await presentPaywallIfNeeded();
+    } catch (e) {
+      Sentry.captureException(e, {
+        tags: {
+          area: 'subscriptions',
+          flow: 'packSubscribeTap',
+        },
+        extra: {
+          packId: pack.id,
+          packName: pack.name,
+        },
+      });
+      Toast.error(t('paywall.error'));
+    }
   }
 
   return (

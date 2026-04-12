@@ -1,3 +1,4 @@
+import * as Sentry from '@sentry/react-native';
 import { createContext, useContext, useState, ReactNode, useEffect } from 'react';
 import * as Localization from 'expo-localization';
 import { GoogleSignin } from '@react-native-google-signin/google-signin';
@@ -76,13 +77,19 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }
 
   async function googleLogin(): Promise<ProfileData> {
-    await GoogleSignin.hasPlayServices();
-    const response = await GoogleSignin.signIn();
-    const idToken = response.data?.idToken;
-    if (!idToken) throw new Error('No Google ID token received');
-    const deviceLang = Localization.getLocales()[0]?.languageCode ?? 'es';
-    const locale = deviceLang === 'en' ? 'en' : 'es';
+    let idToken: string | null = null;
     try {
+      await GoogleSignin.hasPlayServices();
+      const response = await GoogleSignin.signIn();
+      if (response.type !== 'success') {
+        throw new Error(`Google sign-in not successful: ${response.type}`);
+      }
+      idToken = response.data?.idToken ?? null;
+      if (!idToken) {
+        throw new Error('No Google ID token received');
+      }
+      const deviceLang = Localization.getLocales()[0]?.languageCode ?? 'es';
+      const locale = deviceLang === 'en' ? 'en' : 'es';
       const { accessToken, profile } = await apiGoogleAuth(idToken, locale);
       setToken(accessToken);
       setProfile(profile);
@@ -90,9 +97,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       i18n.changeLanguage(profile.locale);
       return profile;
     } catch (err: any) {
+      Sentry.captureException(err, { tags: { flow: 'google_login' } });
       const code = err?.response?.data?.code;
       if (code === 'ACCOUNT_DELETION_PENDING') {
-        throw new DeletionPendingError(err.response.data.deletionScheduledFor ?? '', idToken);
+        throw new DeletionPendingError(
+          err.response.data.deletionScheduledFor ?? '',
+          idToken ?? undefined
+        );
       }
       throw err;
     }

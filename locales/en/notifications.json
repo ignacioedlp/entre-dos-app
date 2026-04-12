@@ -18,7 +18,8 @@
     "played": "Played",
     "system": "System",
     "deck_reset": "Deck reset",
-    "event_cards": "Event"
+    "event_cards": "Event",
+    "couple_linked": "Couple Linked"
   },
   "alert": {
     "disabledTitle": "Notifications Disabled",

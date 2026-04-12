@@ -18,7 +18,8 @@
     "played": "Jugada",
     "system": "Sistema",
     "deck_reset": "Mazo renovado",
-    "event_cards": "Evento"
+    "event_cards": "Evento",
+    "couple_linked": "Pareja vinculada"
   },
   "alert": {
     "disabledTitle": "Notificaciones desactivadas",
