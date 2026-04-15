@@ -88,10 +88,9 @@ export default function HomeScreen() {
 
   const anglePerCard = getAnglePerCard(cards.length);
   const cylinderRadius = getCylinderRadius(cards.length);
-  const dragToAngle = anglePerCard / CARD_WIDTH;
 
   const rotation = useSharedValue(0);
-  const baseRotation = useSharedValue(0);
+  const activeIndex = useSharedValue(0);
   const dragY = useSharedValue(0);
 
   const chevron1Opacity = useSharedValue(1);
@@ -122,17 +121,18 @@ export default function HomeScreen() {
     navigateToCard(card);
   }
 
+  function goTo(i: number) {
+    const clamped = Math.max(0, Math.min(cardsRef.current.length - 1, i));
+    activeIndex.value = clamped;
+    rotation.value = withSpring(clamped * anglePerCard, { damping: 18, stiffness: 200 });
+  }
+
   const pan = Gesture.Pan()
-    .onBegin(() => {
-      baseRotation.value = rotation.value;
-    })
+    .activeOffsetY([-5, 5])
+    .failOffsetX([-10, 10])
     .onUpdate((e) => {
-      const isVertical = Math.abs(e.translationY) > Math.abs(e.translationX) && e.translationY > 0;
-      if (isVertical) {
+      if (e.translationY > 0) {
         dragY.value = e.translationY;
-      } else {
-        dragY.value = 0;
-        rotation.value = baseRotation.value + e.translationX * -dragToAngle;
       }
     })
     .onEnd(() => {
@@ -140,8 +140,7 @@ export default function HomeScreen() {
       if (!list.length) return;
 
       if (dragY.value > 80) {
-        const activeIdx = clamp(Math.round(rotation.value / anglePerCard), 0, list.length - 1);
-        const card = list[activeIdx];
+        const card = list[activeIndex.value];
         dragY.value = withTiming(CARD_HEIGHT * 1.3, { duration: 260 }, () => {
           runOnJS(doNavigate)(card);
         });
@@ -149,13 +148,6 @@ export default function HomeScreen() {
       }
 
       dragY.value = withSpring(0, { damping: 18, stiffness: 200 });
-
-      const nearest = clamp(Math.round(rotation.value / anglePerCard), 0, list.length - 1);
-      rotation.value = withSpring(nearest * anglePerCard, {
-        damping: 18,
-        stiffness: 200,
-      });
-      baseRotation.value = nearest * anglePerCard;
     });
 
   const partnerLastPlay = historyData?.history.find((p) => p.userId !== user?.userId) ?? null;
@@ -230,6 +222,8 @@ export default function HomeScreen() {
                       cylinderRadius={cylinderRadius}
                       rotation={rotation}
                       dragY={dragY}
+                      activeIndex={activeIndex}
+                      onTap={() => goTo(i)}
                     />
                   ))}
                 </View>
