@@ -1,4 +1,4 @@
-import { Dimensions, StyleSheet } from 'react-native';
+import { Dimensions, StyleSheet, Pressable } from 'react-native';
 import { useTranslation } from 'react-i18next';
 import Animated, {
   Extrapolation,
@@ -54,6 +54,8 @@ interface CylinderCardProps {
   cylinderRadius: number;
   rotation: SharedValue<number>;
   dragY: SharedValue<number>;
+  activeIndex: SharedValue<number>;
+  onTap: () => void;
 }
 
 export function CylinderCard({
@@ -64,6 +66,8 @@ export function CylinderCard({
   cylinderRadius,
   rotation,
   dragY,
+  activeIndex,
+  onTap,
 }: CylinderCardProps) {
   const rarity = RARITY_MAP[card.rarity] ?? 'comun';
   const glow = rarityGlow[rarity];
@@ -96,7 +100,8 @@ export function CylinderCard({
     const zIndex = Math.round(depth * 100);
     const shadowOpacity = interpolate(depth, [0, 1], [0, 0.55], Extrapolation.CLAMP);
 
-    const isActive = Math.round(rotation.value / anglePerCard) === index;
+    const isActive = activeIndex.value === index;
+    const isAdjacent = Math.abs(index - activeIndex.value) === 1;
     const y = isActive ? dragY.value : 0;
 
     return {
@@ -114,29 +119,31 @@ export function CylinderCard({
       shadowRadius: 24,
       shadowOffset: { width: 0, height: 8 },
       elevation: visible ? Math.round(scale * 10) : 0,
-      pointerEvents: depth > 0.85 ? 'auto' : 'none',
+      pointerEvents: isActive || isAdjacent ? 'auto' : 'none',
     };
   });
 
   return (
     <Animated.View style={[styles.cardSlot, animStyle]}>
-      <GameCard
-        card={{
-          rarity,
-          label: categoryLabel,
-          title: card.title,
-          description: card.description,
-          packIcon: card.packIcon,
-          event: card.event
-            ? {
-                icon: card.event.icon,
-                name: card.event.name,
-                color: card.event.color,
-              }
-            : undefined,
-        }}
-        width={CARD_WIDTH}
-      />
+      <Pressable onPress={onTap}>
+        <GameCard
+          card={{
+            rarity,
+            label: categoryLabel,
+            title: card.title,
+            description: card.description,
+            packIcon: card.packIcon,
+            event: card.event
+              ? {
+                  icon: card.event.icon,
+                  name: card.event.name,
+                  color: card.event.color,
+                }
+              : undefined,
+          }}
+          width={CARD_WIDTH}
+        />
+      </Pressable>
     </Animated.View>
   );
 }
