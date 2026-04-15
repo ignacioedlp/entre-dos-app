@@ -28,7 +28,6 @@ import { WeekTimeline } from '../../components/cards/WeekTimeline';
 import {
   CylinderCard,
   CARD_HEIGHT,
-  CARD_WIDTH,
   getAnglePerCard,
   getCylinderRadius,
 } from '../../components/carousel/CylinderCard';
@@ -42,11 +41,6 @@ import { Typography } from '../../components/ui/Typography';
 
 const { width: SCREEN_WIDTH } = Dimensions.get('window');
 const HOME_AUTO_REFRESH_MS = 30_000;
-
-function clamp(value: number, min: number, max: number) {
-  'worklet';
-  return Math.min(Math.max(value, min), max);
-}
 
 export default function HomeScreen() {
   const insets = useSafeAreaInsets();
@@ -122,6 +116,7 @@ export default function HomeScreen() {
   }
 
   function goTo(i: number) {
+    if (!cardsRef.current.length) return;
     const clamped = Math.max(0, Math.min(cardsRef.current.length - 1, i));
     activeIndex.value = clamped;
     rotation.value = withSpring(clamped * anglePerCard, { damping: 18, stiffness: 200 });
@@ -347,7 +342,6 @@ function createStyles(colors: ReturnType<typeof useColors>) {
       justifyContent: 'center',
     },
     carouselStage: {
-      width: CARD_WIDTH,
       height: CARD_HEIGHT,
       alignItems: 'center',
       justifyContent: 'center',
