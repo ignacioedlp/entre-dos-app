@@ -122,6 +122,12 @@ export default function HomeScreen() {
     rotation.value = withSpring(clamped * anglePerCard, { damping: 18, stiffness: 200 });
   }
 
+  function handleRandomCard() {
+    if (!cards.length) return;
+    const card = cards[Math.floor(Math.random() * cards.length)];
+    navigateToCard(card);
+  }
+
   const pan = Gesture.Pan()
     .activeOffsetY([-5, 5])
     .failOffsetX([-10, 10])
@@ -201,6 +207,9 @@ export default function HomeScreen() {
                 >
                   {t('screen.deckTitle')}
                 </Typography>
+                <Pressable onPress={handleRandomCard}>
+                  <Ionicons name="shuffle" size={20} color={colors.textMuted} />
+                </Pressable>
               </View>
               <View style={styles.divider} />
             </View>
