@@ -4,7 +4,7 @@
     "emptyTitle": "Your cards arrive on Monday",
     "emptyDescription": "Link your partner and next Monday at 00:00 you'll both receive 7 cards.",
     "deckTitle": "YOUR DECK",
-    "deckHint": "Swipe to browse your cards, and when you want to use one swipe it down."
+    "deckHint": "Tap the cards to browse your deck, and swipe one down when you want to play it."
   },
   "playCard": {
     "title": "Confirm card use.",
