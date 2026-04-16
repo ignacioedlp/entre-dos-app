@@ -125,7 +125,7 @@ export default function HomeScreen() {
   function handleRandomCard() {
     if (!cards.length) return;
     const card = cards[Math.floor(Math.random() * cards.length)];
-    navigateToCard(card);
+    doNavigate(card);
   }
 
   const pan = Gesture.Pan()
@@ -207,7 +207,11 @@ export default function HomeScreen() {
                 >
                   {t('screen.deckTitle')}
                 </Typography>
-                <Pressable onPress={handleRandomCard}>
+                <Pressable
+                  onPress={handleRandomCard}
+                  disabled={cards.length <= 1}
+                  style={{ opacity: cards.length <= 1 ? 0.3 : 1 }}
+                >
                   <Ionicons name="shuffle" size={20} color={colors.textMuted} />
                 </Pressable>
               </View>
