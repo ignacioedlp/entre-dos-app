@@ -11,21 +11,11 @@ import {
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { useMemo, useRef, useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useTranslation } from 'react-i18next';
 import moment from 'moment';
 import 'moment/locale/es';
-import Animated, {
-  useSharedValue,
-  useAnimatedStyle,
-  withRepeat,
-  withSequence,
-  withTiming,
-  withDelay,
-  Easing,
-  type SharedValue,
-} from 'react-native-reanimated';
 
 import { useColors } from '@/context/ThemeContext';
 import { ThemeColors } from '@/constants/colors';
@@ -37,18 +27,6 @@ import { Typography } from '@/components/ui/Typography';
 import { useScaledFontSize } from '@/context/FontScaleContext';
 
 const AVATAR_SIZE = 80;
-const DOT_COUNT = 7;
-
-function AnimatedDot({
-  opacity,
-  styles,
-}: {
-  opacity: SharedValue<number>;
-  styles: ReturnType<typeof createStyles>;
-}) {
-  const style = useAnimatedStyle(() => ({ opacity: opacity.value }));
-  return <Animated.View style={[styles.dot, style]} />;
-}
 
 export default function RelationshipScreen() {
   const insets = useSafeAreaInsets();
@@ -167,50 +145,6 @@ export default function RelationshipScreen() {
     }
   }
 
-  // ── Animations ──────────────────────────────────────────────
-  const heartScale = useSharedValue(1);
-  const heartOpacity = useSharedValue(0.8);
-  // eslint-disable-next-line react-hooks/rules-of-hooks
-  const dotOpacities = Array.from({ length: DOT_COUNT }, () => useSharedValue(0.3));
-
-  useEffect(() => {
-    // Heart pulse
-    heartScale.value = withRepeat(
-      withSequence(
-        withTiming(1.25, { duration: 600, easing: Easing.out(Easing.ease) }),
-        withTiming(1, { duration: 600, easing: Easing.in(Easing.ease) })
-      ),
-      -1,
-      false
-    );
-    heartOpacity.value = withRepeat(
-      withSequence(withTiming(1, { duration: 600 }), withTiming(0.8, { duration: 600 })),
-      -1,
-      false
-    );
-
-    // Dot wave animation — each dot lights up in sequence
-    dotOpacities.forEach((dot, i) => {
-      dot.value = withRepeat(
-        withDelay(
-          i * 120,
-          withSequence(
-            withTiming(1, { duration: 400, easing: Easing.out(Easing.ease) }),
-            withTiming(0.3, { duration: 400, easing: Easing.in(Easing.ease) })
-          )
-        ),
-        -1,
-        false
-      );
-    });
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
-
-  const heartAnimStyle = useAnimatedStyle(() => ({
-    transform: [{ scale: heartScale.value }],
-    opacity: heartOpacity.value,
-  }));
-
   const linkedDate = couple?.linkedAt
     ? moment(couple.linkedAt).locale(i18n.language).format('LL')
     : '';
@@ -240,8 +174,7 @@ export default function RelationshipScreen() {
 
       {couple && (
         <>
-          {/* Partner Card */}
-          <View style={styles.card}>
+          <View style={styles.relationshipSummary}>
             <View style={styles.coupleRow}>
               {/* Left avatar + name */}
               <View style={styles.avatarCol}>
@@ -262,19 +195,8 @@ export default function RelationshipScreen() {
                 </Typography>
               </View>
 
-              {/* Animated connector: dots + heart */}
               <View style={styles.connector}>
-                <View style={styles.dotsRow}>
-                  {dotOpacities.slice(0, Math.floor(DOT_COUNT / 2)).map((dotOp, i) => (
-                    <AnimatedDot key={`l-${i}`} opacity={dotOp} styles={styles} />
-                  ))}
-                  <Animated.View style={[styles.heartCenter, heartAnimStyle]}>
-                    <Ionicons name="heart" size={22} color={colors.accent} />
-                  </Animated.View>
-                  {dotOpacities.slice(Math.ceil(DOT_COUNT / 2)).map((dotOp, i) => (
-                    <AnimatedDot key={`r-${i}`} opacity={dotOp} styles={styles} />
-                  ))}
-                </View>
+                <Ionicons name="heart" size={22} color={colors.accent} />
                 <Typography
                   variant="body"
                   baseFontSize={11}
@@ -322,7 +244,12 @@ export default function RelationshipScreen() {
                         {anniversaryDate}
                       </Typography>
                     </View>
-                    <Pressable onPress={startEditing} style={styles.editBtn}>
+                    <Pressable
+                      accessibilityRole="button"
+                      accessibilityLabel={t('relationship.edit')}
+                      onPress={startEditing}
+                      style={styles.editBtn}
+                    >
                       <Ionicons name="pencil" size={18} color={colors.textSecondary} />
                       <Typography variant="body" baseFontSize={14} color={colors.textSecondary}>
                         {t('relationship.edit')}
@@ -446,11 +373,16 @@ export default function RelationshipScreen() {
 
           {/* Unlink Button */}
           <View style={styles.unlinkSection}>
-            <Button
-              label={t('relationship.unlink')}
+            <Pressable
+              accessibilityRole="button"
               onPress={() => setUnlinkVisible(true)}
-              variant="ghost"
-            />
+              style={styles.unlinkBtn}
+            >
+              <Ionicons name="heart-dislike-outline" size={18} color={colors.textSecondary} />
+              <Typography variant="body" baseFontSize={14} color={colors.textSecondary}>
+                {t('relationship.unlink')}
+              </Typography>
+            </Pressable>
           </View>
 
           {/* Unlink Confirmation Modal */}
@@ -529,15 +461,10 @@ function createStyles(colors: ThemeColors) {
       color: colors.textPrimary,
     },
 
-    // Partner Card
-    card: {
-      backgroundColor: colors.surface,
-      borderRadius: 20,
-      borderWidth: 1,
-      borderColor: colors.border,
-      padding: 24,
+    relationshipSummary: {
       marginHorizontal: 20,
-      marginTop: 24,
+      marginTop: 32,
+      paddingVertical: 12,
     },
     coupleRow: {
       flexDirection: 'row',
@@ -570,28 +497,13 @@ function createStyles(colors: ThemeColors) {
       gap: 8,
       paddingHorizontal: 4,
     },
-    dotsRow: {
-      flexDirection: 'row',
-      alignItems: 'center',
-      justifyContent: 'center',
-      gap: 6,
-    },
-    dot: {
-      width: 5,
-      height: 5,
-      borderRadius: 2.5,
-      backgroundColor: colors.accent,
-    },
-    heartCenter: {
-      marginHorizontal: 4,
-    },
     since: {
       textAlign: 'center',
     },
 
     // Anniversary Section
     section: {
-      marginTop: 32,
+      marginTop: 40,
       paddingHorizontal: 20,
     },
     sectionLabel: {
@@ -600,12 +512,13 @@ function createStyles(colors: ThemeColors) {
       marginBottom: 16,
     },
     anniversaryView: {
-      backgroundColor: colors.surface,
-      borderRadius: 16,
-      borderWidth: 1,
+      borderTopWidth: 1,
+      borderBottomWidth: 1,
       borderColor: colors.border,
-      padding: 20,
-      gap: 14,
+      paddingVertical: 18,
+      flexDirection: 'row',
+      alignItems: 'center',
+      justifyContent: 'space-between',
     },
     dateDisplay: {
       flexDirection: 'row',
@@ -616,7 +529,7 @@ function createStyles(colors: ThemeColors) {
       flexDirection: 'row',
       alignItems: 'center',
       gap: 6,
-      alignSelf: 'flex-start',
+      paddingVertical: 6,
     },
     setDateBtn: {
       flexDirection: 'row',
@@ -672,9 +585,16 @@ function createStyles(colors: ThemeColors) {
 
     // Unlink
     unlinkSection: {
-      marginTop: 40,
+      marginTop: 28,
       paddingHorizontal: 20,
       marginBottom: 40,
+    },
+    unlinkBtn: {
+      flexDirection: 'row',
+      alignSelf: 'flex-start',
+      alignItems: 'center',
+      gap: 8,
+      paddingVertical: 10,
     },
     backdrop: {
       flex: 1,

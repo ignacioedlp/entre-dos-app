@@ -28,11 +28,11 @@ interface GameCardProps {
   style?: object;
 }
 
-export function GameCard({ card, width = 160, rotation = 0, style }: GameCardProps) {
+export function GameCard({ card, width = 10, rotation = 0, style }: GameCardProps) {
   const bg = rarityColor[card.rarity];
   const fg = rarityTextColor[card.rarity];
   const h = width * (4 / 3);
-  const watermarkSize = Math.round(width * 0.54);
+  const watermarkSize = Math.round(width * 0.40);
 
   return (
     <Animated.View
