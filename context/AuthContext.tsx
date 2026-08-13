@@ -50,12 +50,29 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
   }, [state.user]);
 
+  function persistSession(accessToken: string, profile: ProfileData): void {
+    if (typeof accessToken !== 'string' || accessToken.length === 0) {
+      throw new Error('Authentication response did not include an access token');
+    }
+
+    setToken(accessToken);
+
+    // MMKV is synchronous. Verifying the exact value here makes a storage
+    // failure explicit instead of navigating into the authenticated app with
+    // requests that have no Authorization header.
+    if (getToken() !== accessToken) {
+      clearAll();
+      throw new Error('Could not persist the authentication token');
+    }
+
+    setProfile(profile);
+    setState({ user: profile, token: accessToken });
+  }
+
   async function login(email: string, password: string): Promise<ProfileData> {
     try {
       const { accessToken, profile } = await apiLogin(email, password);
-      setToken(accessToken);
-      setProfile(profile);
-      setState({ user: profile, token: accessToken });
+      persistSession(accessToken, profile);
       i18n.changeLanguage(profile.locale);
       return profile;
     } catch (err: any) {
@@ -71,9 +88,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     const deviceLang = Localization.getLocales()[0]?.languageCode ?? 'es';
     const locale = deviceLang === 'en' ? 'en' : 'es';
     const { accessToken, profile } = await apiRegister(email, password, passwordConfirm, locale);
-    setToken(accessToken);
-    setProfile(profile);
-    setState({ user: profile, token: accessToken });
+    persistSession(accessToken, profile);
   }
 
   async function googleLogin(): Promise<ProfileData> {
@@ -91,9 +106,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       const deviceLang = Localization.getLocales()[0]?.languageCode ?? 'es';
       const locale = deviceLang === 'en' ? 'en' : 'es';
       const { accessToken, profile } = await apiGoogleAuth(idToken, locale);
-      setToken(accessToken);
-      setProfile(profile);
-      setState({ user: profile, token: accessToken });
+      persistSession(accessToken, profile);
       i18n.changeLanguage(profile.locale);
       return profile;
     } catch (err: any) {
@@ -111,9 +124,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   async function resetPassword(token: string, password: string): Promise<ProfileData> {
     const { accessToken, profile } = await apiResetPassword(token, password);
-    setToken(accessToken);
-    setProfile(profile);
-    setState({ user: profile, token: accessToken });
+    persistSession(accessToken, profile);
     i18n.changeLanguage(profile.locale);
     return profile;
   }

@@ -1,7 +1,7 @@
 import React, { useMemo } from 'react';
 import { View, Pressable, StyleSheet } from 'react-native';
 import { useTranslation } from 'react-i18next';
-import { ThemeColors, Colors } from '@/constants/colors';
+import { ThemeColors, Colors, darkColors } from '@/constants/colors';
 import { useColors } from '@/context/ThemeContext';
 import { Typography } from '@/components/ui/Typography';
 
@@ -92,7 +92,8 @@ function createStyles(colors: ThemeColors) {
       marginHorizontal: 24,
       marginBottom: 10,
       borderBottomWidth: 1,
-      borderBottomColor: colors.border,
+      borderBottomColor:
+        colors.background === darkColors.background ? 'rgba(255, 255, 255, 0.16)' : colors.border,
     },
     cardPressed: {
       opacity: 0.75,

@@ -1,12 +1,5 @@
-import { useRef, useEffect, useMemo } from 'react';
-import {
-  View,
-  StyleSheet,
-  Dimensions,
-  ActivityIndicator,
-  ScrollView,
-  Pressable,
-} from 'react-native';
+import { useRef, useEffect, useMemo, useState } from 'react';
+import { View, StyleSheet, Dimensions, ScrollView, Pressable } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
 import { useQuery } from '@tanstack/react-query';
@@ -20,17 +13,14 @@ import Animated, {
   withSequence,
   withDelay,
   runOnJS,
+  FadeInDown,
+  ReduceMotion,
 } from 'react-native-reanimated';
 import { Gesture, GestureDetector } from 'react-native-gesture-handler';
 import { Ionicons } from '@expo/vector-icons';
 
 import { WeekTimeline } from '../../components/cards/WeekTimeline';
-import {
-  CylinderCard,
-  CARD_HEIGHT,
-  getAnglePerCard,
-  getCylinderRadius,
-} from '../../components/carousel/CylinderCard';
+import { CylinderCard, CARD_HEIGHT } from '../../components/carousel/CylinderCard';
 import { PartnerLastPlay } from '../../components/cards/PartnerLastPlay';
 import { AllPlayedState } from '../../components/home/AllPlayedState';
 import { useColors } from '../../context/ThemeContext';
@@ -41,6 +31,46 @@ import { Typography } from '../../components/ui/Typography';
 
 const { width: SCREEN_WIDTH } = Dimensions.get('window');
 const HOME_AUTO_REFRESH_MS = 30_000;
+const HORIZONTAL_SWIPE_DISTANCE = 48;
+const HORIZONTAL_SWIPE_VELOCITY = 500;
+const homeEntrance = (delay: number) =>
+  FadeInDown.delay(delay).duration(260).reduceMotion(ReduceMotion.System);
+
+function HomeSkeleton({ styles }: { styles: ReturnType<typeof createStyles> }) {
+  return (
+    <View accessibilityLabel="Cargando baraja" style={styles.homeSkeleton}>
+      <View style={styles.container}>
+        <View style={styles.sectionHeader}>
+          <View style={styles.skeletonDeckLabel} />
+          <View style={styles.skeletonShuffle} />
+        </View>
+        <View style={styles.divider} />
+      </View>
+      <View style={styles.skeletonCarousel}>
+        <View style={[styles.skeletonSideCard, styles.skeletonSideCardLeft]} />
+        <View style={styles.skeletonMainCard}>
+          <View style={[styles.skeletonLine, styles.skeletonCardLabel]} />
+          <View style={[styles.skeletonLine, styles.skeletonCardTitle]} />
+          <View style={[styles.skeletonLine, styles.skeletonCardTitleShort]} />
+          <View style={styles.skeletonCardSpacer} />
+          <View style={[styles.skeletonLine, styles.skeletonCardBody]} />
+          <View style={[styles.skeletonLine, styles.skeletonCardBodyShort]} />
+        </View>
+        <View style={[styles.skeletonSideCard, styles.skeletonSideCardRight]} />
+      </View>
+      <View style={styles.skeletonHint}>
+        <View style={[styles.skeletonLine, styles.skeletonHintLine]} />
+        <View style={styles.skeletonChevron} />
+      </View>
+      <View style={styles.skeletonTimeline}>
+        <View style={styles.skeletonTimelineHeading} />
+        <View style={styles.skeletonTimelineDivider} />
+        <View style={styles.skeletonTimelineRow} />
+        <View style={styles.skeletonTimelineRow} />
+      </View>
+    </View>
+  );
+}
 
 export default function HomeScreen() {
   const insets = useSafeAreaInsets();
@@ -80,12 +110,10 @@ export default function HomeScreen() {
   const cardsRef = useRef<DeckCard[]>([]);
   cardsRef.current = cards;
 
-  const anglePerCard = getAnglePerCard(cards.length);
-  const cylinderRadius = getCylinderRadius(cards.length);
-
   const rotation = useSharedValue(0);
   const activeIndex = useSharedValue(0);
   const dragY = useSharedValue(0);
+  const [activeCardIndex, setActiveCardIndex] = useState(0);
 
   const chevron1Opacity = useSharedValue(1);
   const chevron2Opacity = useSharedValue(1);
@@ -118,9 +146,24 @@ export default function HomeScreen() {
   function goTo(i: number) {
     if (!cardsRef.current.length) return;
     const clamped = Math.max(0, Math.min(cardsRef.current.length - 1, i));
+    setActiveCardIndex(clamped);
     activeIndex.value = clamped;
-    rotation.value = withSpring(clamped * anglePerCard, { damping: 18, stiffness: 200 });
+    rotation.value = withSpring(clamped, { damping: 18, stiffness: 200 });
   }
+
+  const orderedCards = useMemo(
+    () =>
+      cards
+        .map((card, index) => ({ card, index }))
+        // React Native draws later siblings above earlier ones. Keeping the
+        // active card last prevents transformed side cards covering its edges.
+        .sort(({ index: a }, { index: b }) => {
+          if (a === activeCardIndex) return 1;
+          if (b === activeCardIndex) return -1;
+          return a - b;
+        }),
+    [activeCardIndex, cards]
+  );
 
   function handleRandomCard() {
     if (!cards.length) return;
@@ -129,16 +172,29 @@ export default function HomeScreen() {
   }
 
   const pan = Gesture.Pan()
+    .activeOffsetX([-10, 10])
     .activeOffsetY([-5, 5])
-    .failOffsetX([-10, 10])
     .onUpdate((e) => {
-      if (e.translationY > 0) {
+      const isVerticalDrag = Math.abs(e.translationY) >= Math.abs(e.translationX);
+
+      if (isVerticalDrag && e.translationY > 0) {
         dragY.value = e.translationY;
       }
     })
-    .onEnd(() => {
+    .onEnd((e) => {
       const list = cardsRef.current;
       if (!list.length) return;
+
+      const isHorizontalSwipe =
+        Math.abs(e.translationX) > Math.abs(e.translationY) &&
+        (Math.abs(e.translationX) > HORIZONTAL_SWIPE_DISTANCE ||
+          Math.abs(e.velocityX) > HORIZONTAL_SWIPE_VELOCITY);
+
+      if (isHorizontalSwipe) {
+        const direction = e.translationX < 0 ? 1 : -1;
+        runOnJS(goTo)(activeIndex.value + direction);
+        return;
+      }
 
       if (dragY.value > 80) {
         const card = list[activeIndex.value];
@@ -158,7 +214,7 @@ export default function HomeScreen() {
 
   return (
     <View style={[createStyles(colors).root, { paddingTop: insets.top + 20 }]}>
-      <View style={createStyles(colors).header}>
+      <Animated.View entering={homeEntrance(0)} style={createStyles(colors).header}>
         <Typography variant="heading" style={styles.greeting}>
           {t('screen.greeting')}
         </Typography>
@@ -168,13 +224,11 @@ export default function HomeScreen() {
             {hasUnread && <View style={styles.badge} />}
           </Pressable>
         </View>
-      </View>
+      </Animated.View>
 
       <ScrollView showsVerticalScrollIndicator={false} style={styles.scroll}>
         {isLoading ? (
-          <View style={styles.centered}>
-            <ActivityIndicator color={colors.accent} size="large" />
-          </View>
+          <HomeSkeleton styles={styles} />
         ) : showNeverDealt ? (
           <View style={styles.empty}>
             <Typography variant="heading" baseFontSize={48} style={styles.emoji}>
@@ -197,8 +251,12 @@ export default function HomeScreen() {
           <AllPlayedState />
         ) : (
           <View style={styles.carouselSection}>
-            {partnerLastPlay && <PartnerLastPlay play={partnerLastPlay} />}
-            <View style={styles.container}>
+            {partnerLastPlay && (
+              <Animated.View entering={homeEntrance(70)}>
+                <PartnerLastPlay play={partnerLastPlay} />
+              </Animated.View>
+            )}
+            <Animated.View entering={homeEntrance(100)} style={styles.container}>
               <View style={styles.sectionHeader}>
                 <Typography
                   variant="cardLabel"
@@ -216,29 +274,40 @@ export default function HomeScreen() {
                 </Pressable>
               </View>
               <View style={styles.divider} />
-            </View>
-            <GestureDetector gesture={pan}>
-              <Animated.View style={styles.carouselHitArea}>
-                <View style={styles.carouselStage}>
-                  {cards.map((card, i) => (
-                    <CylinderCard
-                      key={card.id}
-                      card={card}
-                      index={i}
-                      cardCount={cards.length}
-                      anglePerCard={anglePerCard}
-                      cylinderRadius={cylinderRadius}
-                      rotation={rotation}
-                      dragY={dragY}
-                      activeIndex={activeIndex}
-                      onTap={() => goTo(i)}
+            </Animated.View>
+            <Animated.View entering={homeEntrance(170)}>
+              <GestureDetector gesture={pan}>
+                <Animated.View style={styles.carouselHitArea}>
+                  <View style={styles.carouselStage}>
+                    {orderedCards.map(({ card, index }) => (
+                      <CylinderCard
+                        key={card.id}
+                        card={card}
+                        index={index}
+                        rotation={rotation}
+                        dragY={dragY}
+                        activeIndex={activeIndex}
+                        onTap={() => goTo(index)}
+                      />
+                    ))}
+                    <Pressable
+                      accessibilityLabel="Previous card"
+                      disabled={activeCardIndex === 0}
+                      onPress={() => goTo(activeCardIndex - 1)}
+                      style={[styles.carouselNavigationZone, styles.carouselNavigationZoneLeft]}
                     />
-                  ))}
-                </View>
-              </Animated.View>
-            </GestureDetector>
+                    <Pressable
+                      accessibilityLabel="Next card"
+                      disabled={activeCardIndex === cards.length - 1}
+                      onPress={() => goTo(activeCardIndex + 1)}
+                      style={[styles.carouselNavigationZone, styles.carouselNavigationZoneRight]}
+                    />
+                  </View>
+                </Animated.View>
+              </GestureDetector>
+            </Animated.View>
 
-            <View style={styles.hint}>
+            <Animated.View entering={homeEntrance(230)} style={styles.hint}>
               <Typography
                 variant="body"
                 baseFontSize={14}
@@ -259,15 +328,17 @@ export default function HomeScreen() {
                   <Ionicons name="chevron-down" size={18} color={colors.textMuted} />
                 </Animated.View>
               </View>
-            </View>
+            </Animated.View>
           </View>
         )}
 
-        <WeekTimeline
-          plays={historyData?.history ?? []}
-          isLoading={isHistoryLoading}
-          currentUserId={user?.userId ?? ''}
-        />
+        <Animated.View entering={homeEntrance(300)}>
+          <WeekTimeline
+            plays={historyData?.history ?? []}
+            isLoading={isHistoryLoading}
+            currentUserId={user?.userId ?? ''}
+          />
+        </Animated.View>
       </ScrollView>
     </View>
   );
@@ -321,11 +392,6 @@ function createStyles(colors: ReturnType<typeof useColors>) {
     greeting: {
       marginBottom: 8,
     },
-    centered: {
-      flex: 1,
-      alignItems: 'center',
-      justifyContent: 'center',
-    },
     empty: {
       flex: 1,
       alignItems: 'center',
@@ -353,11 +419,27 @@ function createStyles(colors: ReturnType<typeof useColors>) {
       height: CARD_HEIGHT,
       alignItems: 'center',
       justifyContent: 'center',
+      overflow: 'hidden',
     },
     carouselStage: {
+      width: SCREEN_WIDTH,
       height: CARD_HEIGHT,
       alignItems: 'center',
       justifyContent: 'center',
+      overflow: 'hidden',
+    },
+    carouselNavigationZone: {
+      position: 'absolute',
+      top: 0,
+      bottom: 0,
+      width: SCREEN_WIDTH * 0.16,
+      zIndex: 1_001,
+    },
+    carouselNavigationZoneLeft: {
+      left: 0,
+    },
+    carouselNavigationZoneRight: {
+      right: 0,
     },
     hint: {
       alignItems: 'center',
@@ -379,6 +461,116 @@ function createStyles(colors: ReturnType<typeof useColors>) {
       height: 8,
       borderRadius: 4,
       backgroundColor: colors.pasion,
+    },
+    homeSkeleton: {
+      gap: 0,
+    },
+    skeletonDeckLabel: {
+      width: 108,
+      height: 10,
+      borderRadius: 5,
+      backgroundColor: colors.surfaceAlt,
+    },
+    skeletonShuffle: {
+      width: 20,
+      height: 20,
+      borderRadius: 10,
+      backgroundColor: colors.surfaceAlt,
+    },
+    skeletonCarousel: {
+      height: CARD_HEIGHT,
+      alignItems: 'center',
+      justifyContent: 'center',
+      overflow: 'hidden',
+    },
+    skeletonMainCard: {
+      zIndex: 2,
+      width: SCREEN_WIDTH * 0.56,
+      height: CARD_HEIGHT,
+      padding: 20,
+      borderRadius: 24,
+      backgroundColor: colors.surface,
+    },
+    skeletonSideCard: {
+      position: 'absolute',
+      width: SCREEN_WIDTH * 0.46,
+      height: CARD_HEIGHT * 0.82,
+      borderRadius: 22,
+      backgroundColor: colors.surface,
+      opacity: 0.75,
+    },
+    skeletonSideCardLeft: {
+      left: -SCREEN_WIDTH * 0.24,
+      transform: [{ rotate: '-8deg' }],
+    },
+    skeletonSideCardRight: {
+      right: -SCREEN_WIDTH * 0.24,
+      transform: [{ rotate: '8deg' }],
+    },
+    skeletonLine: {
+      borderRadius: 6,
+      backgroundColor: colors.surfaceAlt,
+    },
+    skeletonCardLabel: {
+      width: '34%',
+      height: 10,
+      marginBottom: 18,
+    },
+    skeletonCardTitle: {
+      width: '82%',
+      height: 18,
+      marginBottom: 9,
+    },
+    skeletonCardTitleShort: {
+      width: '58%',
+      height: 18,
+    },
+    skeletonCardSpacer: {
+      flex: 1,
+    },
+    skeletonCardBody: {
+      width: '100%',
+      height: 12,
+      marginBottom: 9,
+    },
+    skeletonCardBodyShort: {
+      width: '66%',
+      height: 12,
+    },
+    skeletonHint: {
+      alignItems: 'center',
+      marginTop: 24,
+    },
+    skeletonHintLine: {
+      width: 210,
+      height: 12,
+      marginBottom: 12,
+    },
+    skeletonChevron: {
+      width: 16,
+      height: 10,
+      borderRadius: 5,
+      backgroundColor: colors.surfaceAlt,
+    },
+    skeletonTimeline: {
+      marginTop: 44,
+      paddingHorizontal: 24,
+      gap: 16,
+    },
+    skeletonTimelineHeading: {
+      width: 96,
+      height: 10,
+      borderRadius: 5,
+      backgroundColor: colors.surfaceAlt,
+    },
+    skeletonTimelineDivider: {
+      height: 1,
+      backgroundColor: colors.border,
+    },
+    skeletonTimelineRow: {
+      height: 72,
+      borderRadius: 12,
+      backgroundColor: colors.surface,
     },
   });
 }

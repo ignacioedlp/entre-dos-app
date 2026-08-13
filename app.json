@@ -39,7 +39,29 @@
           "color": "#FF3B5C"
         }
       ],
-      "@react-native-google-signin/google-signin",
+      [
+        "expo-build-properties",
+        {
+          "ios": {
+            "extraPods": [
+              {
+                "name": "GoogleUtilities",
+                "modular_headers": true
+              },
+              {
+                "name": "RecaptchaInterop",
+                "modular_headers": true
+              }
+            ]
+          }
+        }
+      ],
+      [
+        "@react-native-google-signin/google-signin",
+        {
+          "iosUrlScheme": "com.googleusercontent.apps.1007940732524-3pfl43jpncjrdt2lpc800d0htke743j6"
+        }
+      ],
       [
         "@sentry/react-native/expo",
         {

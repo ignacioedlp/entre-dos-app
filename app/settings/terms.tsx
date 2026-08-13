@@ -20,10 +20,11 @@ export default function TermsScreen() {
 
   return (
     <View style={styles.root}>
-      <View style={styles.handle} />
-
       <ScrollView
-        contentContainerStyle={[styles.scrollContent, { paddingBottom: insets.bottom + 24 }]}
+        contentContainerStyle={[
+          styles.scrollContent,
+          { paddingTop: insets.top + 24, paddingBottom: insets.bottom + 24 },
+        ]}
         showsVerticalScrollIndicator={false}
       >
         <Typography variant="heading" baseFontSize={24} style={styles.title}>
@@ -58,15 +59,6 @@ function createStyles(colors: ThemeColors) {
     root: {
       flex: 1,
       backgroundColor: colors.surface,
-      paddingTop: 12,
-    },
-    handle: {
-      width: 36,
-      height: 4,
-      borderRadius: 2,
-      backgroundColor: colors.border,
-      alignSelf: 'center',
-      marginBottom: 20,
     },
     scrollContent: {
       paddingHorizontal: 24,

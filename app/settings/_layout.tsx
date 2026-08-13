@@ -2,12 +2,8 @@ import { Stack } from 'expo-router';
 import { useColors } from '@/context/ThemeContext';
 
 const FORMSHEET_OPTIONS = {
-  presentation: 'formSheet' as const,
+  presentation: 'pageSheet' as const,
   headerShown: false,
-  sheetAllowedDetents: [0.85],
-  sheetInitialDetentIndex: 0,
-  sheetGrabberVisible: true,
-  sheetCornerRadius: 16,
 };
 
 export default function SettingLayout() {

@@ -12,7 +12,9 @@ export const api = axios.create({
 api.interceptors.request.use((config) => {
   const token = getToken();
   if (token) {
-    config.headers.Authorization = `Bearer ${token}`;
+    // Axios normalizes headers to AxiosHeaders on native platforms. Using its
+    // setter keeps the Authorization header intact on both iOS and Android.
+    config.headers.set('Authorization', `Bearer ${token}`);
   }
   return config;
 });
@@ -20,7 +22,12 @@ api.interceptors.request.use((config) => {
 api.interceptors.response.use(
   (response) => response,
   (error) => {
-    if (error.response?.status === 401) {
+    const authorization = error.config?.headers?.get?.('Authorization');
+
+    // A 401 from a public/uncredentialed request must not erase an otherwise
+    // valid locally persisted session. Only discard credentials that were
+    // actually sent and rejected by the API.
+    if (error.response?.status === 401 && authorization?.startsWith('Bearer ')) {
       clearAll();
     }
     return Promise.reject(error);
@@ -152,12 +159,15 @@ export interface DeckResponse {
 }
 
 export async function apiGetDeck(): Promise<DeckResponse> {
-  const res = await api.get<DeckResponse>('/deck');
+  // The API canonicalizes the collection endpoint with a trailing slash.
+  // iOS drops Authorization when following that 301 redirect, so request the
+  // canonical URL directly.
+  const res = await api.get<DeckResponse>('/deck/');
   return res.data;
 }
 
 export async function apiGetActiveEvents(): Promise<ActiveEventsResponse> {
-  const res = await api.get<ActiveEventsResponse>('/events/active');
+  const res = await api.get<ActiveEventsResponse>('/events/active/');
   return res.data;
 }
 
@@ -207,7 +217,9 @@ export interface PacksResponse {
 }
 
 export async function apiGetPacks(): Promise<PacksResponse> {
-  const res = await api.get<PacksResponse>('/packs');
+  // Avoid the backend's /packs -> /packs/ redirect, which can strip the
+  // Authorization header when iOS follows it.
+  const res = await api.get<PacksResponse>('/packs/');
   return res.data;
 }
 

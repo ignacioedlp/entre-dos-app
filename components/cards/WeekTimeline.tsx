@@ -290,8 +290,9 @@ const createStyles = (colors: ThemeColors) =>
     },
     lineSegment: {
       flex: 1,
-      width: 1,
-      backgroundColor: colors.border,
+      width: 2,
+      backgroundColor: colors.textMuted,
+      opacity: 0.55,
       marginTop: 4,
       marginBottom: 0,
     },

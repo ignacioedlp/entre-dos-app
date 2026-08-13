@@ -3,8 +3,8 @@ import {
   SectionList,
   StyleSheet,
   TouchableOpacity,
-  ActivityIndicator,
   Pressable,
+  ScrollView,
 } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
@@ -17,6 +17,44 @@ import { useColors } from '@/context/ThemeContext';
 import { ThemeColors } from '@/constants/colors';
 import { useTranslation } from 'react-i18next';
 import { Typography } from '@/components/ui/Typography';
+import Animated, { FadeInDown, ReduceMotion } from 'react-native-reanimated';
+
+const notificationEntrance = (delay: number) =>
+  FadeInDown.delay(delay).duration(220).reduceMotion(ReduceMotion.System);
+
+function NotificationSkeletonRow({ styles }: { styles: ReturnType<typeof createStyles> }) {
+  return (
+    <View style={styles.skeletonRow}>
+      <View style={styles.skeletonTopRow}>
+        <View style={styles.skeletonPill} />
+        <View style={styles.skeletonTime} />
+      </View>
+      <View style={styles.skeletonTitle} />
+      <View style={styles.skeletonMessage} />
+      <View style={styles.skeletonUnreadDot} />
+    </View>
+  );
+}
+
+function NotificationsSkeleton({ styles }: { styles: ReturnType<typeof createStyles> }) {
+  return (
+    <ScrollView
+      accessibilityLabel="Cargando notificaciones"
+      contentContainerStyle={styles.skeletonContent}
+      showsVerticalScrollIndicator={false}
+    >
+      <View style={styles.skeletonMarkAll} />
+      <View style={styles.skeletonSectionLabel} />
+      <NotificationSkeletonRow styles={styles} />
+      <View style={styles.skeletonSectionLabel} />
+      <NotificationSkeletonRow styles={styles} />
+      <NotificationSkeletonRow styles={styles} />
+      <NotificationSkeletonRow styles={styles} />
+      <View style={styles.skeletonSectionLabel} />
+      <NotificationSkeletonRow styles={styles} />
+    </ScrollView>
+  );
+}
 
 export default function NotificationsScreen() {
   const insets = useSafeAreaInsets();
@@ -34,18 +72,16 @@ export default function NotificationsScreen() {
 
   return (
     <View style={[styles.root, { paddingTop: insets.top + 20 }]}>
-      <View style={styles.header}>
+      <Animated.View entering={notificationEntrance(0)} style={styles.header}>
         <Pressable onPress={() => router.back()} style={styles.backBtn}>
           <Ionicons name="arrow-back" size={22} color={colors.background} />
         </Pressable>
         <Typography variant="heading" style={styles.headerTitle}>
           {t('title')}
         </Typography>
-      </View>
+      </Animated.View>
       {isLoading ? (
-        <View style={styles.centered}>
-          <ActivityIndicator color={colors.accent} />
-        </View>
+        <NotificationsSkeleton styles={styles} />
       ) : groups.length === 0 ? (
         <View style={styles.centered}>
           <Ionicons name="notifications-off-outline" size={48} color={colors.textMuted} />
@@ -66,7 +102,8 @@ export default function NotificationsScreen() {
         <SectionList
           ListHeaderComponent={
             hasUnread ? (
-              <View
+              <Animated.View
+                entering={notificationEntrance(50)}
                 style={{
                   paddingHorizontal: 24,
                   flexDirection: 'row',
@@ -74,11 +111,16 @@ export default function NotificationsScreen() {
                 }}
               >
                 <TouchableOpacity onPress={markAllRead} activeOpacity={0.7}>
-                  <Typography variant="label" color={colors.pasion} style={styles.markAll}>
+                  <Typography
+                    variant="label"
+                    color={colors.pasion}
+                    numberOfLines={1}
+                    style={styles.markAll}
+                  >
                     {t('readAll')}
                   </Typography>
                 </TouchableOpacity>
-              </View>
+              </Animated.View>
             ) : null
           }
           sections={groups.map((g) => ({ title: g.title, data: g.items }))}
@@ -86,18 +128,22 @@ export default function NotificationsScreen() {
           onRefresh={refresh}
           refreshing={isLoading}
           contentContainerStyle={styles.listContent}
-          renderSectionHeader={({ section: { title } }) => (
-            <Typography variant="cardLabel" color={colors.textMuted} style={styles.sectionHeader}>
-              {BUCKET_LABELS[title] ?? title}
-            </Typography>
+          renderSectionHeader={({ section: { title, data } }) => (
+            <Animated.View entering={notificationEntrance(90 + data.length * 20)}>
+              <Typography variant="cardLabel" color={colors.textMuted} style={styles.sectionHeader}>
+                {BUCKET_LABELS[title] ?? title}
+              </Typography>
+            </Animated.View>
           )}
-          renderItem={({ item }) => (
-            <NotificationCard
-              item={item}
-              onPress={() => {
-                if (!item.read) markRead(item.id);
-              }}
-            />
+          renderItem={({ item, index }) => (
+            <Animated.View entering={notificationEntrance(120 + index * 55)}>
+              <NotificationCard
+                item={item}
+                onPress={() => {
+                  if (!item.read) markRead(item.id);
+                }}
+              />
+            </Animated.View>
           )}
           stickySectionHeadersEnabled={false}
         />
@@ -133,7 +179,7 @@ const createStyles = (colors: ThemeColors) =>
     },
     markAll: {
       textAlign: 'right',
-      width: 60,
+      flexShrink: 0,
     },
     centered: {
       flex: 1,
@@ -151,6 +197,77 @@ const createStyles = (colors: ThemeColors) =>
     listContent: {
       paddingTop: 12,
       paddingBottom: 32,
+    },
+    skeletonContent: {
+      paddingTop: 12,
+      paddingBottom: 32,
+    },
+    skeletonMarkAll: {
+      alignSelf: 'flex-end',
+      width: 92,
+      height: 14,
+      marginRight: 24,
+      marginBottom: 32,
+      borderRadius: 7,
+      backgroundColor: colors.surfaceAlt,
+    },
+    skeletonSectionLabel: {
+      width: 56,
+      height: 10,
+      marginLeft: 24,
+      marginBottom: 16,
+      borderRadius: 5,
+      backgroundColor: colors.surfaceAlt,
+    },
+    skeletonRow: {
+      position: 'relative',
+      minHeight: 132,
+      marginHorizontal: 24,
+      paddingTop: 2,
+      paddingBottom: 20,
+      marginBottom: 22,
+      borderBottomWidth: 1,
+      borderBottomColor: colors.border,
+    },
+    skeletonTopRow: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      justifyContent: 'space-between',
+      marginBottom: 16,
+    },
+    skeletonPill: {
+      width: 104,
+      height: 24,
+      borderRadius: 5,
+      backgroundColor: colors.surfaceAlt,
+    },
+    skeletonTime: {
+      width: 48,
+      height: 11,
+      borderRadius: 6,
+      backgroundColor: colors.surfaceAlt,
+    },
+    skeletonTitle: {
+      width: '62%',
+      height: 16,
+      marginBottom: 12,
+      borderRadius: 8,
+      backgroundColor: colors.surfaceAlt,
+    },
+    skeletonMessage: {
+      width: '38%',
+      height: 13,
+      borderRadius: 7,
+      backgroundColor: colors.surfaceAlt,
+    },
+    skeletonUnreadDot: {
+      position: 'absolute',
+      right: 0,
+      bottom: 20,
+      width: 8,
+      height: 8,
+      borderRadius: 4,
+      backgroundColor: colors.surfaceAlt,
     },
     sectionHeader: {
       opacity: 1,

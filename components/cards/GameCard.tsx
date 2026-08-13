@@ -1,9 +1,9 @@
 import { StyleSheet } from 'react-native';
 import Animated from 'react-native-reanimated';
 import { LinearGradient } from 'expo-linear-gradient';
-import { Ionicons } from '@expo/vector-icons';
 import { rarityColor, rarityTextColor, RarityKey } from '../../constants/colors';
 import { Typography } from '../ui/Typography';
+import { CategoryWatermark } from './CategoryWatermark';
 
 export interface EventBadgeData {
   icon: string;
@@ -13,6 +13,7 @@ export interface EventBadgeData {
 
 export interface GameCardData {
   rarity: RarityKey;
+  category?: 'action' | 'home' | 'date';
   label: string; // e.g. "LEGENDARIA"
   title: string; // e.g. "MASAJE 10 MINUTOS"
   description?: string;
@@ -31,8 +32,7 @@ export function GameCard({ card, width = 160, rotation = 0, style }: GameCardPro
   const bg = rarityColor[card.rarity];
   const fg = rarityTextColor[card.rarity];
   const h = width * (4 / 3);
-  const iconSize = Math.round(width * 0.6);
-  const iconColor = rarityTextColor[card.rarity] + '33';
+  const watermarkSize = Math.round(width * 0.54);
 
   return (
     <Animated.View
@@ -56,10 +56,9 @@ export function GameCard({ card, width = 160, rotation = 0, style }: GameCardPro
         pointerEvents="none"
       />
 
-      {/* Pack icon — shown when card belongs to a non-base deck */}
-      {card.packIcon && (
-        <Animated.View style={styles.packIconContainer} pointerEvents="none">
-          <Ionicons name={card.packIcon as any} size={iconSize} color={iconColor} />
+      {card.category && (
+        <Animated.View style={styles.watermark} pointerEvents="none">
+          <CategoryWatermark category={card.category} color={fg} size={watermarkSize} />
         </Animated.View>
       )}
 
@@ -134,11 +133,11 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     alignSelf: 'flex-start',
   },
-  packIconContainer: {
+  watermark: {
     ...StyleSheet.absoluteFillObject,
     alignItems: 'center',
     justifyContent: 'center',
-    opacity: 0.12,
+    opacity: 0.11,
   },
   inner: {
     flex: 1,

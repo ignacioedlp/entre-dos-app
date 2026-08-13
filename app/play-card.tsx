@@ -58,8 +58,9 @@ export default function CardDetailSheet() {
 
   if (!card) {
     return (
-      <View style={[styles.root, { paddingBottom: insets.bottom + 24 }]}>
-        <View style={styles.handle} />
+      <View
+        style={[styles.root, { paddingTop: insets.top + 24, paddingBottom: insets.bottom + 24 }]}
+      >
         <Typography
           variant="body"
           baseFontSize={15}
@@ -77,9 +78,7 @@ export default function CardDetailSheet() {
   const isPlayed = card.status === 'played';
 
   return (
-    <View style={[styles.root, { paddingBottom: insets.bottom + 24 }]}>
-      <View style={styles.handle} />
-
+    <View style={[styles.root, { paddingTop: insets.top + 24, paddingBottom: insets.bottom + 24 }]}>
       <View style={styles.header}>
         <Typography variant="heading" baseFontSize={24} baseLineHeight={28} style={styles.title}>
           {t('playCard.title')}
@@ -129,15 +128,6 @@ function createStyles(colors: ThemeColors) {
     root: {
       flex: 1,
       backgroundColor: colors.surface,
-      paddingTop: 12,
-    },
-    handle: {
-      width: 36,
-      height: 4,
-      borderRadius: 2,
-      backgroundColor: colors.border,
-      alignSelf: 'center',
-      marginBottom: 20,
     },
     title: {
       letterSpacing: -0.5,
