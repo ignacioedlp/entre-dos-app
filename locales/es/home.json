@@ -11,6 +11,8 @@
     "description": "Al confirmar el uso, tu pareja recibirá una notificación sobre la misma. Diviértanse.",
     "played": "Ya jugaste esta carta ✓",
     "success": "¡Carta jugada!",
+    "saving": "GUARDANDO...",
+    "errorSave": "No se pudo guardar la jugada. Intentá de nuevo.",
     "errorLoad": "No se pudo cargar la carta."
   },
   "weekTimeline": {

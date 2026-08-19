@@ -11,6 +11,8 @@
     "description": "By confirming, your partner will receive a notification about it. Have fun.",
     "played": "You already played this card ✓",
     "success": "Card played!",
+    "saving": "SAVING...",
+    "errorSave": "Could not save the play. Please try again.",
     "errorLoad": "Could not load the card."
   },
   "weekTimeline": {

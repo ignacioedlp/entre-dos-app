@@ -1,4 +1,4 @@
-import { useRef, useMemo } from 'react';
+import { useRef, useMemo, useState } from 'react';
 import { View, StyleSheet } from 'react-native';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -25,6 +25,8 @@ export default function CardDetailSheet() {
   const insets = useSafeAreaInsets();
   const queryClient = useQueryClient();
   const playing = useRef(false);
+  const [isPlaying, setIsPlaying] = useState(false);
+  const [confirmAttempt, setConfirmAttempt] = useState(0);
   const { t } = useTranslation('home');
   const colors = useColors();
   const styles = useMemo(() => createStyles(colors), [colors]);
@@ -32,6 +34,7 @@ export default function CardDetailSheet() {
   async function handleConfirm(cardId: string) {
     if (playing.current) return;
     playing.current = true;
+    setIsPlaying(true);
     try {
       await apiPlayCard(cardId);
       queryClient.setQueryData<DeckResponse>(['deck'], (old) => {
@@ -42,11 +45,14 @@ export default function CardDetailSheet() {
         };
       });
       queryClient.invalidateQueries({ queryKey: ['deck-history'] });
+      Toast.success(t('playCard.success'));
+      router.back();
     } catch {
-      // ignore — navigate back regardless
+      playing.current = false;
+      setIsPlaying(false);
+      setConfirmAttempt((attempt) => attempt + 1);
+      Toast.error(t('playCard.errorSave'));
     }
-    Toast.success(t('playCard.success'));
-    router.back();
   }
 
   let card: DeckCard | null = null;
@@ -116,7 +122,12 @@ export default function CardDetailSheet() {
             </Typography>
           </View>
         ) : (
-          <SwipeToConfirm onConfirm={() => handleConfirm(card.id)} />
+          <SwipeToConfirm
+            key={confirmAttempt}
+            onConfirm={() => handleConfirm(card.id)}
+            disabled={isPlaying}
+            label={isPlaying ? t('playCard.saving') : undefined}
+          />
         )}
       </View>
     </View>

@@ -1,4 +1,4 @@
-import { View, StyleSheet } from 'react-native';
+import { Pressable, StyleSheet } from 'react-native';
 import { useMemo } from 'react';
 import { Gesture, GestureDetector } from 'react-native-gesture-handler';
 import Animated, {
@@ -20,9 +20,10 @@ const PADDING = 6;
 interface SwipeToConfirmProps {
   onConfirm: () => void;
   label?: string;
+  disabled?: boolean;
 }
 
-export function SwipeToConfirm({ onConfirm, label }: SwipeToConfirmProps) {
+export function SwipeToConfirm({ onConfirm, label, disabled = false }: SwipeToConfirmProps) {
   const translateX = useSharedValue(0);
   const trackWidth = useSharedValue(0);
   const confirmed = useSharedValue(false);
@@ -32,7 +33,17 @@ export function SwipeToConfirm({ onConfirm, label }: SwipeToConfirmProps) {
 
   const resolvedLabel = label ?? t('swipeToConfirm.label');
 
+  function confirm() {
+    if (disabled || confirmed.value) return;
+
+    const max = trackWidth.value - THUMB_SIZE - PADDING * 2;
+    confirmed.value = true;
+    translateX.value = withSpring(max, { damping: 22, stiffness: 200 });
+    onConfirm();
+  }
+
   const gesture = Gesture.Pan()
+    .enabled(!disabled)
     .onUpdate((e) => {
       const max = trackWidth.value - THUMB_SIZE - PADDING * 2;
       translateX.value = Math.max(0, Math.min(e.translationX, max));
@@ -40,9 +51,7 @@ export function SwipeToConfirm({ onConfirm, label }: SwipeToConfirmProps) {
     .onEnd(() => {
       const max = trackWidth.value - THUMB_SIZE - PADDING * 2;
       if (translateX.value > max * 0.82 && !confirmed.value) {
-        confirmed.value = true;
-        translateX.value = withSpring(max, { damping: 22, stiffness: 200 });
-        runOnJS(onConfirm)();
+        runOnJS(confirm)();
       } else {
         translateX.value = withSpring(0, { damping: 22, stiffness: 200 });
       }
@@ -60,8 +69,13 @@ export function SwipeToConfirm({ onConfirm, label }: SwipeToConfirmProps) {
   });
 
   return (
-    <View
-      style={styles.track}
+    <Pressable
+      style={[styles.track, disabled && styles.disabled]}
+      accessibilityRole="button"
+      accessibilityLabel={resolvedLabel}
+      accessibilityState={{ disabled, busy: disabled }}
+      disabled={disabled}
+      onPress={confirm}
       onLayout={(e) => {
         trackWidth.value = e.nativeEvent.layout.width;
       }}
@@ -73,7 +87,7 @@ export function SwipeToConfirm({ onConfirm, label }: SwipeToConfirmProps) {
           <Ionicons name="arrow-forward" style={styles.arrow} />
         </Animated.View>
       </GestureDetector>
-    </View>
+    </Pressable>
   );
 }
 
@@ -86,6 +100,9 @@ function createStyles(colors: ThemeColors) {
       padding: PADDING,
       justifyContent: 'center',
       overflow: 'hidden',
+    },
+    disabled: {
+      opacity: 0.65,
     },
     label: {
       position: 'absolute',

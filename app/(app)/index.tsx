@@ -113,7 +113,24 @@ export default function HomeScreen() {
   const rotation = useSharedValue(0);
   const activeIndex = useSharedValue(0);
   const dragY = useSharedValue(0);
+  const cardsForGesture = useSharedValue<DeckCard[]>([]);
   const [activeCardIndex, setActiveCardIndex] = useState(0);
+  const activeCardIndexRef = useRef(0);
+  const cardIds = cards.map((card) => card.id).join('|');
+
+  useEffect(() => {
+    const nextIndex = Math.min(
+      activeCardIndexRef.current,
+      Math.max(cardsRef.current.length - 1, 0)
+    );
+
+    activeCardIndexRef.current = nextIndex;
+    activeIndex.value = nextIndex;
+    rotation.value = nextIndex;
+    dragY.value = 0;
+    cardsForGesture.value = cardsRef.current;
+    setActiveCardIndex(nextIndex);
+  }, [activeIndex, cardIds, cardsForGesture, dragY, rotation]);
 
   const chevron1Opacity = useSharedValue(1);
   const chevron2Opacity = useSharedValue(1);
@@ -146,6 +163,7 @@ export default function HomeScreen() {
   function goTo(i: number) {
     if (!cardsRef.current.length) return;
     const clamped = Math.max(0, Math.min(cardsRef.current.length - 1, i));
+    activeCardIndexRef.current = clamped;
     setActiveCardIndex(clamped);
     activeIndex.value = clamped;
     rotation.value = withSpring(clamped, { damping: 18, stiffness: 200 });
@@ -182,7 +200,7 @@ export default function HomeScreen() {
       }
     })
     .onEnd((e) => {
-      const list = cardsRef.current;
+      const list = cardsForGesture.value;
       if (!list.length) return;
 
       const isHorizontalSwipe =
