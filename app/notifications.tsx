@@ -141,6 +141,12 @@ export default function NotificationsScreen() {
                 item={item}
                 onPress={() => {
                   if (!item.read) markRead(item.id);
+                  if (item.data?.cardPlayId) {
+                    router.push({
+                      pathname: '/play-thread',
+                      params: { playId: String(item.data.cardPlayId) },
+                    });
+                  }
                 }}
               />
             </Animated.View>

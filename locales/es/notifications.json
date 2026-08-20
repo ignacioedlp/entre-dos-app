@@ -19,7 +19,10 @@
     "system": "Sistema",
     "deck_reset": "Mazo renovado",
     "event_cards": "Evento",
-    "couple_linked": "Pareja vinculada"
+    "couple_linked": "Pareja vinculada",
+    "play_comment": "Comentario",
+    "play_schedule": "Fecha",
+    "play_schedule_removed": "Fecha"
   },
   "alert": {
     "disabledTitle": "Notificaciones desactivadas",

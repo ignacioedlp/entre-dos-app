@@ -171,8 +171,17 @@ export async function apiGetActiveEvents(): Promise<ActiveEventsResponse> {
   return res.data;
 }
 
-export async function apiPlayCard(deckCardId: string): Promise<void> {
-  await api.post(`/deck/${deckCardId}/play`);
+export interface CardPlay {
+  id: string;
+  userDeckId: string;
+  userId: string;
+  coupleId: string;
+  playedAt: string;
+}
+
+export async function apiPlayCard(deckCardId: string): Promise<CardPlay> {
+  const res = await api.post<{ cardPlay: CardPlay }>(`/deck/${deckCardId}/play`);
+  return res.data.cardPlay;
 }
 
 export interface CardHistoryItem {
@@ -181,7 +190,6 @@ export interface CardHistoryItem {
   userId: string;
   userName: string | null;
   coupleId: string;
-  note: string | null;
   playedAt: string;
   title: string;
   description: string;
@@ -197,6 +205,106 @@ export interface HistoryResponse {
 export async function apiGetHistory(): Promise<HistoryResponse> {
   const res = await api.get<HistoryResponse>('/deck/history');
   return res.data;
+}
+
+export interface PlayThreadUser {
+  id: string;
+  displayName: string;
+  avatarUrl: string;
+}
+
+export interface PlayThreadCard {
+  id: string;
+  title: string;
+  description: string;
+  category: 'date' | 'action' | 'home';
+  rarity: 'common' | 'rare' | 'epic' | 'legendary';
+  event?: EventBadge | null;
+}
+
+export interface PlayComment {
+  id: string;
+  author: PlayThreadUser;
+  body: string;
+  createdAt: string;
+}
+
+export type PlayReactionType = 'heart' | 'heart_eyes' | 'laugh' | 'fire' | 'raised_hands';
+
+export interface PlayReaction {
+  id: string;
+  user: PlayThreadUser;
+  type: PlayReactionType;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface PlaySchedule {
+  scheduledAt: string;
+  timeZone: string;
+  hasTime: boolean;
+  updatedBy: PlayThreadUser | null;
+  updatedAt: string;
+}
+
+export interface PlayThread {
+  id: string;
+  playedAt: string;
+  updatedAt: string;
+  playedBy: PlayThreadUser;
+  card: PlayThreadCard;
+  schedule: PlaySchedule | null;
+  comments: PlayComment[];
+  reactions: PlayReaction[];
+}
+
+export async function apiGetPlayThread(playId: string): Promise<PlayThread> {
+  const res = await api.get<{ thread: PlayThread }>(`/deck/plays/${playId}/thread`);
+  return res.data.thread;
+}
+
+export async function apiCreatePlayComment(
+  playId: string,
+  body: string,
+  idempotencyKey: string
+): Promise<PlayComment> {
+  const res = await api.post<{ comment: PlayComment }>(`/deck/plays/${playId}/comments`, {
+    body,
+    idempotencyKey,
+  });
+  return res.data.comment;
+}
+
+export interface PlayScheduleInput {
+  date: string;
+  time: string | null;
+  timeZone: string;
+}
+
+export async function apiUpdatePlaySchedule(
+  playId: string,
+  input: PlayScheduleInput
+): Promise<PlaySchedule> {
+  const res = await api.put<{ schedule: PlaySchedule }>(`/deck/plays/${playId}/schedule`, input);
+  return res.data.schedule;
+}
+
+export async function apiDeletePlaySchedule(playId: string): Promise<void> {
+  await api.delete(`/deck/plays/${playId}/schedule`);
+}
+
+export async function apiUpdatePlayReaction(
+  playId: string,
+  type: PlayReactionType
+): Promise<PlayReaction> {
+  const res = await api.put<{ reaction: PlayReaction }>(`/deck/plays/${playId}/reaction`, {
+    type,
+  });
+  return res.data.reaction;
+}
+
+export async function apiDeletePlayReaction(playId: string): Promise<void> {
+  await api.delete(`/deck/plays/${playId}/reaction`);
 }
 
 export interface Pack {

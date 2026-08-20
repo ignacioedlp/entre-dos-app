@@ -1,7 +1,7 @@
 import * as Sentry from '@sentry/react-native';
 import { vexo } from 'vexo-analytics';
 import { useEffect } from 'react';
-import { Stack } from 'expo-router';
+import { Stack, useRouter } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
 import * as SplashScreen from 'expo-splash-screen';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
@@ -57,6 +57,7 @@ function ThemedStatusBar() {
 }
 
 function RootLayout() {
+  const router = useRouter();
   const [fontsLoaded, fontError] = useFonts({
     Inter_400Regular,
     Inter_700Bold,
@@ -71,17 +72,32 @@ function RootLayout() {
 
   // Notification listeners (foreground receive + tap response)
   useEffect(() => {
-    const receivedSub = Notifications.addNotificationReceivedListener((_notification) => {
-      // Notification received while app is in foreground — handler above manages display
+    let active = true;
+    Notifications.getLastNotificationResponseAsync()
+      .then((response) => {
+        const playId = response?.notification.request.content.data?.cardPlayId;
+        if (active && playId) {
+          router.push({ pathname: '/play-thread', params: { playId: String(playId) } });
+          Notifications.clearLastNotificationResponseAsync();
+        }
+      })
+      .catch(() => undefined);
+    const receivedSub = Notifications.addNotificationReceivedListener((notification) => {
+      const playId = notification.request.content.data?.cardPlayId;
+      if (playId) queryClient.invalidateQueries({ queryKey: ['play-thread', String(playId)] });
     });
-    const responseSub = Notifications.addNotificationResponseReceivedListener((_response) => {
-      // User tapped a notification — add navigation logic here when needed
+    const responseSub = Notifications.addNotificationResponseReceivedListener((response) => {
+      const playId = response.notification.request.content.data?.cardPlayId;
+      if (playId) {
+        router.push({ pathname: '/play-thread', params: { playId: String(playId) } });
+      }
     });
     return () => {
+      active = false;
       receivedSub.remove();
       responseSub.remove();
     };
-  }, []);
+  }, [router]);
 
   if (!fontsLoaded && !fontError) {
     return null;
@@ -120,6 +136,7 @@ function RootLayout() {
                       }}
                     />
                     <Stack.Screen name="notifications" options={{ headerShown: false }} />
+                    <Stack.Screen name="play-thread" options={{ headerShown: false }} />
                   </Stack>
                   <ToastManager
                     config={toastConfig}

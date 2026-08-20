@@ -19,7 +19,10 @@
     "system": "System",
     "deck_reset": "Deck reset",
     "event_cards": "Event",
-    "couple_linked": "Couple Linked"
+    "couple_linked": "Couple Linked",
+    "play_comment": "Comment",
+    "play_schedule": "Date",
+    "play_schedule_removed": "Date"
   },
   "alert": {
     "disabledTitle": "Notifications Disabled",

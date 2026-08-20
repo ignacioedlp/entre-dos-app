@@ -36,7 +36,7 @@ export default function CardDetailSheet() {
     playing.current = true;
     setIsPlaying(true);
     try {
-      await apiPlayCard(cardId);
+      const play = await apiPlayCard(cardId);
       queryClient.setQueryData<DeckResponse>(['deck'], (old) => {
         if (!old) return old;
         return {
@@ -46,7 +46,7 @@ export default function CardDetailSheet() {
       });
       queryClient.invalidateQueries({ queryKey: ['deck-history'] });
       Toast.success(t('playCard.success'));
-      router.back();
+      router.replace({ pathname: '/play-thread', params: { playId: play.id } });
     } catch {
       playing.current = false;
       setIsPlaying(false);
