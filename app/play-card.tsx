@@ -11,6 +11,7 @@ import { useColors } from '../context/ThemeContext';
 import { DeckCard, DeckResponse, apiPlayCard } from '../lib/api';
 import { SwipeToConfirm } from '../components/ui/SwipeToConfirm';
 import { Typography } from '../components/ui/Typography';
+import { triggerFeedback } from '../lib/feedback';
 
 const RARITY_MAP: Record<string, RarityKey> = {
   common: 'comun',
@@ -45,12 +46,14 @@ export default function CardDetailSheet() {
         };
       });
       queryClient.invalidateQueries({ queryKey: ['deck-history'] });
+      triggerFeedback('success');
       Toast.success(t('playCard.success'));
       router.replace({ pathname: '/play-thread', params: { playId: play.id } });
     } catch {
       playing.current = false;
       setIsPlaying(false);
       setConfirmAttempt((attempt) => attempt + 1);
+      triggerFeedback('error');
       Toast.error(t('playCard.errorSave'));
     }
   }

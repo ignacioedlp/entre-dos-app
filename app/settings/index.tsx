@@ -57,6 +57,11 @@ export default function SettingsScreen() {
       icon: 'notifications-outline',
     },
     {
+      label: t('menu.feedback'),
+      route: '/settings/feedback',
+      icon: 'musical-notes-outline',
+    },
+    {
       label: t('menu.language'),
       route: '/settings/language',
       icon: 'language-outline',

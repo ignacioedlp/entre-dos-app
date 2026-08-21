@@ -6,6 +6,20 @@
     "deckTitle": "TU BARAJA",
     "deckHint": "Tocá las cartas o deslizá a los lados para navegar tu baraja; deslizá una hacia abajo para jugarla."
   },
+  "weeklyPack": {
+    "eyebrow": "NUEVA SEMANA",
+    "title": "SIETE CARTAS PARA LOS DOS.",
+    "description": "Deslizá sobre el sello para abrir el paquete y descubrir la baraja de esta semana.",
+    "gestureHint": "DESLIZÁ SOBRE EL PACK",
+    "packLabel": "EDICIÓN SEMANAL",
+    "packCount": "{{count}} CARTAS",
+    "open": "ABRIR PAQUETE",
+    "skip": "OMITIR",
+    "opening": "PREPARANDO CARTAS...",
+    "revealing": "TU SEMANA ESTÁ LISTA",
+    "cardOf": "CARTA {{current}} DE {{total}}",
+    "error": "No pudimos registrar la apertura. Mostramos tus cartas y volveremos a intentarlo."
+  },
   "playCard": {
     "title": "Confirmar uso de la carta.",
     "description": "Al confirmar el uso, tu pareja recibirá una notificación sobre la misma. Diviértanse.",

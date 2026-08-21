@@ -156,6 +156,10 @@ export interface ActiveEventsResponse {
 
 export interface DeckResponse {
   cards: DeckCard[];
+  weeklyPack: {
+    weekStart: string;
+    openingRequired: boolean;
+  };
 }
 
 export async function apiGetDeck(): Promise<DeckResponse> {
@@ -163,6 +167,16 @@ export async function apiGetDeck(): Promise<DeckResponse> {
   // iOS drops Authorization when following that 301 redirect, so request the
   // canonical URL directly.
   const res = await api.get<DeckResponse>('/deck/');
+  return res.data;
+}
+
+export interface WeeklyPackOpenResponse {
+  weekStart: string;
+  shouldAnimate: boolean;
+}
+
+export async function apiOpenWeeklyPack(weekStart: string): Promise<WeeklyPackOpenResponse> {
+  const res = await api.put<WeeklyPackOpenResponse>('/deck/weekly-pack/open', { weekStart });
   return res.data;
 }
 

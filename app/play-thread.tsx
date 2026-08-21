@@ -37,6 +37,7 @@ import {
   PlayThread,
 } from '@/lib/api';
 import { Typography } from '@/components/ui/Typography';
+import { triggerFeedback } from '@/lib/feedback';
 
 const REACTIONS: { type: PlayReactionType; emoji: string }[] = [
   { type: 'heart', emoji: '❤️' },
@@ -115,8 +116,12 @@ export default function PlayThreadScreen() {
       setDraft('');
       draftKey.current = null;
       draftBody.current = null;
+      triggerFeedback('softSuccess');
     },
-    onError: () => Toast.error(t('playThread.commentError')),
+    onError: () => {
+      triggerFeedback('error');
+      Toast.error(t('playThread.commentError'));
+    },
   });
 
   const reactionMutation = useMutation<
@@ -156,6 +161,7 @@ export default function PlayThreadScreen() {
     },
     onError: (_error, _type, context) => {
       queryClient.setQueryData(['play-thread', playId], context?.previous);
+      triggerFeedback('error');
       Toast.error(t('playThread.reactionError'));
     },
     onSettled: () => queryClient.invalidateQueries({ queryKey: ['play-thread', playId] }),
@@ -173,8 +179,12 @@ export default function PlayThreadScreen() {
         current ? { ...current, schedule } : current
       );
       setScheduleOpen(false);
+      triggerFeedback('softSuccess');
     },
-    onError: () => Toast.error(t('playThread.scheduleError')),
+    onError: () => {
+      triggerFeedback('error');
+      Toast.error(t('playThread.scheduleError'));
+    },
   });
 
   const removeScheduleMutation = useMutation({
@@ -184,8 +194,12 @@ export default function PlayThreadScreen() {
         current ? { ...current, schedule: null } : current
       );
       setScheduleOpen(false);
+      triggerFeedback('softSuccess');
     },
-    onError: () => Toast.error(t('playThread.scheduleRemoveError')),
+    onError: () => {
+      triggerFeedback('error');
+      Toast.error(t('playThread.scheduleRemoveError'));
+    },
   });
 
   function sendComment() {
@@ -196,6 +210,11 @@ export default function PlayThreadScreen() {
       draftBody.current = body;
     }
     commentMutation.mutate({ body, key: draftKey.current });
+  }
+
+  function updateReaction(type: PlayReactionType | null) {
+    triggerFeedback('selection');
+    reactionMutation.mutate(type);
   }
 
   function openSchedule() {
@@ -314,7 +333,7 @@ export default function PlayThreadScreen() {
                       testID={`reaction-${type}`}
                       accessibilityLabel={t(`playThread.reactionLabels.${type}`)}
                       accessibilityState={{ selected }}
-                      onPress={() => reactionMutation.mutate(selected ? null : type)}
+                      onPress={() => updateReaction(selected ? null : type)}
                       style={[styles.reactionButton, selected && styles.reactionButtonSelected]}
                     >
                       <Text style={styles.emoji}>{emoji}</Text>

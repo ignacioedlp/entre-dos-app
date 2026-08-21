@@ -18,8 +18,17 @@
     "faq": "PREGUNTAS FRECUENTES",
     "subscription": "GESTIONAR SUSCRIPCIÓN",
     "restorePurchases": "RESTAURAR COMPRAS",
+    "feedback": "SONIDOS Y VIBRACIÓN",
     "fontSize": "TAMAÑO DE FUENTE",
     "theme": "TEMA"
+  },
+  "feedback": {
+    "back": "Volver a configuración",
+    "title": "SONIDOS Y VIBRACIÓN.",
+    "soundTitle": "Sonidos",
+    "soundDescription": "Reproducir sonidos breves al abrir paquetes y completar acciones.",
+    "hapticsTitle": "Vibración",
+    "hapticsDescription": "Sentir una respuesta sutil al seleccionar y confirmar acciones."
   },
   "fontSize": {
     "title": "TAMAÑO DE FUENTE.",

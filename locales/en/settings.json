@@ -18,8 +18,17 @@
     "faq": "FAQ",
     "subscription": "MANAGE SUBSCRIPTION",
     "restorePurchases": "RESTORE PURCHASES",
+    "feedback": "SOUNDS & HAPTICS",
     "fontSize": "FONT SIZE",
     "theme": "THEME"
+  },
+  "feedback": {
+    "back": "Back to settings",
+    "title": "SOUNDS & HAPTICS.",
+    "soundTitle": "Sounds",
+    "soundDescription": "Play short sounds when opening packs and completing actions.",
+    "hapticsTitle": "Haptics",
+    "hapticsDescription": "Feel subtle feedback when selecting and confirming actions."
   },
   "theme": {
     "title": "THEME.",

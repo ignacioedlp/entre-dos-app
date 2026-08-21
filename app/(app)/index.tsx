@@ -1,8 +1,8 @@
-import { useRef, useEffect, useMemo, useState } from 'react';
+import { useRef, useEffect, useMemo, useState, useCallback } from 'react';
 import { View, StyleSheet, Dimensions, ScrollView, Pressable } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { useTranslation } from 'react-i18next';
 import Animated, {
   useSharedValue,
@@ -18,6 +18,7 @@ import Animated, {
 } from 'react-native-reanimated';
 import { Gesture, GestureDetector } from 'react-native-gesture-handler';
 import { Ionicons } from '@expo/vector-icons';
+import { Toast } from 'toastify-react-native';
 
 import { WeekTimeline } from '../../components/cards/WeekTimeline';
 import { CylinderCard, CARD_HEIGHT } from '../../components/carousel/CylinderCard';
@@ -25,9 +26,18 @@ import { PartnerLastPlay } from '../../components/cards/PartnerLastPlay';
 import { AllPlayedState } from '../../components/home/AllPlayedState';
 import { useColors } from '../../context/ThemeContext';
 import { useAuth } from '../../context/AuthContext';
-import { apiGetDeck, apiGetHistory, DeckCard } from '../../lib/api';
+import {
+  apiGetDeck,
+  apiGetHistory,
+  apiOpenWeeklyPack,
+  DeckCard,
+  DeckResponse,
+} from '../../lib/api';
 import { useNotificationList } from '../../hooks/use-notification-list';
 import { Typography } from '../../components/ui/Typography';
+import { WeeklyPackOpening } from '../../components/deck/WeeklyPackOpening';
+import { storage } from '../../lib/storage';
+import { triggerFeedback } from '../../lib/feedback';
 
 const { width: SCREEN_WIDTH } = Dimensions.get('window');
 const HOME_AUTO_REFRESH_MS = 30_000;
@@ -75,6 +85,7 @@ function HomeSkeleton({ styles }: { styles: ReturnType<typeof createStyles> }) {
 export default function HomeScreen() {
   const insets = useSafeAreaInsets();
   const router = useRouter();
+  const queryClient = useQueryClient();
   const { user } = useAuth();
   const { t } = useTranslation('home');
   const colors = useColors();
@@ -115,6 +126,8 @@ export default function HomeScreen() {
   const dragY = useSharedValue(0);
   const cardsForGesture = useSharedValue<DeckCard[]>([]);
   const [activeCardIndex, setActiveCardIndex] = useState(0);
+  const [packVisible, setPackVisible] = useState(false);
+  const syncingPackKey = useRef<string | null>(null);
   const activeCardIndexRef = useRef(0);
   const cardIds = cards.map((card) => card.id).join('|');
 
@@ -163,6 +176,8 @@ export default function HomeScreen() {
   function goTo(i: number) {
     if (!cardsRef.current.length) return;
     const clamped = Math.max(0, Math.min(cardsRef.current.length - 1, i));
+    if (clamped === activeCardIndexRef.current) return;
+    triggerFeedback('selection');
     activeCardIndexRef.current = clamped;
     setActiveCardIndex(clamped);
     activeIndex.value = clamped;
@@ -226,138 +241,203 @@ export default function HomeScreen() {
     });
 
   const partnerLastPlay = historyData?.history.find((p) => p.userId !== user?.userId) ?? null;
+  const weeklyCards = allCards.filter((card) => !card.event && card.status === 'active');
+  const weeklyPackKey = data?.weeklyPack
+    ? `weekly-pack.v1.handled.${user?.userId ?? 'anonymous'}.${data.weeklyPack.weekStart}`
+    : null;
+
+  useEffect(() => {
+    if (!data?.weeklyPack.openingRequired || !weeklyPackKey || weeklyCards.length === 0) {
+      setPackVisible(false);
+      return;
+    }
+
+    if (!storage.getBoolean(weeklyPackKey)) {
+      setPackVisible(true);
+      return;
+    }
+
+    if (syncingPackKey.current === weeklyPackKey) return;
+    syncingPackKey.current = weeklyPackKey;
+    void apiOpenWeeklyPack(data.weeklyPack.weekStart)
+      .then(() => queryClient.invalidateQueries({ queryKey: ['deck'] }))
+      .catch(() => {
+        syncingPackKey.current = null;
+      });
+  }, [data?.weeklyPack, queryClient, weeklyCards.length, weeklyPackKey]);
+
+  const claimWeeklyPack = useCallback(async () => {
+    if (!data?.weeklyPack || !weeklyPackKey) return false;
+    storage.set(weeklyPackKey, true);
+    try {
+      const result = await apiOpenWeeklyPack(data.weeklyPack.weekStart);
+      queryClient.setQueryData<DeckResponse>(['deck'], (current) =>
+        current
+          ? { ...current, weeklyPack: { ...current.weeklyPack, openingRequired: false } }
+          : current
+      );
+      return result.shouldAnimate;
+    } catch {
+      Toast.warn(t('weeklyPack.error'));
+      return true;
+    }
+  }, [data?.weeklyPack, queryClient, t, weeklyPackKey]);
+
+  const skipWeeklyPack = useCallback(() => {
+    if (!data?.weeklyPack || !weeklyPackKey) return;
+    storage.set(weeklyPackKey, true);
+    setPackVisible(false);
+    void apiOpenWeeklyPack(data.weeklyPack.weekStart)
+      .then(() => queryClient.invalidateQueries({ queryKey: ['deck'] }))
+      .catch(() => undefined);
+  }, [data?.weeklyPack, queryClient, weeklyPackKey]);
+
+  const completeWeeklyPack = useCallback(() => setPackVisible(false), []);
 
   const showAllPlayed = !isLoading && allCards.length > 0 && cards.length === 0;
   const showNeverDealt = !isLoading && allCards.length === 0;
 
   return (
     <View style={[createStyles(colors).root, { paddingTop: insets.top + 20 }]}>
-      <Animated.View entering={homeEntrance(0)} style={createStyles(colors).header}>
-        <Typography variant="heading" style={styles.greeting}>
-          {t('screen.greeting')}
-        </Typography>
-        <View style={styles.headerActions}>
-          <Pressable onPress={() => router.push('/notifications')}>
-            <Ionicons name="notifications-outline" size={24} color={colors.textPrimary} />
-            {hasUnread && <View style={styles.badge} />}
-          </Pressable>
-        </View>
-      </Animated.View>
-
-      <ScrollView showsVerticalScrollIndicator={false} style={styles.scroll}>
-        {isLoading ? (
-          <HomeSkeleton styles={styles} />
-        ) : showNeverDealt ? (
-          <View style={styles.empty}>
-            <Typography variant="heading" baseFontSize={48} style={styles.emoji}>
-              🃏
-            </Typography>
-            <Typography variant="swissTitle" style={styles.emptyTitle}>
-              {t('screen.emptyTitle')}
-            </Typography>
-            <Typography
-              variant="body"
-              baseFontSize={15}
-              baseLineHeight={22}
-              color={colors.textSecondary}
-              style={styles.emptyBody}
-            >
-              {t('screen.emptyDescription')}
-            </Typography>
+      <WeeklyPackOpening
+        visible={packVisible}
+        cards={weeklyCards}
+        onClaim={claimWeeklyPack}
+        onSkip={skipWeeklyPack}
+        onComplete={completeWeeklyPack}
+      />
+      <View
+        style={styles.homeContent}
+        accessibilityElementsHidden={packVisible}
+        importantForAccessibility={packVisible ? 'no-hide-descendants' : 'auto'}
+      >
+        <Animated.View entering={homeEntrance(0)} style={createStyles(colors).header}>
+          <Typography variant="heading" style={styles.greeting}>
+            {t('screen.greeting')}
+          </Typography>
+          <View style={styles.headerActions}>
+            <Pressable onPress={() => router.push('/notifications')}>
+              <Ionicons name="notifications-outline" size={24} color={colors.textPrimary} />
+              {hasUnread && <View style={styles.badge} />}
+            </Pressable>
           </View>
-        ) : showAllPlayed ? (
-          <AllPlayedState />
-        ) : (
-          <View style={styles.carouselSection}>
-            {partnerLastPlay && (
-              <Animated.View entering={homeEntrance(70)}>
-                <PartnerLastPlay play={partnerLastPlay} />
-              </Animated.View>
-            )}
-            <Animated.View entering={homeEntrance(100)} style={styles.container}>
-              <View style={styles.sectionHeader}>
-                <Typography
-                  variant="cardLabel"
-                  color={colors.textMuted}
-                  style={{ opacity: 1, letterSpacing: 2.5 }}
-                >
-                  {t('screen.deckTitle')}
-                </Typography>
-                <Pressable
-                  onPress={handleRandomCard}
-                  disabled={cards.length <= 1}
-                  style={{ opacity: cards.length <= 1 ? 0.3 : 1 }}
-                >
-                  <Ionicons name="shuffle" size={20} color={colors.textMuted} />
-                </Pressable>
-              </View>
-              <View style={styles.divider} />
-            </Animated.View>
-            <Animated.View entering={homeEntrance(170)}>
-              <GestureDetector gesture={pan}>
-                <Animated.View style={styles.carouselHitArea}>
-                  <View style={styles.carouselStage}>
-                    {orderedCards.map(({ card, index }) => (
-                      <CylinderCard
-                        key={card.id}
-                        card={card}
-                        index={index}
-                        rotation={rotation}
-                        dragY={dragY}
-                        activeIndex={activeIndex}
-                        onTap={() => goTo(index)}
-                      />
-                    ))}
-                    <Pressable
-                      accessibilityLabel="Previous card"
-                      disabled={activeCardIndex === 0}
-                      onPress={() => goTo(activeCardIndex - 1)}
-                      style={[styles.carouselNavigationZone, styles.carouselNavigationZoneLeft]}
-                    />
-                    <Pressable
-                      accessibilityLabel="Next card"
-                      disabled={activeCardIndex === cards.length - 1}
-                      onPress={() => goTo(activeCardIndex + 1)}
-                      style={[styles.carouselNavigationZone, styles.carouselNavigationZoneRight]}
-                    />
-                  </View>
-                </Animated.View>
-              </GestureDetector>
-            </Animated.View>
+        </Animated.View>
 
-            <Animated.View entering={homeEntrance(230)} style={styles.hint}>
+        <ScrollView showsVerticalScrollIndicator={false} style={styles.scroll}>
+          {isLoading ? (
+            <HomeSkeleton styles={styles} />
+          ) : showNeverDealt ? (
+            <View style={styles.empty}>
+              <Typography variant="heading" baseFontSize={48} style={styles.emoji}>
+                🃏
+              </Typography>
+              <Typography variant="swissTitle" style={styles.emptyTitle}>
+                {t('screen.emptyTitle')}
+              </Typography>
               <Typography
                 variant="body"
-                baseFontSize={14}
-                baseLineHeight={20}
+                baseFontSize={15}
+                baseLineHeight={22}
                 color={colors.textSecondary}
-                style={styles.hintText}
+                style={styles.emptyBody}
               >
-                {t('screen.deckHint')}
+                {t('screen.emptyDescription')}
               </Typography>
-              <View style={styles.chevrons}>
-                <Animated.View style={chevron1Style}>
-                  <Ionicons name="chevron-down" size={18} color={colors.textMuted} />
+            </View>
+          ) : showAllPlayed ? (
+            <AllPlayedState />
+          ) : (
+            <View style={styles.carouselSection}>
+              {partnerLastPlay && (
+                <Animated.View entering={homeEntrance(70)}>
+                  <PartnerLastPlay play={partnerLastPlay} />
                 </Animated.View>
-                <Animated.View style={[chevron2Style, { marginTop: -10 }]}>
-                  <Ionicons name="chevron-down" size={18} color={colors.textMuted} />
-                </Animated.View>
-                <Animated.View style={[chevron3Style, { marginTop: -10 }]}>
-                  <Ionicons name="chevron-down" size={18} color={colors.textMuted} />
-                </Animated.View>
-              </View>
-            </Animated.View>
-          </View>
-        )}
+              )}
+              <Animated.View entering={homeEntrance(100)} style={styles.container}>
+                <View style={styles.sectionHeader}>
+                  <Typography
+                    variant="cardLabel"
+                    color={colors.textMuted}
+                    style={{ opacity: 1, letterSpacing: 2.5 }}
+                  >
+                    {t('screen.deckTitle')}
+                  </Typography>
+                  <Pressable
+                    onPress={handleRandomCard}
+                    disabled={cards.length <= 1}
+                    style={{ opacity: cards.length <= 1 ? 0.3 : 1 }}
+                  >
+                    <Ionicons name="shuffle" size={20} color={colors.textMuted} />
+                  </Pressable>
+                </View>
+                <View style={styles.divider} />
+              </Animated.View>
+              <Animated.View entering={homeEntrance(170)}>
+                <GestureDetector gesture={pan}>
+                  <Animated.View style={styles.carouselHitArea}>
+                    <View style={styles.carouselStage}>
+                      {orderedCards.map(({ card, index }) => (
+                        <CylinderCard
+                          key={card.id}
+                          card={card}
+                          index={index}
+                          rotation={rotation}
+                          dragY={dragY}
+                          activeIndex={activeIndex}
+                          onTap={() => goTo(index)}
+                        />
+                      ))}
+                      <Pressable
+                        accessibilityLabel="Previous card"
+                        disabled={activeCardIndex === 0}
+                        onPress={() => goTo(activeCardIndex - 1)}
+                        style={[styles.carouselNavigationZone, styles.carouselNavigationZoneLeft]}
+                      />
+                      <Pressable
+                        accessibilityLabel="Next card"
+                        disabled={activeCardIndex === cards.length - 1}
+                        onPress={() => goTo(activeCardIndex + 1)}
+                        style={[styles.carouselNavigationZone, styles.carouselNavigationZoneRight]}
+                      />
+                    </View>
+                  </Animated.View>
+                </GestureDetector>
+              </Animated.View>
 
-        <Animated.View entering={homeEntrance(300)}>
-          <WeekTimeline
-            plays={historyData?.history ?? []}
-            isLoading={isHistoryLoading}
-            currentUserId={user?.userId ?? ''}
-          />
-        </Animated.View>
-      </ScrollView>
+              <Animated.View entering={homeEntrance(230)} style={styles.hint}>
+                <Typography
+                  variant="body"
+                  baseFontSize={14}
+                  baseLineHeight={20}
+                  color={colors.textSecondary}
+                  style={styles.hintText}
+                >
+                  {t('screen.deckHint')}
+                </Typography>
+                <View style={styles.chevrons}>
+                  <Animated.View style={chevron1Style}>
+                    <Ionicons name="chevron-down" size={18} color={colors.textMuted} />
+                  </Animated.View>
+                  <Animated.View style={[chevron2Style, { marginTop: -10 }]}>
+                    <Ionicons name="chevron-down" size={18} color={colors.textMuted} />
+                  </Animated.View>
+                  <Animated.View style={[chevron3Style, { marginTop: -10 }]}>
+                    <Ionicons name="chevron-down" size={18} color={colors.textMuted} />
+                  </Animated.View>
+                </View>
+              </Animated.View>
+            </View>
+          )}
+
+          <Animated.View entering={homeEntrance(300)}>
+            <WeekTimeline
+              plays={historyData?.history ?? []}
+              isLoading={isHistoryLoading}
+              currentUserId={user?.userId ?? ''}
+            />
+          </Animated.View>
+        </ScrollView>
+      </View>
     </View>
   );
 }
@@ -368,6 +448,7 @@ function createStyles(colors: ReturnType<typeof useColors>) {
       flex: 1,
       backgroundColor: colors.background,
     },
+    homeContent: { flex: 1 },
     scroll: {
       flex: 1,
     },
