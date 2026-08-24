@@ -363,13 +363,25 @@ export default function HomeScreen() {
                     {t('screen.deckTitle')}
                   </Typography>
                   <View style={styles.deckActions}>
-                    <Typography variant="cardLabel" color={colors.textMuted} baseFontSize={10}>
-                      {t('cardSwap.remaining', { count: data?.weeklyChanges.remaining ?? 0 })}
-                    </Typography>
+                    <View
+                      accessibilityLabel={t('cardSwap.remaining', {
+                        count: data?.weeklyChanges.remaining ?? 0,
+                      })}
+                      style={styles.swapCount}
+                    >
+                      <Ionicons name="swap-horizontal" size={20} color={colors.textMuted} />
+                      <Typography variant="cardLabel" color={colors.textMuted} baseFontSize={12}>
+                        {data?.weeklyChanges.remaining ?? 0}
+                      </Typography>
+                    </View>
                     <Pressable
                       onPress={handleRandomCard}
                       disabled={cards.length <= 1}
-                      style={{ opacity: cards.length <= 1 ? 0.3 : 1 }}
+                      accessibilityLabel={t('screen.randomCard')}
+                      style={[
+                        styles.shuffleButton,
+                        cards.length <= 1 && styles.shuffleButtonDisabled,
+                      ]}
                     >
                       <Ionicons name="shuffle" size={20} color={colors.textMuted} />
                     </Pressable>
@@ -481,6 +493,17 @@ function createStyles(colors: ReturnType<typeof useColors>) {
       flexDirection: 'row',
       alignItems: 'center',
       gap: 12,
+    },
+    swapCount: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: 6,
+    },
+    shuffleButton: {
+      padding: 2,
+    },
+    shuffleButtonDisabled: {
+      opacity: 0.3,
     },
     eventCountPill: {
       width: 10,

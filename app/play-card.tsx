@@ -164,7 +164,7 @@ export default function CardDetailSheet() {
           >
             {card.title}
           </Typography>
-          {!isPlayed && !card.event && (
+          {!isPlayed && !card.event && isSwapping && (
             <Pressable
               accessibilityRole="button"
               accessibilityLabel={t('cardSwap.button')}

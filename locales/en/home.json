@@ -4,6 +4,7 @@
     "emptyTitle": "Your cards arrive on Monday",
     "emptyDescription": "Link your partner and next Monday at 00:00 you'll both receive 7 cards.",
     "deckTitle": "YOUR DECK",
+    "randomCard": "Choose a random card",
     "deckHint": "Tap a card or swipe sideways to browse your deck; swipe one down when you want to play it."
   },
   "weeklyPack": {
@@ -30,8 +31,8 @@
     "errorLoad": "Could not load the card."
   },
   "cardSwap": {
-    "remaining_one": "{{count}} CHANGE THIS WEEK",
-    "remaining_other": "{{count}} CHANGES THIS WEEK",
+    "remaining_one": "{{count}} CHANGE",
+    "remaining_other": "{{count}} CHANGES",
     "button": "CHANGE CARD",
     "swapping": "CHANGING...",
     "confirmTitle": "Change this card?",

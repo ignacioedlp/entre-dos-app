@@ -4,6 +4,7 @@
     "emptyTitle": "Tus cartas llegan el lunes",
     "emptyDescription": "Vinculá tu pareja y el próximo lunes a las 00:00 recibirán sus 7 cartas.",
     "deckTitle": "TU BARAJA",
+    "randomCard": "Elegir una carta aleatoria",
     "deckHint": "Tocá las cartas o deslizá a los lados para navegar tu baraja; deslizá una hacia abajo para jugarla."
   },
   "weeklyPack": {
@@ -30,8 +31,8 @@
     "errorLoad": "No se pudo cargar la carta."
   },
   "cardSwap": {
-    "remaining_one": "{{count}} CAMBIO ESTA SEMANA",
-    "remaining_other": "{{count}} CAMBIOS ESTA SEMANA",
+    "remaining_one": "{{count}} CAMBIO",
+    "remaining_other": "{{count}} CAMBIOS",
     "button": "CAMBIAR CARTA",
     "swapping": "CAMBIANDO...",
     "confirmTitle": "¿Cambiar esta carta?",
