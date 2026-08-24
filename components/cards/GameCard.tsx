@@ -26,13 +26,20 @@ interface GameCardProps {
   width?: number;
   rotation?: number; // degrees for scattered layout
   style?: object;
+  variant?: 'full' | 'thumbnail';
 }
 
-export function GameCard({ card, width = 10, rotation = 0, style }: GameCardProps) {
+export function GameCard({
+  card,
+  width = 10,
+  rotation = 0,
+  style,
+  variant = 'full',
+}: GameCardProps) {
   const bg = rarityColor[card.rarity];
   const fg = rarityTextColor[card.rarity];
   const h = width * (4 / 3);
-  const watermarkSize = Math.round(width * 0.40);
+  const watermarkSize = Math.round(width * 0.4);
 
   return (
     <Animated.View
@@ -42,6 +49,7 @@ export function GameCard({ card, width = 10, rotation = 0, style }: GameCardProp
           width,
           height: h,
           backgroundColor: bg,
+          borderRadius: variant === 'thumbnail' ? 12 : 24,
           transform: [{ rotate: `${rotation}deg` }],
         },
         style,
@@ -62,58 +70,58 @@ export function GameCard({ card, width = 10, rotation = 0, style }: GameCardProp
         </Animated.View>
       )}
 
-      <Animated.View style={styles.inner}>
-        {/* Rarity label */}
-        <Animated.View style={{ gap: 10 }}>
-          {/* Event badge — top-left corner */}
-          <Animated.View
-            style={{
-              flexDirection: 'row',
-              alignItems: 'center',
-              justifyContent: 'space-between',
-              gap: 8,
-              width: '100%',
-            }}
-          >
-            <Typography variant="cardLabel" color={fg}>
-              {card.label}
-            </Typography>
+      {variant === 'full' && (
+        <Animated.View style={styles.inner}>
+          {/* Rarity label */}
+          <Animated.View style={{ gap: 10 }}>
+            {/* Event badge — top-left corner */}
+            <Animated.View
+              style={{
+                flexDirection: 'row',
+                alignItems: 'center',
+                justifyContent: 'space-between',
+                gap: 8,
+                width: '100%',
+              }}
+            >
+              <Typography variant="cardLabel" color={fg}>
+                {card.label}
+              </Typography>
 
-            {card.event && (
-              <Animated.View style={[styles.badge, { borderColor: card.event.color + '55' }]}>
-                <Typography
-                  variant="cardLabel"
-                  color={card.event.color}
-                  baseFontSize={9}
-                  style={{ opacity: 1, letterSpacing: 1.5 }}
-                >
-                  {card.event.name}
-                </Typography>
-              </Animated.View>
-            )}
+              {card.event && (
+                <Animated.View style={[styles.badge, { borderColor: card.event.color + '55' }]}>
+                  <Typography
+                    variant="cardLabel"
+                    color={card.event.color}
+                    baseFontSize={9}
+                    style={{ opacity: 1, letterSpacing: 1.5 }}
+                  >
+                    {card.event.name}
+                  </Typography>
+                </Animated.View>
+              )}
+            </Animated.View>
+            <Typography
+              variant="cardTitle"
+              color={fg}
+              baseFontSize={24}
+              baseLineHeight={28}
+              numberOfLines={4}
+            >
+              {card.title}
+            </Typography>
           </Animated.View>
           <Typography
-            variant="cardTitle"
+            variant="body"
             color={fg}
-            baseFontSize={24}
-            baseLineHeight={28}
+            baseFontSize={14}
+            baseLineHeight={18}
             numberOfLines={4}
           >
-            {card.title}
+            {card.description}
           </Typography>
         </Animated.View>
-
-        {/* Card subtitle — bottom */}
-        <Typography
-          variant="body"
-          color={fg}
-          baseFontSize={14}
-          baseLineHeight={18}
-          numberOfLines={4}
-        >
-          {card.description}
-        </Typography>
-      </Animated.View>
+      )}
     </Animated.View>
   );
 }

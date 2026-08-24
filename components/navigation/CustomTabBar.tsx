@@ -6,8 +6,9 @@ import { Ionicons } from '@expo/vector-icons';
 import { ThemeColors } from '../../constants/colors';
 import { useColors } from '../../context/ThemeContext';
 
-const TABS: { name: string; icon: 'home' | 'calendar' | 'layers' | 'person' }[] = [
+const TABS: { name: string; icon: 'home' | 'images' | 'layers' | 'person' }[] = [
   { name: 'index', icon: 'home' },
+  { name: 'album', icon: 'images' },
   { name: 'packs', icon: 'layers' },
   { name: 'profile', icon: 'person' },
 ];

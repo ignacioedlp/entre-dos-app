@@ -292,6 +292,28 @@ export interface PlayPhoto {
   url?: string;
 }
 
+export interface AlbumMoment {
+  id: string;
+  playedAt: string;
+  playedBy: PlayThreadUser;
+  card: PlayThreadCard;
+  photo: PlayPhoto | null;
+  commentCount: number;
+  reactionCount: number;
+}
+
+export interface AlbumMomentsResponse {
+  moments: AlbumMoment[];
+  nextCursor: string | null;
+}
+
+export async function apiGetAlbumMoments(cursor?: string | null): Promise<AlbumMomentsResponse> {
+  const res = await api.get<AlbumMomentsResponse>('/album/moments', {
+    params: { limit: 20, ...(cursor ? { cursor } : {}) },
+  });
+  return res.data;
+}
+
 export async function apiGetPlayThread(playId: string): Promise<PlayThread> {
   const res = await api.get<{ thread: PlayThread }>(`/deck/plays/${playId}/thread`);
   return res.data.thread;

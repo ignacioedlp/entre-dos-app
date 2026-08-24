@@ -11,6 +11,7 @@ export default function AppLayout() {
       }}
     >
       <Tabs.Screen name="index" />
+      <Tabs.Screen name="album" />
       <Tabs.Screen name="packs" />
       <Tabs.Screen name="profile" />
     </Tabs>

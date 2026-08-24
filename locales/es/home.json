@@ -87,6 +87,16 @@
     "photoRejected": "No podemos publicar esta foto por su contenido.",
     "photoError": "No pudimos analizar la foto. Intentá de nuevo."
   },
+  "album": {
+    "title": "ÁLBUM",
+    "subtitle": "Los momentos que compartieron.",
+    "lockedTitle": "Tu álbum de momentos",
+    "lockedCopy": "Guardá y recorré sus jugadas, fotos y reacciones en un espacio privado para ustedes dos.",
+    "unlock": "DESBLOQUEAR ÁLBUM",
+    "emptyTitle": "Todavía no hay momentos",
+    "emptyCopy": "Cuando jueguen cartas, sus recuerdos aparecerán acá.",
+    "loadingMore": "Cargando más momentos…"
+  },
   "weekTimeline": {
     "title": "ESTA SEMANA",
     "played_one": "{{count}} jugada",

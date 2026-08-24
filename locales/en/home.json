@@ -87,6 +87,16 @@
     "photoRejected": "We can't publish this photo because of its content.",
     "photoError": "We couldn't analyze the photo. Please try again."
   },
+  "album": {
+    "title": "ALBUM",
+    "subtitle": "The moments you shared.",
+    "lockedTitle": "Your moments album",
+    "lockedCopy": "Save and revisit your plays, photos, and reactions in a private space for the two of you.",
+    "unlock": "UNLOCK ALBUM",
+    "emptyTitle": "No moments yet",
+    "emptyCopy": "Once you play cards, your memories will appear here.",
+    "loadingMore": "Loading more moments…"
+  },
   "weekTimeline": {
     "title": "THIS WEEK",
     "played_one": "{{count}} play",
