@@ -1,5 +1,6 @@
 import DateTimePicker from '@react-native-community/datetimepicker';
 import { Ionicons } from '@expo/vector-icons';
+import * as ImagePicker from 'expo-image-picker';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useIsFocused, useLocalSearchParams, useRouter } from 'expo-router';
 import moment from 'moment';
@@ -8,6 +9,7 @@ import { useTranslation } from 'react-i18next';
 import {
   ActivityIndicator,
   AppState,
+  Image,
   KeyboardAvoidingView,
   Modal,
   Platform,
@@ -27,11 +29,13 @@ import { useAuth } from '@/context/AuthContext';
 import { useColors } from '@/context/ThemeContext';
 import {
   apiCreatePlayComment,
+  apiDeletePlayPhoto,
   apiDeletePlayReaction,
   apiDeletePlaySchedule,
   apiGetPlayThread,
   apiUpdatePlayReaction,
   apiUpdatePlaySchedule,
+  apiUploadPlayPhoto,
   PlayReaction,
   PlayReactionType,
   PlayThread,
@@ -202,6 +206,34 @@ export default function PlayThreadScreen() {
     },
   });
 
+  const photoMutation = useMutation({
+    mutationFn: (asset: ImagePicker.ImagePickerAsset) =>
+      apiUploadPlayPhoto(playId!, asset, newIdempotencyKey()),
+    onSuccess: (photo) => {
+      queryClient.setQueryData<PlayThread>(['play-thread', playId], (current) =>
+        current ? { ...current, photo } : current
+      );
+      if (photo?.status === 'rejected') Toast.error(t('playThread.photoRejected'));
+      else if (photo?.status === 'error') Toast.error(t('playThread.photoError'));
+      else triggerFeedback('softSuccess');
+    },
+    onError: () => {
+      triggerFeedback('error');
+      Toast.error(t('playThread.photoError'));
+    },
+  });
+
+  const deletePhotoMutation = useMutation({
+    mutationFn: () => apiDeletePlayPhoto(playId!),
+    onSuccess: () => {
+      queryClient.setQueryData<PlayThread>(['play-thread', playId], (current) =>
+        current ? { ...current, photo: null } : current
+      );
+      triggerFeedback('softSuccess');
+    },
+    onError: () => Toast.error(t('playThread.photoError')),
+  });
+
   function sendComment() {
     const body = draft.trim();
     if (!body || body.length > 500 || commentMutation.isPending) return;
@@ -215,6 +247,20 @@ export default function PlayThreadScreen() {
   function updateReaction(type: PlayReactionType | null) {
     triggerFeedback('selection');
     reactionMutation.mutate(type);
+  }
+
+  async function pickPhoto(useCamera: boolean) {
+    const permission = useCamera
+      ? await ImagePicker.requestCameraPermissionsAsync()
+      : await ImagePicker.requestMediaLibraryPermissionsAsync();
+    if (!permission.granted) {
+      Toast.error(t('playThread.photoPermission'));
+      return;
+    }
+    const result = useCamera
+      ? await ImagePicker.launchCameraAsync({ mediaTypes: ['images'], quality: 1 })
+      : await ImagePicker.launchImageLibraryAsync({ mediaTypes: ['images'], quality: 1 });
+    if (!result.canceled && result.assets[0]) photoMutation.mutate(result.assets[0]);
   }
 
   function openSchedule() {
@@ -303,6 +349,62 @@ export default function PlayThreadScreen() {
               <Typography variant="body" color={colors.textSecondary}>
                 {thread.card.description}
               </Typography>
+            </View>
+
+            <View style={styles.section}>
+              <View style={styles.sectionHeader}>
+                <View style={styles.sectionTitleRow}>
+                  <Ionicons name="image-outline" size={18} color={colors.pasion} />
+                  <Typography variant="bodyBold">{t('playThread.photoTitle')}</Typography>
+                </View>
+                {thread.photo?.status === 'approved' ? (
+                  <Pressable onPress={() => deletePhotoMutation.mutate()}>
+                    <Typography variant="label" color={colors.pasion}>
+                      {t('playThread.photoRemove')}
+                    </Typography>
+                  </Pressable>
+                ) : null}
+              </View>
+              {thread.photo?.status === 'approved' && thread.photo.url ? (
+                <Image
+                  source={{ uri: thread.photo.url }}
+                  style={styles.photo}
+                  accessibilityLabel={t('playThread.photoTitle')}
+                />
+              ) : thread.photo?.status === 'pending' || photoMutation.isPending ? (
+                <View style={styles.photoPending}>
+                  <ActivityIndicator color={colors.pasion} />
+                  <Typography variant="body" color={colors.textSecondary}>
+                    {t('playThread.photoPending')}
+                  </Typography>
+                </View>
+              ) : (
+                <Typography variant="body" color={colors.textSecondary}>
+                  {t('playThread.photoEmpty')}
+                </Typography>
+              )}
+              <View style={styles.photoActions}>
+                <Pressable
+                  disabled={photoMutation.isPending}
+                  onPress={() => pickPhoto(false)}
+                  style={styles.photoAction}
+                >
+                  <Ionicons name="images-outline" size={18} color={colors.pasion} />
+                  <Typography variant="label" color={colors.pasion}>
+                    {t('playThread.photoGallery')}
+                  </Typography>
+                </Pressable>
+                <Pressable
+                  disabled={photoMutation.isPending}
+                  onPress={() => pickPhoto(true)}
+                  style={styles.photoAction}
+                >
+                  <Ionicons name="camera-outline" size={18} color={colors.pasion} />
+                  <Typography variant="label" color={colors.pasion}>
+                    {t('playThread.photoCamera')}
+                  </Typography>
+                </Pressable>
+              </View>
             </View>
 
             <View style={styles.section}>
@@ -590,6 +692,10 @@ function createStyles(colors: ThemeColors) {
     },
     sectionHeader: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
     sectionTitleRow: { flexDirection: 'row', alignItems: 'center', gap: 8 },
+    photo: { width: '100%', aspectRatio: 1, borderRadius: 16, backgroundColor: colors.surfaceAlt },
+    photoPending: { flexDirection: 'row', alignItems: 'center', gap: 10, paddingVertical: 10 },
+    photoActions: { flexDirection: 'row', gap: 12 },
+    photoAction: { flexDirection: 'row', alignItems: 'center', gap: 6, paddingVertical: 8 },
     reactionRow: { flexDirection: 'row', gap: 10 },
     reactionButton: {
       width: 50,

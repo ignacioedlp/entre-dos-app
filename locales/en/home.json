@@ -76,7 +76,16 @@
     "saving": "SAVING...",
     "removeSchedule": "REMOVE DATE",
     "scheduleError": "The date couldn't be saved.",
-    "scheduleRemoveError": "The date couldn't be removed."
+    "scheduleRemoveError": "The date couldn't be removed.",
+    "photoTitle": "Memory photo",
+    "photoEmpty": "There is no photo yet.",
+    "photoPending": "Analyzing the photo…",
+    "photoGallery": "Gallery",
+    "photoCamera": "Camera",
+    "photoRemove": "Remove",
+    "photoPermission": "We need permission to access your photos or camera.",
+    "photoRejected": "We can't publish this photo because of its content.",
+    "photoError": "We couldn't analyze the photo. Please try again."
   },
   "weekTimeline": {
     "title": "THIS WEEK",

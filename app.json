@@ -34,6 +34,13 @@
       "expo-router",
       "expo-font",
       [
+        "expo-image-picker",
+        {
+          "photosPermission": "Permite a Entre Dos elegir fotos para los recuerdos compartidos.",
+          "cameraPermission": "Permite a Entre Dos tomar fotos para los recuerdos compartidos."
+        }
+      ],
+      [
         "expo-notifications",
         {
           "color": "#FF3B5C"

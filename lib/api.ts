@@ -284,6 +284,12 @@ export interface PlayThread {
   schedule: PlaySchedule | null;
   comments: PlayComment[];
   reactions: PlayReaction[];
+  photo: PlayPhoto | null;
+}
+
+export interface PlayPhoto {
+  status: 'pending' | 'approved' | 'rejected' | 'error';
+  url?: string;
 }
 
 export async function apiGetPlayThread(playId: string): Promise<PlayThread> {
@@ -333,6 +339,28 @@ export async function apiUpdatePlayReaction(
 
 export async function apiDeletePlayReaction(playId: string): Promise<void> {
   await api.delete(`/deck/plays/${playId}/reaction`);
+}
+
+export async function apiUploadPlayPhoto(
+  playId: string,
+  image: { uri: string; mimeType?: string | null; fileName?: string | null },
+  idempotencyKey: string
+): Promise<PlayPhoto | null> {
+  const form = new FormData();
+  form.append('idempotencyKey', idempotencyKey);
+  form.append('image', {
+    uri: image.uri,
+    type: image.mimeType || 'image/jpeg',
+    name: image.fileName || 'play-photo.jpg',
+  } as unknown as Blob);
+  const res = await api.post<{ photo: PlayPhoto | null }>(`/deck/plays/${playId}/photo`, form, {
+    headers: { 'Content-Type': 'multipart/form-data' },
+  });
+  return res.data.photo;
+}
+
+export async function apiDeletePlayPhoto(playId: string): Promise<void> {
+  await api.delete(`/deck/plays/${playId}/photo`);
 }
 
 export interface Pack {

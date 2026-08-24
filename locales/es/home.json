@@ -76,7 +76,16 @@
     "saving": "GUARDANDO...",
     "removeSchedule": "QUITAR FECHA",
     "scheduleError": "No se pudo guardar la fecha.",
-    "scheduleRemoveError": "No se pudo quitar la fecha."
+    "scheduleRemoveError": "No se pudo quitar la fecha.",
+    "photoTitle": "Foto del recuerdo",
+    "photoEmpty": "Todavía no hay una foto.",
+    "photoPending": "Analizando la foto…",
+    "photoGallery": "Galería",
+    "photoCamera": "Cámara",
+    "photoRemove": "Eliminar",
+    "photoPermission": "Necesitamos permiso para acceder a tus fotos o cámara.",
+    "photoRejected": "No podemos publicar esta foto por su contenido.",
+    "photoError": "No pudimos analizar la foto. Intentá de nuevo."
   },
   "weekTimeline": {
     "title": "ESTA SEMANA",
