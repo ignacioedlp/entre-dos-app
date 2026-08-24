@@ -29,6 +29,18 @@
     "errorSave": "No se pudo guardar la jugada. Intentá de nuevo.",
     "errorLoad": "No se pudo cargar la carta."
   },
+  "cardSwap": {
+    "remaining_one": "{{count}} CAMBIO ESTA SEMANA",
+    "remaining_other": "{{count}} CAMBIOS ESTA SEMANA",
+    "button": "CAMBIAR CARTA",
+    "swapping": "CAMBIANDO...",
+    "confirmTitle": "¿Cambiar esta carta?",
+    "confirmDescription": "Te quedan {{remaining}} cambios esta semana. Recibirás otra carta disponible.",
+    "cancel": "CANCELAR",
+    "confirm": "CAMBIAR",
+    "success": "¡Carta cambiada!",
+    "error": "No pudimos cambiar la carta. Intentá de nuevo."
+  },
   "playThread": {
     "title": "HILO DE LA JUGADA",
     "back": "Volver",

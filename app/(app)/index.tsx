@@ -362,13 +362,18 @@ export default function HomeScreen() {
                   >
                     {t('screen.deckTitle')}
                   </Typography>
-                  <Pressable
-                    onPress={handleRandomCard}
-                    disabled={cards.length <= 1}
-                    style={{ opacity: cards.length <= 1 ? 0.3 : 1 }}
-                  >
-                    <Ionicons name="shuffle" size={20} color={colors.textMuted} />
-                  </Pressable>
+                  <View style={styles.deckActions}>
+                    <Typography variant="cardLabel" color={colors.textMuted} baseFontSize={10}>
+                      {t('cardSwap.remaining', { count: data?.weeklyChanges.remaining ?? 0 })}
+                    </Typography>
+                    <Pressable
+                      onPress={handleRandomCard}
+                      disabled={cards.length <= 1}
+                      style={{ opacity: cards.length <= 1 ? 0.3 : 1 }}
+                    >
+                      <Ionicons name="shuffle" size={20} color={colors.textMuted} />
+                    </Pressable>
+                  </View>
                 </View>
                 <View style={styles.divider} />
               </Animated.View>
@@ -471,6 +476,11 @@ function createStyles(colors: ReturnType<typeof useColors>) {
       flexDirection: 'row',
       alignItems: 'center',
       gap: 14,
+    },
+    deckActions: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: 12,
     },
     eventCountPill: {
       width: 10,

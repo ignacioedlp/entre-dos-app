@@ -1,14 +1,15 @@
 import { useRef, useMemo, useState } from 'react';
-import { View, StyleSheet } from 'react-native';
+import { Alert, Pressable, StyleSheet, View } from 'react-native';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Toast } from 'toastify-react-native';
 import { useQueryClient } from '@tanstack/react-query';
 import { useTranslation } from 'react-i18next';
+import { Ionicons } from '@expo/vector-icons';
 
 import { RarityKey, rarityColor, ThemeColors } from '../constants/colors';
 import { useColors } from '../context/ThemeContext';
-import { DeckCard, DeckResponse, apiPlayCard } from '../lib/api';
+import { apiGetDeck, apiPlayCard, apiSwapCard, DeckCard, DeckResponse } from '../lib/api';
 import { SwipeToConfirm } from '../components/ui/SwipeToConfirm';
 import { Typography } from '../components/ui/Typography';
 import { triggerFeedback } from '../lib/feedback';
@@ -27,10 +28,13 @@ export default function CardDetailSheet() {
   const queryClient = useQueryClient();
   const playing = useRef(false);
   const [isPlaying, setIsPlaying] = useState(false);
+  const [isSwapping, setIsSwapping] = useState(false);
   const [confirmAttempt, setConfirmAttempt] = useState(0);
   const { t } = useTranslation('home');
   const colors = useColors();
   const styles = useMemo(() => createStyles(colors), [colors]);
+  const changesRemaining =
+    queryClient.getQueryData<DeckResponse>(['deck'])?.weeklyChanges.remaining ?? 0;
 
   async function handleConfirm(cardId: string) {
     if (playing.current) return;
@@ -55,6 +59,58 @@ export default function CardDetailSheet() {
       setConfirmAttempt((attempt) => attempt + 1);
       triggerFeedback('error');
       Toast.error(t('playCard.errorSave'));
+    }
+  }
+
+  function handleSwap(cardId: string) {
+    if (changesRemaining <= 0 || isSwapping) return;
+
+    Alert.alert(
+      t('cardSwap.confirmTitle'),
+      t('cardSwap.confirmDescription', { remaining: changesRemaining }),
+      [
+        { text: t('cardSwap.cancel'), style: 'cancel' },
+        {
+          text: t('cardSwap.confirm'),
+          style: 'destructive',
+          onPress: () => void performSwap(cardId),
+        },
+      ]
+    );
+  }
+
+  async function performSwap(cardId: string) {
+    if (isSwapping) return;
+    setIsSwapping(true);
+    try {
+      const result = await apiSwapCard(cardId);
+      queryClient.setQueryData<DeckResponse>(['deck'], (old) =>
+        old
+          ? {
+              ...old,
+              cards: old.cards.map((item) => (item.id === cardId ? result.card : item)),
+              weeklyChanges: { ...old.weeklyChanges, remaining: result.changesRemaining },
+            }
+          : old
+      );
+      // The carousel keeps animations and a derived card list locally. Fetch the
+      // authoritative deck before returning so it cannot render stale card data.
+      try {
+        await queryClient.fetchQuery({
+          queryKey: ['deck'],
+          queryFn: apiGetDeck,
+          staleTime: 0,
+        });
+      } catch {
+        // Keep the optimistic cache update when a refresh is temporarily unavailable.
+      }
+      triggerFeedback('success');
+      Toast.success(t('cardSwap.success'));
+      router.back();
+    } catch {
+      triggerFeedback('error');
+      Toast.error(t('cardSwap.error'));
+      setIsSwapping(false);
     }
   }
 
@@ -98,15 +154,35 @@ export default function CardDetailSheet() {
       </View>
 
       <View style={styles.body}>
-        <Typography
-          variant="swissTitle"
-          baseFontSize={32}
-          baseLineHeight={34}
-          color={cardBg}
-          style={styles.cardTitle}
-        >
-          {card.title}
-        </Typography>
+        <View style={styles.cardTitleRow}>
+          <Typography
+            variant="swissTitle"
+            baseFontSize={32}
+            baseLineHeight={34}
+            color={cardBg}
+            style={styles.cardTitle}
+          >
+            {card.title}
+          </Typography>
+          {!isPlayed && !card.event && (
+            <Pressable
+              accessibilityRole="button"
+              accessibilityLabel={t('cardSwap.button')}
+              disabled={isPlaying || isSwapping || changesRemaining <= 0}
+              onPress={() => handleSwap(card.id)}
+              style={({ pressed }) => [
+                styles.swapButton,
+                (isPlaying || isSwapping || changesRemaining <= 0) && styles.swapButtonDisabled,
+                pressed && styles.swapButtonPressed,
+              ]}
+            >
+              <Ionicons name="swap-horizontal" size={16} color={colors.pasion} />
+              <Typography variant="bodyBold" baseFontSize={12} color={colors.pasion}>
+                {isSwapping ? t('cardSwap.swapping') : t('cardSwap.button')}
+              </Typography>
+            </Pressable>
+          )}
+        </View>
         <Typography
           variant="body"
           baseFontSize={12}
@@ -153,19 +229,38 @@ function createStyles(colors: ThemeColors) {
     body: {
       paddingHorizontal: 24,
       paddingTop: 24,
+      paddingBottom: 24,
       gap: 10,
-      flex: 1,
+      flexShrink: 1,
     },
     cardTitle: {
+      flex: 1,
       letterSpacing: -0.5,
+    },
+    cardTitleRow: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: 12,
     },
     cardDescription: {
       textTransform: 'uppercase',
     },
     footer: {
       paddingHorizontal: 24,
-      gap: 12,
+      marginTop: 'auto',
     },
+    swapButton: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: 8,
+      borderWidth: 1,
+      borderColor: colors.border,
+      borderRadius: 10,
+      paddingHorizontal: 10,
+      paddingVertical: 8,
+    },
+    swapButtonDisabled: { opacity: 0.5 },
+    swapButtonPressed: { opacity: 0.7 },
     playedBanner: {
       backgroundColor: colors.surfaceAlt,
       borderRadius: 12,

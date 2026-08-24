@@ -160,6 +160,10 @@ export interface DeckResponse {
     weekStart: string;
     openingRequired: boolean;
   };
+  weeklyChanges: {
+    limit: number;
+    remaining: number;
+  };
 }
 
 export async function apiGetDeck(): Promise<DeckResponse> {
@@ -196,6 +200,16 @@ export interface CardPlay {
 export async function apiPlayCard(deckCardId: string): Promise<CardPlay> {
   const res = await api.post<{ cardPlay: CardPlay }>(`/deck/${deckCardId}/play`);
   return res.data.cardPlay;
+}
+
+export interface CardSwapResponse {
+  card: DeckCard;
+  changesRemaining: number;
+}
+
+export async function apiSwapCard(deckCardId: string): Promise<CardSwapResponse> {
+  const res = await api.post<CardSwapResponse>(`/deck/${deckCardId}/swap`);
+  return res.data;
 }
 
 export interface CardHistoryItem {

@@ -29,6 +29,18 @@
     "errorSave": "Could not save the play. Please try again.",
     "errorLoad": "Could not load the card."
   },
+  "cardSwap": {
+    "remaining_one": "{{count}} CHANGE THIS WEEK",
+    "remaining_other": "{{count}} CHANGES THIS WEEK",
+    "button": "CHANGE CARD",
+    "swapping": "CHANGING...",
+    "confirmTitle": "Change this card?",
+    "confirmDescription": "You have {{remaining}} changes left this week. You will receive another available card.",
+    "cancel": "CANCEL",
+    "confirm": "CHANGE",
+    "success": "Card changed!",
+    "error": "We couldn't change the card. Please try again."
+  },
   "playThread": {
     "title": "PLAY THREAD",
     "back": "Back",
