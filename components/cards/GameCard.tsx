@@ -122,6 +122,29 @@ export function GameCard({
           </Typography>
         </Animated.View>
       )}
+
+      {variant === 'thumbnail' && (
+        <Animated.View style={styles.thumbnailInner}>
+          <Typography
+            variant="cardTitle"
+            color={fg}
+            baseFontSize={18}
+            baseLineHeight={21}
+            numberOfLines={2}
+          >
+            {card.title}
+          </Typography>
+          <Typography
+            variant="body"
+            color={fg}
+            baseFontSize={12}
+            baseLineHeight={15}
+            numberOfLines={3}
+          >
+            {card.description}
+          </Typography>
+        </Animated.View>
+      )}
     </Animated.View>
   );
 }
@@ -148,6 +171,10 @@ const styles = StyleSheet.create({
     opacity: 0.11,
   },
   inner: {
+    flex: 1,
+    justifyContent: 'space-between',
+  },
+  thumbnailInner: {
     flex: 1,
     justifyContent: 'space-between',
   },

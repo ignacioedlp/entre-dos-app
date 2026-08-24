@@ -409,6 +409,62 @@ export async function apiGetPacks(): Promise<PacksResponse> {
   return res.data;
 }
 
+export type CardCategory = 'date' | 'action' | 'home';
+export type CardRarity = 'common' | 'rare' | 'legendary';
+
+export interface CustomCard {
+  id: string;
+  title: string;
+  description: string;
+  category: CardCategory;
+  rarity: CardRarity;
+  isActive: boolean;
+  isArchived: boolean;
+  creatorId: string;
+  createdAt: string;
+  updatedAt: string;
+  canEdit: boolean;
+}
+
+export interface CustomCardsResponse {
+  cards: CustomCard[];
+  limit: number;
+  rarityLimits: Record<CardRarity, number>;
+}
+
+export interface CustomCardInput {
+  title: string;
+  description: string;
+  category: CardCategory;
+  rarity: CardRarity;
+}
+
+export async function apiGetCustomCards(): Promise<CustomCardsResponse> {
+  const res = await api.get<CustomCardsResponse>('/cards/custom');
+  return res.data;
+}
+
+export async function apiCreateCustomCard(input: CustomCardInput): Promise<CustomCard> {
+  const res = await api.post<{ card: CustomCard }>('/cards/custom', input);
+  return res.data.card;
+}
+
+export async function apiUpdateCustomCard(
+  cardId: string,
+  input: CustomCardInput
+): Promise<CustomCard> {
+  const res = await api.patch<{ card: CustomCard }>(`/cards/custom/${cardId}`, input);
+  return res.data.card;
+}
+
+export async function apiSetCustomCardActive(
+  cardId: string,
+  isActive: boolean
+): Promise<CustomCard> {
+  const res = await api.patch<{ card: CustomCard }>(`/cards/custom/${cardId}`, { isActive });
+  return res.data.card;
+}
+
 // Subscriptions / Entitlements
 export interface EntitlementsResponse {
   premium: boolean;
