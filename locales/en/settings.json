@@ -12,7 +12,6 @@
     "notifications": "NOTIFICATIONS",
     "language": "LANGUAGE",
     "country": "COUNTRY",
-    "relationship": "MY RELATIONSHIP",
     "terms": "TERMS & CONDITIONS",
     "privacy": "PRIVACY POLICY",
     "faq": "FAQ",
@@ -63,7 +62,16 @@
     "noCardsYet": "No cards played yet",
     "changePhoto": "Change Photo",
     "camera": "Camera",
-    "gallery": "Gallery"
+    "gallery": "Gallery",
+    "manage": "Manage",
+    "manageRelationship": "Manage my relationship",
+    "partner": "Your partner",
+    "togetherYears_zero": "Together for less than a year",
+    "togetherYears_one": "Together for one year",
+    "togetherYears_other": "Together for {{count}} years",
+    "anniversaryEmpty": "Set your special date",
+    "linkRelationship": "Link with your partner",
+    "linkRelationshipDescription": "Share the game and create memories together"
   },
   "relationship": {
     "title": "MY RELATIONSHIP.",

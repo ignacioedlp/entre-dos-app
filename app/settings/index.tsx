@@ -81,11 +81,6 @@ export default function SettingsScreen() {
       route: '/settings/country',
       icon: 'earth-outline',
     },
-    {
-      label: t('menu.relationship'),
-      route: '/settings/relationship',
-      icon: 'heart-outline',
-    },
     ...(isPurchaser
       ? [
           {

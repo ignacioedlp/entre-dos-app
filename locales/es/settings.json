@@ -12,7 +12,6 @@
     "notifications": "NOTIFICACIONES",
     "language": "IDIOMA",
     "country": "PAÍS",
-    "relationship": "MI RELACIÓN",
     "terms": "TÉRMINOS Y CONDICIONES",
     "privacy": "POLÍTICAS DE PRIVACIDAD",
     "faq": "PREGUNTAS FRECUENTES",
@@ -63,7 +62,16 @@
     "noCardsYet": "Aún no jugaste cartas",
     "changePhoto": "Cambiar Foto",
     "camera": "Cámara",
-    "gallery": "Galería"
+    "gallery": "Galería",
+    "manage": "Gestionar",
+    "manageRelationship": "Gestionar mi relación",
+    "partner": "Tu pareja",
+    "togetherYears_zero": "Menos de un año juntos",
+    "togetherYears_one": "Hace un año juntos",
+    "togetherYears_other": "Hace {{count}} años juntos",
+    "anniversaryEmpty": "Establezcan su fecha especial",
+    "linkRelationship": "Vinculá a tu pareja",
+    "linkRelationshipDescription": "Compartí el juego y creen recuerdos juntos"
   },
   "relationship": {
     "title": "MI RELACIÓN.",
