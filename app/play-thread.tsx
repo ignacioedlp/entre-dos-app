@@ -70,6 +70,87 @@ function isoTime(date: Date): string {
   return `${String(date.getHours()).padStart(2, '0')}:${String(date.getMinutes()).padStart(2, '0')}`;
 }
 
+function ThreadSkeleton({ styles }: { styles: ReturnType<typeof createStyles> }) {
+  return (
+    <ScrollView
+      accessibilityLabel="Cargando hilo de la jugada"
+      contentContainerStyle={styles.skeletonContent}
+      showsVerticalScrollIndicator={false}
+    >
+      <View style={styles.skeletonSummary}>
+        <View style={[styles.skeletonLine, styles.skeletonPlayedBy]} />
+        <View style={[styles.skeletonLine, styles.skeletonCardTitle]} />
+        <View style={[styles.skeletonLine, styles.skeletonDescription]} />
+      </View>
+
+      <ThreadSkeletonSection styles={styles} hasActions />
+      <ThreadSkeletonSection styles={styles} hasAction />
+
+      <View style={styles.skeletonSection}>
+        <View style={[styles.skeletonLine, styles.skeletonSectionTitle]} />
+        <View style={styles.skeletonReactionRow}>
+          {REACTIONS.map(({ type }) => (
+            <View key={type} style={styles.skeletonReaction} />
+          ))}
+        </View>
+      </View>
+
+      <View style={styles.skeletonCommentsHeader}>
+        <View style={[styles.skeletonLine, styles.skeletonCommentsTitle]} />
+        <View style={[styles.skeletonLine, styles.skeletonCommentCount]} />
+      </View>
+      <View style={styles.skeletonEmptyComments}>
+        <View style={styles.skeletonCommentIcon} />
+        <View style={[styles.skeletonLine, styles.skeletonEmptyCommentLine]} />
+      </View>
+    </ScrollView>
+  );
+}
+
+function ThreadSkeletonSection({
+  styles,
+  hasAction = false,
+  hasActions = false,
+}: {
+  styles: ReturnType<typeof createStyles>;
+  hasAction?: boolean;
+  hasActions?: boolean;
+}) {
+  return (
+    <View style={styles.skeletonSection}>
+      <View style={styles.skeletonSectionHeader}>
+        <View style={styles.skeletonSectionTitleRow}>
+          <View style={styles.skeletonSectionIcon} />
+          <View style={[styles.skeletonLine, styles.skeletonSectionTitle]} />
+        </View>
+        {hasAction && <View style={[styles.skeletonLine, styles.skeletonAction]} />}
+      </View>
+      <View style={[styles.skeletonLine, styles.skeletonSectionBody]} />
+      {hasActions && (
+        <View style={styles.skeletonPhotoActions}>
+          <View style={[styles.skeletonLine, styles.skeletonPhotoAction]} />
+          <View style={[styles.skeletonLine, styles.skeletonPhotoAction]} />
+        </View>
+      )}
+    </View>
+  );
+}
+
+function ThreadComposerSkeleton({
+  styles,
+  bottomInset,
+}: {
+  styles: ReturnType<typeof createStyles>;
+  bottomInset: number;
+}) {
+  return (
+    <View style={[styles.skeletonComposer, { paddingBottom: Math.max(bottomInset, 12) }]}>
+      <View style={styles.skeletonInput} />
+      <View style={styles.skeletonSendButton} />
+    </View>
+  );
+}
+
 export default function PlayThreadScreen() {
   const { playId } = useLocalSearchParams<{ playId: string }>();
   const router = useRouter();
@@ -312,12 +393,10 @@ export default function PlayThreadScreen() {
       </View>
 
       {threadQuery.isLoading ? (
-        <View style={styles.centered}>
-          <ActivityIndicator color={colors.pasion} />
-          <Typography variant="body" color={colors.textSecondary}>
-            {t('playThread.loading')}
-          </Typography>
-        </View>
+        <>
+          <ThreadSkeleton styles={styles} />
+          <ThreadComposerSkeleton styles={styles} bottomInset={insets.bottom} />
+        </>
       ) : threadQuery.isError || !thread ? (
         <View style={styles.centered}>
           <Ionicons name="cloud-offline-outline" size={42} color={colors.textMuted} />
@@ -677,6 +756,66 @@ function createStyles(colors: ThemeColors) {
     },
     centerText: { textAlign: 'center' },
     content: { paddingHorizontal: 20, paddingTop: 10, paddingBottom: 32 },
+    skeletonContent: { paddingHorizontal: 20, paddingTop: 10, paddingBottom: 32 },
+    skeletonLine: { borderRadius: 6, backgroundColor: colors.surfaceAlt },
+    skeletonSummary: {
+      paddingHorizontal: 2,
+      paddingTop: 12,
+      paddingBottom: 24,
+      gap: 12,
+    },
+    skeletonPlayedBy: { width: '38%', height: 12 },
+    skeletonCardTitle: { width: '48%', height: 26 },
+    skeletonDescription: { width: '78%', height: 16 },
+    skeletonSection: {
+      paddingVertical: 20,
+      borderTopWidth: 1,
+      borderTopColor: colors.border,
+      gap: 14,
+    },
+    skeletonSectionHeader: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      justifyContent: 'space-between',
+    },
+    skeletonSectionTitleRow: { flexDirection: 'row', alignItems: 'center', gap: 8 },
+    skeletonSectionIcon: {
+      width: 18,
+      height: 18,
+      borderRadius: 5,
+      backgroundColor: colors.surfaceAlt,
+    },
+    skeletonSectionTitle: { width: 132, height: 17 },
+    skeletonAction: { width: 74, height: 13 },
+    skeletonSectionBody: { width: '68%', height: 16 },
+    skeletonPhotoActions: { flexDirection: 'row', gap: 16, marginTop: 2 },
+    skeletonPhotoAction: { width: 92, height: 15 },
+    skeletonReactionRow: { flexDirection: 'row', gap: 10 },
+    skeletonReaction: {
+      width: 50,
+      height: 50,
+      borderRadius: 14,
+      backgroundColor: colors.surfaceAlt,
+    },
+    skeletonCommentsHeader: {
+      flexDirection: 'row',
+      justifyContent: 'space-between',
+      alignItems: 'center',
+      borderTopWidth: 1,
+      borderTopColor: colors.border,
+      paddingTop: 20,
+      paddingBottom: 12,
+    },
+    skeletonCommentsTitle: { width: 126, height: 17 },
+    skeletonCommentCount: { width: 12, height: 12 },
+    skeletonEmptyComments: { alignItems: 'center', gap: 12, paddingVertical: 28 },
+    skeletonCommentIcon: {
+      width: 32,
+      height: 28,
+      borderRadius: 14,
+      backgroundColor: colors.surfaceAlt,
+    },
+    skeletonEmptyCommentLine: { width: '52%', height: 14 },
     cardSummary: {
       paddingHorizontal: 2,
       paddingTop: 12,

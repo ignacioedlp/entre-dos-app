@@ -67,6 +67,34 @@ function errorMessage(error: unknown, fallback: string) {
   return response.response?.data?.error || fallback;
 }
 
+function CustomCardsSkeleton({
+  cardWidth,
+  styles,
+}: {
+  cardWidth: number;
+  styles: ReturnType<typeof createStyles>;
+}) {
+  return (
+    <ScrollView
+      accessibilityLabel="Cargando mis cartas"
+      contentContainerStyle={styles.skeletonContent}
+      showsVerticalScrollIndicator={false}
+    >
+      <View style={[styles.skeletonLine, styles.skeletonCount]} />
+      <View style={styles.skeletonGrid}>
+        {[0, 1, 2, 3].map((index) => (
+          <View key={index} style={[styles.skeletonCard, { width: cardWidth }]}>
+            <View style={[styles.skeletonLine, styles.skeletonCardLabel]} />
+            <View style={[styles.skeletonLine, styles.skeletonCardTitle]} />
+            <View style={[styles.skeletonLine, styles.skeletonCardWatermark]} />
+            <View style={[styles.skeletonLine, styles.skeletonCardDescription]} />
+          </View>
+        ))}
+      </View>
+    </ScrollView>
+  );
+}
+
 export default function CustomCardsScreen() {
   const { t } = useTranslation('home');
   const insets = useSafeAreaInsets();
@@ -79,7 +107,7 @@ export default function CustomCardsScreen() {
   const [form, setForm] = useState<CustomCardInput>(EMPTY_FORM);
   const styles = useMemo(() => createStyles(colors), [colors]);
 
-  const { data: entitlements } = useQuery({
+  const { data: entitlements, isLoading: entitlementsLoading } = useQuery({
     queryKey: ['entitlements'],
     queryFn: apiGetEntitlements,
   });
@@ -161,6 +189,9 @@ export default function CustomCardsScreen() {
     form.description.trim().length > 0 &&
     descriptionRemaining >= 0;
   const cardWidth = (width - GRID_PADDING * 2 - GRID_GAP) / 2;
+  const showSkeleton =
+    (entitlementsLoading && !isSubscribed && entitlementData?.premium !== true) ||
+    (isPremium && isLoading);
 
   return (
     <View style={[styles.root, { paddingTop: insets.top + 20 }]}>
@@ -180,7 +211,9 @@ export default function CustomCardsScreen() {
         {t('customCards.subtitle')}
       </Typography>
 
-      {!isPremium ? (
+      {showSkeleton ? (
+        <CustomCardsSkeleton cardWidth={cardWidth} styles={styles} />
+      ) : !isPremium ? (
         <View style={styles.empty}>
           <Ionicons name="lock-closed-outline" size={36} color={colors.textMuted} />
           <Typography variant="body" color={colors.textSecondary} style={styles.centered}>
@@ -203,12 +236,7 @@ export default function CustomCardsScreen() {
               {t('customCards.count', { count: activeCards.length, limit: data?.limit ?? 20 })}
             </Typography>
           </View>
-          {isLoading ? (
-            <Typography variant="body" color={colors.textSecondary}>
-              {t('common:loading')}
-            </Typography>
-          ) : null}
-          {!isLoading && data?.cards.length === 0 ? (
+          {data?.cards.length === 0 ? (
             <View style={styles.empty}>
               <Ionicons name="sparkles-outline" size={38} color={colors.textMuted} />
               <Typography variant="body" color={colors.textSecondary} style={styles.centered}>
@@ -439,6 +467,32 @@ const createStyles = (colors: ReturnType<typeof useColors>) =>
     },
     subtitle: { paddingHorizontal: 20, marginTop: 2, marginBottom: 20 },
     content: { padding: 24, gap: 12, paddingBottom: 44 },
+    skeletonContent: { padding: 24, gap: 12, paddingBottom: 44 },
+    skeletonLine: { borderRadius: 6, backgroundColor: colors.surfaceAlt },
+    skeletonCount: { width: 168, height: 16, marginBottom: 4 },
+    skeletonGrid: { flexDirection: 'row', flexWrap: 'wrap', gap: GRID_GAP },
+    skeletonCard: {
+      aspectRatio: 3 / 4,
+      borderRadius: 14,
+      padding: 16,
+      backgroundColor: colors.surface,
+    },
+    skeletonCardLabel: { width: '48%', height: 10 },
+    skeletonCardTitle: { width: '76%', height: 18, marginTop: 12 },
+    skeletonCardWatermark: {
+      width: 58,
+      height: 58,
+      borderRadius: 29,
+      alignSelf: 'center',
+      marginTop: 30,
+    },
+    skeletonCardDescription: {
+      width: '62%',
+      height: 12,
+      position: 'absolute',
+      left: 16,
+      bottom: 18,
+    },
     countRow: {
       flexDirection: 'row',
       justifyContent: 'space-between',

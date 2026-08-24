@@ -1,6 +1,6 @@
 import { Ionicons } from '@expo/vector-icons';
 import { useInfiniteQuery, useQuery } from '@tanstack/react-query';
-import { Image, Pressable, SectionList, StyleSheet, View } from 'react-native';
+import { Image, Pressable, ScrollView, SectionList, StyleSheet, View } from 'react-native';
 import { useMemo } from 'react';
 import { useRouter } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -40,6 +40,48 @@ function CardThumbnail({ card }: Pick<AlbumMoment, 'card'>) {
         variant="thumbnail"
         width={60}
       />
+    </View>
+  );
+}
+
+function AlbumSkeleton({ styles }: { styles: ReturnType<typeof createStyles> }) {
+  return (
+    <ScrollView
+      accessibilityLabel="Cargando álbum"
+      contentContainerStyle={styles.skeletonContent}
+      showsVerticalScrollIndicator={false}
+    >
+      <View style={styles.skeletonMonth} />
+      <AlbumSkeletonRow styles={styles} titleWidth="58%" />
+      <AlbumSkeletonRow styles={styles} titleWidth="72%" />
+      <AlbumSkeletonRow styles={styles} titleWidth="48%" />
+      <AlbumSkeletonRow styles={styles} titleWidth="64%" />
+      <AlbumSkeletonRow styles={styles} titleWidth="54%" />
+    </ScrollView>
+  );
+}
+
+function AlbumSkeletonRow({
+  styles,
+  titleWidth,
+}: {
+  styles: ReturnType<typeof createStyles>;
+  titleWidth: `${number}%`;
+}) {
+  return (
+    <View style={styles.skeletonMoment}>
+      <View style={styles.skeletonThumbnail} />
+      <View style={styles.skeletonMomentBody}>
+        <View style={[styles.skeletonLine, styles.skeletonTitle, { width: titleWidth }]} />
+        <View style={[styles.skeletonLine, styles.skeletonDate]} />
+        <View style={styles.skeletonActivity}>
+          <View style={styles.skeletonIcon} />
+          <View style={[styles.skeletonLine, styles.skeletonCount]} />
+          <View style={styles.skeletonIcon} />
+          <View style={[styles.skeletonLine, styles.skeletonCount]} />
+        </View>
+      </View>
+      <View style={styles.skeletonChevron} />
     </View>
   );
 }
@@ -109,57 +151,59 @@ export default function AlbumScreen() {
           {t('album.subtitle')}
         </Typography>
       </View>
-      <SectionList
-        sections={sections}
-        keyExtractor={(moment) => moment.id}
-        contentContainerStyle={styles.content}
-        stickySectionHeadersEnabled={false}
-        onEndReached={() => {
-          if (momentsQuery.hasNextPage && !momentsQuery.isFetchingNextPage) {
-            momentsQuery.fetchNextPage();
-          }
-        }}
-        onEndReachedThreshold={0.4}
-        renderSectionHeader={({ section }) => (
-          <Typography variant="label" color={colors.pasion} style={styles.month}>
-            {section.title}
-          </Typography>
-        )}
-        renderItem={({ item }) => (
-          <Pressable
-            onPress={() => router.push({ pathname: '/play-thread', params: { playId: item.id } })}
-            style={({ pressed }) => [styles.moment, pressed && styles.momentPressed]}
-          >
-            {item.photo?.url ? (
-              <Image source={{ uri: item.photo.url }} style={styles.photo} />
-            ) : (
-              <CardThumbnail card={item.card} />
-            )}
-            <View style={styles.momentBody}>
-              <Typography variant="bodyBold" numberOfLines={2}>
-                {item.card.title}
-              </Typography>
-              <Typography variant="caption" color={colors.textSecondary} numberOfLines={1}>
-                {new Intl.DateTimeFormat(i18n.language, { dateStyle: 'medium' }).format(
-                  new Date(item.playedAt)
-                )}
-              </Typography>
-              <View style={styles.activity}>
-                <Ionicons name="chatbubble-outline" size={14} color={colors.textMuted} />
-                <Typography variant="caption" color={colors.textMuted}>
-                  {item.commentCount}
+      {entitlementQuery.isLoading || momentsQuery.isLoading ? (
+        <AlbumSkeleton styles={styles} />
+      ) : (
+        <SectionList
+          sections={sections}
+          keyExtractor={(moment) => moment.id}
+          contentContainerStyle={styles.content}
+          stickySectionHeadersEnabled={false}
+          onEndReached={() => {
+            if (momentsQuery.hasNextPage && !momentsQuery.isFetchingNextPage) {
+              momentsQuery.fetchNextPage();
+            }
+          }}
+          onEndReachedThreshold={0.4}
+          renderSectionHeader={({ section }) => (
+            <Typography variant="label" color={colors.pasion} style={styles.month}>
+              {section.title}
+            </Typography>
+          )}
+          renderItem={({ item }) => (
+            <Pressable
+              onPress={() => router.push({ pathname: '/play-thread', params: { playId: item.id } })}
+              style={({ pressed }) => [styles.moment, pressed && styles.momentPressed]}
+            >
+              {item.photo?.url ? (
+                <Image source={{ uri: item.photo.url }} style={styles.photo} />
+              ) : (
+                <CardThumbnail card={item.card} />
+              )}
+              <View style={styles.momentBody}>
+                <Typography variant="bodyBold" numberOfLines={2}>
+                  {item.card.title}
                 </Typography>
-                <Ionicons name="heart-outline" size={14} color={colors.textMuted} />
-                <Typography variant="caption" color={colors.textMuted}>
-                  {item.reactionCount}
+                <Typography variant="caption" color={colors.textSecondary} numberOfLines={1}>
+                  {new Intl.DateTimeFormat(i18n.language, { dateStyle: 'medium' }).format(
+                    new Date(item.playedAt)
+                  )}
                 </Typography>
+                <View style={styles.activity}>
+                  <Ionicons name="chatbubble-outline" size={14} color={colors.textMuted} />
+                  <Typography variant="caption" color={colors.textMuted}>
+                    {item.commentCount}
+                  </Typography>
+                  <Ionicons name="heart-outline" size={14} color={colors.textMuted} />
+                  <Typography variant="caption" color={colors.textMuted}>
+                    {item.reactionCount}
+                  </Typography>
+                </View>
               </View>
-            </View>
-            <Ionicons name="chevron-forward" size={18} color={colors.textMuted} />
-          </Pressable>
-        )}
-        ListEmptyComponent={
-          entitlementQuery.isLoading || momentsQuery.isLoading ? null : (
+              <Ionicons name="chevron-forward" size={18} color={colors.textMuted} />
+            </Pressable>
+          )}
+          ListEmptyComponent={
             <View style={styles.empty}>
               <Ionicons name="images-outline" size={46} color={colors.textMuted} />
               <Typography variant="bodyBold">{t('album.emptyTitle')}</Typography>
@@ -167,16 +211,16 @@ export default function AlbumScreen() {
                 {t('album.emptyCopy')}
               </Typography>
             </View>
-          )
-        }
-        ListFooterComponent={
-          momentsQuery.isFetchingNextPage ? (
-            <Typography variant="caption" color={colors.textMuted} style={styles.loadingMore}>
-              {t('album.loadingMore')}
-            </Typography>
-          ) : null
-        }
-      />
+          }
+          ListFooterComponent={
+            momentsQuery.isFetchingNextPage ? (
+              <Typography variant="caption" color={colors.textMuted} style={styles.loadingMore}>
+                {t('album.loadingMore')}
+              </Typography>
+            ) : null
+          }
+        />
+      )}
     </View>
   );
 }
@@ -187,6 +231,52 @@ function createStyles(colors: ThemeColors) {
     centered: { alignItems: 'center', justifyContent: 'center', paddingHorizontal: 36, gap: 16 },
     header: { paddingHorizontal: 24, paddingBottom: 20, gap: 8 },
     content: { paddingHorizontal: 24, paddingBottom: 32 },
+    skeletonContent: { paddingHorizontal: 24, paddingBottom: 32 },
+    skeletonMonth: {
+      width: 144,
+      height: 14,
+      marginTop: 14,
+      marginBottom: 18,
+      borderRadius: 7,
+      backgroundColor: colors.surfaceAlt,
+    },
+    skeletonMoment: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: 12,
+      minHeight: 96,
+      paddingVertical: 12,
+      borderBottomWidth: 1,
+      borderBottomColor:
+        colors.background === darkColors.background ? 'rgba(255, 255, 255, 0.16)' : colors.border,
+    },
+    skeletonThumbnail: {
+      width: 76,
+      height: 76,
+      borderRadius: 11,
+      backgroundColor: colors.surfaceAlt,
+    },
+    skeletonMomentBody: { flex: 1, gap: 9 },
+    skeletonLine: { borderRadius: 6, backgroundColor: colors.surfaceAlt },
+    skeletonTitle: { height: 17 },
+    skeletonDate: { width: '44%', height: 12 },
+    skeletonActivity: { flexDirection: 'row', alignItems: 'center', gap: 6 },
+    skeletonIcon: {
+      width: 14,
+      height: 14,
+      borderRadius: 7,
+      backgroundColor: colors.surfaceAlt,
+    },
+    skeletonCount: { width: 10, height: 11, marginRight: 5 },
+    skeletonChevron: {
+      width: 10,
+      height: 10,
+      borderTopWidth: 2,
+      borderRightWidth: 2,
+      borderColor: colors.surfaceAlt,
+      transform: [{ rotate: '45deg' }],
+      marginRight: 4,
+    },
     month: { textTransform: 'uppercase', marginTop: 14, marginBottom: 10, letterSpacing: 1 },
     moment: {
       flexDirection: 'row',
