@@ -3,6 +3,7 @@ import { AccessibilityInfo, Image, Modal, Pressable, StyleSheet, View } from 're
 import { Ionicons } from '@expo/vector-icons';
 import { useTranslation } from 'react-i18next';
 import { Gesture, GestureDetector } from 'react-native-gesture-handler';
+import Svg, { Defs, Ellipse, RadialGradient, Stop } from 'react-native-svg';
 import Animated, {
   FadeIn,
   FadeOut,
@@ -210,14 +211,6 @@ export function WeeklyPackOpening({
       onRequestClose={phase === 'sealed' ? onSkip : undefined}
     >
       <View style={styles.root} accessibilityViewIsModal>
-        <View style={styles.brandMark}>
-          <View style={styles.brandLine} />
-          <Typography variant="cardLabel" color="rgba(255,255,255,.42)" style={styles.brandText}>
-            ENTRE DOS
-          </Typography>
-          <View style={styles.brandLine} />
-        </View>
-
         {phase !== 'revealing' ? (
           <View style={styles.sealedContent}>
             <View style={styles.copy}>
@@ -247,6 +240,20 @@ export function WeeklyPackOpening({
                 onAccessibilityTap={beginOpening}
                 style={styles.packetStage}
               >
+                <View pointerEvents="none" style={styles.packetGlow}>
+                  <Svg width="100%" height="100%" viewBox="0 0 374 454">
+                    <Defs>
+                      <RadialGradient id="packetBacklight" cx="50%" cy="48%" r="50%">
+                        <Stop offset="0%" stopColor={colors.pasion} stopOpacity={0.42} />
+                        <Stop offset="38%" stopColor={colors.pasion} stopOpacity={0.24} />
+                        <Stop offset="72%" stopColor={colors.pasion} stopOpacity={0.09} />
+                        <Stop offset="100%" stopColor={colors.pasion} stopOpacity={0} />
+                      </RadialGradient>
+                    </Defs>
+                    <Ellipse cx="187" cy="227" rx="184" ry="224" fill="url(#packetBacklight)" />
+                  </Svg>
+                </View>
+
                 <Animated.View style={[styles.cardStack, cardStackStyle]} pointerEvents="none">
                   <View style={[styles.previewCard, styles.previewCardLeft]} />
                   <View style={[styles.previewCard, styles.previewCardRight]} />
@@ -357,6 +364,13 @@ function createStyles(colors: ThemeColors) {
       alignSelf: 'center',
       justifyContent: 'flex-end',
       marginTop: 8,
+    },
+    packetGlow: {
+      position: 'absolute',
+      left: -62,
+      top: -20,
+      width: 374,
+      height: 454,
     },
     packet: {
       width: 250,

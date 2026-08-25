@@ -8,13 +8,14 @@ import {
   TouchableWithoutFeedback,
   TouchableOpacity,
   ActivityIndicator,
+  Pressable,
 } from 'react-native';
 import * as Clipboard from 'expo-clipboard';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useQuery, useMutation } from '@tanstack/react-query';
 import { router } from 'expo-router';
 import { useTranslation } from 'react-i18next';
-import { Logo } from '../../components/ui/Logo';
+import { Ionicons } from '@expo/vector-icons';
 import { Button } from '../../components/ui/Button';
 import { useColors } from '@/context/ThemeContext';
 import { ThemeColors } from '../../constants/colors';
@@ -106,12 +107,28 @@ export default function WaitingScreen() {
     Keyboard.dismiss();
   };
 
+  const handleBack = () => {
+    if (router.canGoBack()) {
+      router.back();
+      return;
+    }
+
+    router.replace('/(auth)/welcome');
+  };
+
   if (mode === 'join') {
     return (
       <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
         <View style={[styles.root, { paddingTop: insets.top + 16 }]}>
           <View style={styles.header}>
-            <Logo size="sm" />
+            <Pressable
+              accessibilityRole="button"
+              accessibilityLabel={t('link.back')}
+              onPress={handleBack}
+              style={styles.backBtn}
+            >
+              <Ionicons name="arrow-back" size={22} color={colors.background} />
+            </Pressable>
           </View>
 
           <View style={styles.content}>
@@ -186,7 +203,14 @@ export default function WaitingScreen() {
   return (
     <View style={[styles.root, { paddingTop: insets.top + 16 }]}>
       <View style={styles.header}>
-        <Logo size="sm" />
+        <Pressable
+          accessibilityRole="button"
+          accessibilityLabel={t('link.back')}
+          onPress={handleBack}
+          style={styles.backBtn}
+        >
+          <Ionicons name="arrow-back" size={22} color={colors.background} />
+        </Pressable>
       </View>
 
       <View style={styles.content}>
@@ -235,6 +259,14 @@ function createStyles(colors: ThemeColors) {
     },
     header: {
       marginBottom: 48,
+    },
+    backBtn: {
+      width: 40,
+      height: 40,
+      backgroundColor: colors.textPrimary,
+      alignItems: 'center',
+      justifyContent: 'center',
+      borderRadius: 25,
     },
     content: {
       flex: 1,

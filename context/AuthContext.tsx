@@ -1,8 +1,16 @@
 import * as Sentry from '@sentry/react-native';
-import { createContext, useContext, useState, ReactNode, useEffect } from 'react';
+import { createContext, useCallback, useContext, useState, ReactNode, useEffect } from 'react';
 import * as Localization from 'expo-localization';
 import { GoogleSignin } from '@react-native-google-signin/google-signin';
-import { apiLogin, apiRegister, apiGoogleAuth, apiResetPassword } from '../lib/api';
+import { useQueryClient } from '@tanstack/react-query';
+import { useRouter } from 'expo-router';
+import {
+  apiLogin,
+  apiRegister,
+  apiGoogleAuth,
+  apiResetPassword,
+  subscribeToUnauthorized,
+} from '../lib/api';
 import { clearAll, getProfile, getToken, ProfileData, setProfile, setToken } from '../lib/storage';
 import i18n from '@/i18n';
 
@@ -39,10 +47,21 @@ interface AuthContextValue extends AuthState {
 const AuthContext = createContext<AuthContextValue | undefined>(undefined);
 
 export function AuthProvider({ children }: { children: ReactNode }) {
+  const router = useRouter();
+  const queryClient = useQueryClient();
   const [state, setState] = useState<AuthState>(() => ({
     user: getProfile(),
     token: getToken(),
   }));
+
+  const resetSession = useCallback(() => {
+    clearAll();
+    queryClient.clear();
+    setState({ user: null, token: null });
+    router.replace('/(auth)/welcome');
+  }, [queryClient, router]);
+
+  useEffect(() => subscribeToUnauthorized(resetSession), [resetSession]);
 
   useEffect(() => {
     if (state.user) {
@@ -130,8 +149,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }
 
   function logout(): void {
-    clearAll();
-    setState({ user: null, token: null });
+    resetSession();
   }
 
   function updateProfile(profile: ProfileData): void {

@@ -8,6 +8,7 @@ const HAPTICS_ENABLED_KEY = 'feedback.haptics.enabled';
 
 export type FeedbackEvent =
   | 'selection'
+  | 'cardSwipe'
   | 'softSuccess'
   | 'success'
   | 'error'
@@ -16,6 +17,7 @@ export type FeedbackEvent =
 
 const audioSources = {
   success: require('@/assets/audio/confirm.wav'),
+  cardSwipe: require('@/assets/audio/card-slide.wav'),
   packCut: require('@/assets/audio/pack-tear.wav'),
   packReveal: require('@/assets/audio/card-reveal.wav'),
 } as const;
@@ -62,6 +64,7 @@ async function playHaptic(event: FeedbackEvent): Promise<void> {
   if (!isHapticsEnabled()) return;
   switch (event) {
     case 'selection':
+    case 'cardSwipe':
       await Haptics.selectionAsync();
       break;
     case 'softSuccess':
@@ -83,7 +86,7 @@ async function playHaptic(event: FeedbackEvent): Promise<void> {
 export function triggerFeedback(event: FeedbackEvent): void {
   void Promise.all([
     playHaptic(event),
-    event === 'success' || event === 'packCut' || event === 'packReveal'
+    event === 'success' || event === 'cardSwipe' || event === 'packCut' || event === 'packReveal'
       ? playSound(event)
       : Promise.resolve(),
   ]).catch(() => undefined);

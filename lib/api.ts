@@ -1,6 +1,15 @@
 import axios from 'axios';
 import { clearAll, getToken, ProfileData } from './storage';
 
+type UnauthorizedListener = () => void;
+
+const unauthorizedListeners = new Set<UnauthorizedListener>();
+
+export function subscribeToUnauthorized(listener: UnauthorizedListener): () => void {
+  unauthorizedListeners.add(listener);
+  return () => unauthorizedListeners.delete(listener);
+}
+
 export const api = axios.create({
   baseURL:
     process.env.EXPO_PUBLIC_API_URL ??
@@ -29,6 +38,7 @@ api.interceptors.response.use(
     // actually sent and rejected by the API.
     if (error.response?.status === 401 && authorization?.startsWith('Bearer ')) {
       clearAll();
+      unauthorizedListeners.forEach((listener) => listener());
     }
     return Promise.reject(error);
   }

@@ -178,11 +178,11 @@ export default function HomeScreen() {
     navigateToCard(card);
   }
 
-  function goTo(i: number) {
+  function goTo(i: number, feedback: 'selection' | 'cardSwipe' = 'selection') {
     if (!carouselItemCountRef.current) return;
     const clamped = Math.max(0, Math.min(carouselItemCountRef.current - 1, i));
     if (clamped === activeCardIndexRef.current) return;
-    triggerFeedback('selection');
+    triggerFeedback(feedback);
     activeCardIndexRef.current = clamped;
     setActiveCardIndex(clamped);
     activeIndex.value = clamped;
@@ -230,7 +230,7 @@ export default function HomeScreen() {
 
       if (isHorizontalSwipe) {
         const direction = e.translationX < 0 ? 1 : -1;
-        runOnJS(goTo)(activeIndex.value + direction);
+        runOnJS(goTo)(activeIndex.value + direction, 'cardSwipe');
         return;
       }
 

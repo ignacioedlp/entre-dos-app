@@ -57,6 +57,17 @@ writeWav(resolve(output, 'card-reveal.wav'), 0.34, (time) => {
   return Math.sin(2 * Math.PI * frequency * time) * envelope * 0.2;
 });
 
+let previousCardNoise = 0;
+writeWav(resolve(output, 'card-slide.wav'), 0.18, (time) => {
+  const progress = time / 0.18;
+  const noise = deterministicNoise();
+  const paperFriction = noise - previousCardNoise * 0.7;
+  previousCardNoise = noise;
+  const envelope = Math.sin(Math.PI * progress) ** 0.55;
+  const edgeContact = Math.exp(-Math.abs(time - 0.035) * 115);
+  return paperFriction * envelope * 0.12 + edgeContact * 0.045;
+});
+
 writeWav(resolve(output, 'confirm.wav'), 0.42, (time) => {
   const first = Math.sin(2 * Math.PI * 523.25 * time) * Math.exp(-time * 9);
   const secondTime = Math.max(0, time - 0.11);
