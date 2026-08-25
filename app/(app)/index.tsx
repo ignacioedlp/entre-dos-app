@@ -36,6 +36,7 @@ import {
 import { useNotificationList } from '../../hooks/use-notification-list';
 import { Typography } from '../../components/ui/Typography';
 import { WeeklyPackOpening } from '../../components/deck/WeeklyPackOpening';
+import { ExtraCardReward } from '../../components/deck/ExtraCardReward';
 import { storage } from '../../lib/storage';
 import { triggerFeedback } from '../../lib/feedback';
 
@@ -120,6 +121,10 @@ export default function HomeScreen() {
     });
   const cardsRef = useRef<DeckCard[]>([]);
   cardsRef.current = cards;
+  const hasExtraCardSlot = data?.extraCard?.state === 'available';
+  const carouselItemCount = cards.length + (hasExtraCardSlot ? 1 : 0);
+  const carouselItemCountRef = useRef(carouselItemCount);
+  carouselItemCountRef.current = carouselItemCount;
 
   const rotation = useSharedValue(0);
   const activeIndex = useSharedValue(0);
@@ -129,12 +134,12 @@ export default function HomeScreen() {
   const [packVisible, setPackVisible] = useState(false);
   const syncingPackKey = useRef<string | null>(null);
   const activeCardIndexRef = useRef(0);
-  const cardIds = cards.map((card) => card.id).join('|');
+  const cardIds = `${cards.map((card) => card.id).join('|')}|extra:${hasExtraCardSlot}`;
 
   useEffect(() => {
     const nextIndex = Math.min(
       activeCardIndexRef.current,
-      Math.max(cardsRef.current.length - 1, 0)
+      Math.max(carouselItemCountRef.current - 1, 0)
     );
 
     activeCardIndexRef.current = nextIndex;
@@ -174,8 +179,8 @@ export default function HomeScreen() {
   }
 
   function goTo(i: number) {
-    if (!cardsRef.current.length) return;
-    const clamped = Math.max(0, Math.min(cardsRef.current.length - 1, i));
+    if (!carouselItemCountRef.current) return;
+    const clamped = Math.max(0, Math.min(carouselItemCountRef.current - 1, i));
     if (clamped === activeCardIndexRef.current) return;
     triggerFeedback('selection');
     activeCardIndexRef.current = clamped;
@@ -231,6 +236,10 @@ export default function HomeScreen() {
 
       if (dragY.value > 80) {
         const card = list[activeIndex.value];
+        if (!card) {
+          dragY.value = withSpring(0, { damping: 18, stiffness: 200 });
+          return;
+        }
         dragY.value = withTiming(CARD_HEIGHT * 1.3, { duration: 260 }, () => {
           runOnJS(doNavigate)(card);
         });
@@ -343,9 +352,14 @@ export default function HomeScreen() {
               >
                 {t('screen.emptyDescription')}
               </Typography>
+              {data?.extraCard ? <ExtraCardReward extraCard={data.extraCard} /> : null}
             </View>
           ) : showAllPlayed ? (
-            <AllPlayedState />
+            <AllPlayedState
+              extraCardAction={
+                data?.extraCard ? <ExtraCardReward extraCard={data.extraCard} /> : undefined
+              }
+            />
           ) : (
             <View style={styles.carouselSection}>
               {partnerLastPlay && (
@@ -404,6 +418,18 @@ export default function HomeScreen() {
                           onTap={() => goTo(index)}
                         />
                       ))}
+                      {hasExtraCardSlot && data?.extraCard ? (
+                        <ExtraCardReward
+                          extraCard={data.extraCard}
+                          carousel={{
+                            index: cards.length,
+                            rotation,
+                            activeIndex,
+                            isActive: activeCardIndex === cards.length,
+                            onFocus: () => goTo(cards.length),
+                          }}
+                        />
+                      ) : null}
                       <Pressable
                         accessibilityLabel="Previous card"
                         disabled={activeCardIndex === 0}
@@ -412,7 +438,7 @@ export default function HomeScreen() {
                       />
                       <Pressable
                         accessibilityLabel="Next card"
-                        disabled={activeCardIndex === cards.length - 1}
+                        disabled={activeCardIndex === carouselItemCount - 1}
                         onPress={() => goTo(activeCardIndex + 1)}
                         style={[styles.carouselNavigationZone, styles.carouselNavigationZoneRight]}
                       />
@@ -429,7 +455,11 @@ export default function HomeScreen() {
                   color={colors.textSecondary}
                   style={styles.hintText}
                 >
-                  {t('screen.deckHint')}
+                  {t(
+                    hasExtraCardSlot && activeCardIndex === cards.length
+                      ? 'extraCard.deckHint'
+                      : 'screen.deckHint'
+                  )}
                 </Typography>
                 <View style={styles.chevrons}>
                   <Animated.View style={chevron1Style}>

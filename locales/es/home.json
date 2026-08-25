@@ -117,6 +117,27 @@
     "body": "Las próximas cartas llegan el lunes.",
     "countdown": "PRÓXIMAS CARTAS EN"
   },
+  "extraCard": {
+    "title": "Una carta extra esta semana",
+    "bodyAd": "Mirá un video corto y sumá una carta sorpresa a tu baraja.",
+    "bodyPremium": "Tu beneficio Premium te permite reclamarla sin publicidad.",
+    "deckLabel": "EXTRA",
+    "deckTitle": "CARTA SORPRESA",
+    "deckBodyAd": "Mirá un video corto para sumarla a tu baraja.",
+    "deckBodyPremium": "Incluida con Premium. Tocá para sumarla.",
+    "deckHint": "Tocá la carta para sumarla a tu baraja.",
+    "ctaAd": "DESBLOQUEAR",
+    "ctaPremium": "RECLAMAR",
+    "preparing": "PREPARANDO...",
+    "loading": "CARGANDO VIDEO...",
+    "confirming": "CONFIRMANDO...",
+    "confirmingDelayed": "Google sigue confirmando la recompensa. La carta aparecerá automáticamente.",
+    "closed": "Cerraste el video antes de completar la recompensa. Podés volver a intentarlo.",
+    "unavailable": "No hay un anuncio disponible ahora. Intentá de nuevo más tarde.",
+    "revealed": "CARTA EXTRA DESBLOQUEADA",
+    "badge": "EXTRA",
+    "done": "VER MI BARAJA"
+  },
   "events": {
     "hero": {
       "local": "De tu país",

@@ -6,12 +6,16 @@ import { useColors } from '@/context/ThemeContext';
 import { ThemeColors } from '@/constants/colors';
 import { Typography } from '@/components/ui/Typography';
 import { useMemo } from 'react';
+import { Button } from '@/components/ui/Button';
+import { useAds } from '@/context/AdsContext';
+import { Toast } from 'toastify-react-native';
 
 export default function PrivacyScreen() {
   const insets = useSafeAreaInsets();
   const { t } = useTranslation('settings');
   const colors = useColors();
   const styles = useMemo(() => createStyles(colors), [colors]);
+  const { showPrivacyOptions } = useAds();
 
   const items = t('privacy.items', { returnObjects: true }) as {
     title: string;
@@ -49,6 +53,15 @@ export default function PrivacyScreen() {
             </Typography>
           </View>
         ))}
+        <Button
+          label={t('privacy.adPreferences')}
+          variant="ghost"
+          onPress={() => {
+            void showPrivacyOptions().catch(() =>
+              Toast.warn(t('privacy.adPreferencesUnavailable'))
+            );
+          }}
+        />
       </ScrollView>
     </View>
   );

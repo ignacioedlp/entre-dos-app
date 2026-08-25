@@ -131,6 +131,10 @@ export interface DeckCard {
   rarity: 'common' | 'rare' | 'epic' | 'legendary';
   packIcon?: string;
   event?: EventBadge | null;
+  extraUnlock?: {
+    source: 'rewarded_ad' | 'premium';
+    unlockedBy: { id: string; displayName: string; avatarUrl: string };
+  } | null;
 }
 
 export interface EventBadge {
@@ -164,6 +168,11 @@ export interface DeckResponse {
     limit: number;
     remaining: number;
   };
+  extraCard: {
+    weekStart: string;
+    state: 'available' | 'claimed' | 'unavailable';
+    requiresAd: boolean;
+  };
 }
 
 export async function apiGetDeck(): Promise<DeckResponse> {
@@ -182,6 +191,33 @@ export interface WeeklyPackOpenResponse {
 export async function apiOpenWeeklyPack(weekStart: string): Promise<WeeklyPackOpenResponse> {
   const res = await api.put<WeeklyPackOpenResponse>('/deck/weekly-pack/open', { weekStart });
   return res.data;
+}
+
+export type ExtraCardClaimResponse =
+  | { status: 'granted'; card: DeckCard }
+  | {
+      status: 'ad_required';
+      attemptId: string;
+      adUnitId: string;
+      userId: string;
+      customData: string;
+    };
+
+export async function apiClaimExtraCard(platform: 'ios' | 'android') {
+  const response = await api.post<ExtraCardClaimResponse>('/deck/extra-card/claim', { platform });
+  return response.data;
+}
+
+export type ExtraCardAttemptResponse =
+  | { status: 'pending' | 'expired' }
+  | { status: 'granted'; card: DeckCard };
+
+export async function apiGetExtraCardAttempt(attemptId: string) {
+  const response = await api.get<ExtraCardAttemptResponse>(
+    `/deck/extra-card/attempts/${attemptId}`,
+    { timeout: 1800 }
+  );
+  return response.data;
 }
 
 export async function apiGetActiveEvents(): Promise<ActiveEventsResponse> {

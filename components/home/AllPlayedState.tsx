@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo } from 'react';
+import { ReactNode, useEffect, useMemo, useState } from 'react';
 import { View, StyleSheet } from 'react-native';
 import moment from 'moment';
 import { useTranslation } from 'react-i18next';
@@ -26,7 +26,7 @@ function formatCountdown(target: moment.Moment): string {
   return `${String(h).padStart(2, '0')}:${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')}`;
 }
 
-export function AllPlayedState() {
+export function AllPlayedState({ extraCardAction }: { extraCardAction?: ReactNode }) {
   const nextMonday = useMemo(() => getNextMondayUTC(), []);
   const [countdown, setCountdown] = useState(() => formatCountdown(nextMonday));
   const { t } = useTranslation('home');
@@ -68,6 +68,7 @@ export function AllPlayedState() {
           {countdown}
         </Typography>
       </View>
+      {extraCardAction}
     </View>
   );
 }

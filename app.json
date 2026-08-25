@@ -49,6 +49,9 @@
       [
         "expo-build-properties",
         {
+          "android": {
+            "extraProguardRules": "-keep class com.google.android.gms.internal.consent_sdk.** { *; }"
+          },
           "ios": {
             "extraPods": [
               {

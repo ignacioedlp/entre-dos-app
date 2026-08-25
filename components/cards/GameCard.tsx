@@ -1,6 +1,7 @@
 import { StyleSheet } from 'react-native';
 import Animated from 'react-native-reanimated';
 import { LinearGradient } from 'expo-linear-gradient';
+import { Ionicons } from '@expo/vector-icons';
 import { rarityColor, rarityTextColor, RarityKey } from '../../constants/colors';
 import { Typography } from '../ui/Typography';
 import { CategoryWatermark } from './CategoryWatermark';
@@ -19,6 +20,8 @@ export interface GameCardData {
   description?: string;
   packIcon?: string;
   event?: EventBadgeData | null;
+  extraLabel?: string;
+  specialWatermark?: 'sparkles';
 }
 
 interface GameCardProps {
@@ -70,6 +73,12 @@ export function GameCard({
         </Animated.View>
       )}
 
+      {card.specialWatermark && (
+        <Animated.View style={styles.watermark} pointerEvents="none">
+          <Ionicons name={card.specialWatermark} color={fg} size={watermarkSize} />
+        </Animated.View>
+      )}
+
       {variant === 'full' && (
         <Animated.View style={styles.inner}>
           {/* Rarity label */}
@@ -88,15 +97,22 @@ export function GameCard({
                 {card.label}
               </Typography>
 
-              {card.event && (
-                <Animated.View style={[styles.badge, { borderColor: card.event.color + '55' }]}>
+              {(card.event || card.extraLabel) && (
+                <Animated.View
+                  style={[
+                    styles.badge,
+                    {
+                      borderColor: card.event ? card.event.color + '55' : fg + '55',
+                    },
+                  ]}
+                >
                   <Typography
                     variant="cardLabel"
-                    color={card.event.color}
+                    color={card.event?.color ?? fg}
                     baseFontSize={9}
                     style={{ opacity: 1, letterSpacing: 1.5 }}
                   >
-                    {card.event.name}
+                    {card.extraLabel ?? card.event?.name}
                   </Typography>
                 </Animated.View>
               )}

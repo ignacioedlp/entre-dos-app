@@ -15,6 +15,7 @@ import {
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { AuthProvider } from '../context/AuthContext';
 import { RevenueCatProvider } from '../context/RevenueCatContext';
+import { AdsProvider } from '../context/AdsContext';
 import { FontScaleProvider } from '../context/FontScaleContext';
 import { ThemeProvider, useTheme } from '../context/ThemeContext';
 import ToastManager from 'toastify-react-native';
@@ -85,6 +86,10 @@ function RootLayout() {
     const receivedSub = Notifications.addNotificationReceivedListener((notification) => {
       const playId = notification.request.content.data?.cardPlayId;
       if (playId) queryClient.invalidateQueries({ queryKey: ['play-thread', String(playId)] });
+      if (notification.request.content.data?.type === 'extra_card_unlocked') {
+        queryClient.invalidateQueries({ queryKey: ['deck'] });
+        queryClient.invalidateQueries({ queryKey: ['notifications'] });
+      }
     });
     const responseSub = Notifications.addNotificationResponseReceivedListener((response) => {
       const playId = response.notification.request.content.data?.cardPlayId;
@@ -108,46 +113,48 @@ function RootLayout() {
       <SafeAreaProvider>
         <QueryClientProvider client={queryClient}>
           <AuthProvider>
-            <RevenueCatProvider>
-              <ThemeProvider>
-                <FontScaleProvider>
-                  <NotificationSetup />
-                  <ThemedStatusBar />
-                  <Stack screenOptions={{ headerShown: false }}>
-                    <Stack.Screen name="index" />
-                    <Stack.Screen name="(auth)" />
-                    <Stack.Screen name="(app)" />
-                    <Stack.Screen
-                      name="play-card"
-                      options={{
-                        presentation: 'formSheet',
-                        headerShown: false,
-                        sheetAllowedDetents: [0.5],
-                        sheetInitialDetentIndex: 0,
-                        sheetGrabberVisible: true,
-                        sheetCornerRadius: 16,
-                      }}
+            <AdsProvider>
+              <RevenueCatProvider>
+                <ThemeProvider>
+                  <FontScaleProvider>
+                    <NotificationSetup />
+                    <ThemedStatusBar />
+                    <Stack screenOptions={{ headerShown: false }}>
+                      <Stack.Screen name="index" />
+                      <Stack.Screen name="(auth)" />
+                      <Stack.Screen name="(app)" />
+                      <Stack.Screen
+                        name="play-card"
+                        options={{
+                          presentation: 'formSheet',
+                          headerShown: false,
+                          sheetAllowedDetents: [0.5],
+                          sheetInitialDetentIndex: 0,
+                          sheetGrabberVisible: true,
+                          sheetCornerRadius: 16,
+                        }}
+                      />
+                      <Stack.Screen
+                        name="paywall"
+                        options={{
+                          presentation: 'pageSheet',
+                          headerShown: false,
+                        }}
+                      />
+                      <Stack.Screen name="notifications" options={{ headerShown: false }} />
+                      <Stack.Screen name="play-thread" options={{ headerShown: false }} />
+                    </Stack>
+                    <ToastManager
+                      config={toastConfig}
+                      showProgressBar
+                      animationStyle="fade"
+                      position="top"
+                      topOffset={56}
                     />
-                    <Stack.Screen
-                      name="paywall"
-                      options={{
-                        presentation: 'pageSheet',
-                        headerShown: false,
-                      }}
-                    />
-                    <Stack.Screen name="notifications" options={{ headerShown: false }} />
-                    <Stack.Screen name="play-thread" options={{ headerShown: false }} />
-                  </Stack>
-                  <ToastManager
-                    config={toastConfig}
-                    showProgressBar
-                    animationStyle="fade"
-                    position="top"
-                    topOffset={56}
-                  />
-                </FontScaleProvider>
-              </ThemeProvider>
-            </RevenueCatProvider>
+                  </FontScaleProvider>
+                </ThemeProvider>
+              </RevenueCatProvider>
+            </AdsProvider>
           </AuthProvider>
         </QueryClientProvider>
       </SafeAreaProvider>

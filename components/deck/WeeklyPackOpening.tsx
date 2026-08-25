@@ -38,18 +38,24 @@ interface WeeklyCardRevealProps {
   card: DeckCard;
   index: number;
   total: number;
+  reduceMotion?: boolean;
 }
 
 /** Reusable one-card reveal, ready for future non-weekly card sources. */
-export function WeeklyCardReveal({ card, index, total }: WeeklyCardRevealProps) {
+export function WeeklyCardReveal({
+  card,
+  index,
+  total,
+  reduceMotion = false,
+}: WeeklyCardRevealProps) {
   const { t } = useTranslation('home');
   const colors = useColors();
   const styles = useMemo(() => createStyles(colors), [colors]);
 
   return (
     <Animated.View
-      entering={FadeIn.duration(220)}
-      exiting={FadeOut.duration(140)}
+      entering={FadeIn.duration(reduceMotion ? 0 : 220)}
+      exiting={FadeOut.duration(reduceMotion ? 0 : 140)}
       style={styles.cardReveal}
     >
       <Typography variant="cardLabel" color={colors.pasion} style={styles.cardCount}>
@@ -305,6 +311,7 @@ export function WeeklyPackOpening({
                 card={activeCard}
                 index={revealIndex}
                 total={cards.length}
+                reduceMotion={reduceMotion}
               />
             ) : null}
             <View style={styles.revealDots}>

@@ -117,6 +117,27 @@
     "body": "Next cards arrive on Monday.",
     "countdown": "NEXT CARDS IN"
   },
+  "extraCard": {
+    "title": "One extra card this week",
+    "bodyAd": "Watch a short video and add a surprise card to your deck.",
+    "bodyPremium": "Your Premium benefit lets you claim it without an ad.",
+    "deckLabel": "EXTRA",
+    "deckTitle": "SURPRISE CARD",
+    "deckBodyAd": "Watch a short video to add it to your deck.",
+    "deckBodyPremium": "Included with Premium. Tap to add it.",
+    "deckHint": "Tap the card to add it to your deck.",
+    "ctaAd": "UNLOCK",
+    "ctaPremium": "CLAIM",
+    "preparing": "PREPARING...",
+    "loading": "LOADING VIDEO...",
+    "confirming": "CONFIRMING...",
+    "confirmingDelayed": "Google is still confirming the reward. Your card will appear automatically.",
+    "closed": "You closed the video before earning the reward. You can try again.",
+    "unavailable": "No ad is available right now. Please try again later.",
+    "revealed": "EXTRA CARD UNLOCKED",
+    "badge": "EXTRA",
+    "done": "VIEW MY DECK"
+  },
   "events": {
     "hero": {
       "local": "From your country",

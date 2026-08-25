@@ -816,6 +816,28 @@ function createStyles(colors: ThemeColors) {
       backgroundColor: colors.surfaceAlt,
     },
     skeletonEmptyCommentLine: { width: '52%', height: 14 },
+    skeletonComposer: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: 10,
+      paddingHorizontal: 16,
+      paddingTop: 12,
+      backgroundColor: colors.surface,
+      borderTopWidth: 1,
+      borderTopColor: colors.border,
+    },
+    skeletonInput: {
+      flex: 1,
+      height: 48,
+      borderRadius: 16,
+      backgroundColor: colors.surfaceAlt,
+    },
+    skeletonSendButton: {
+      width: 48,
+      height: 48,
+      borderRadius: 24,
+      backgroundColor: colors.surfaceAlt,
+    },
     cardSummary: {
       paddingHorizontal: 2,
       paddingTop: 12,

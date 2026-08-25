@@ -140,7 +140,9 @@
   },
   "privacy": {
     "title": "PRIVACY POLICY.",
-    "lastUpdated": "Last updated: March 2026",
+    "lastUpdated": "Last updated: August 2026",
+    "adPreferences": "AD PRIVACY OPTIONS",
+    "adPreferencesUnavailable": "Privacy options are not available right now.",
     "items": [
       {
         "title": "1. Information We Collect",
@@ -164,7 +166,7 @@
       },
       {
         "title": "6. Cookies and Similar Technologies",
-        "body": "We use tracking technologies to improve the app's functionality and analyze usage patterns. You can manage these preferences from your device settings."
+        "body": "Google AdMob may use identifiers, local storage, and technical data to provide rewarded ads. We do not request cross-app tracking permission in this MVP. Where applicable, you can review or change your consent from the ad privacy options."
       },
       {
         "title": "7. Minors",

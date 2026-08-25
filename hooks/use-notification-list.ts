@@ -6,6 +6,7 @@ import {
   markNotificationRead,
 } from '@/lib/api';
 import moment from 'moment';
+import * as Notifications from 'expo-notifications';
 import { useCallback, useEffect, useState } from 'react';
 import i18n from '@/i18n';
 
@@ -106,6 +107,13 @@ export function useNotificationList(): UseNotificationListResult {
 
   useEffect(() => {
     load();
+  }, [load]);
+
+  useEffect(() => {
+    const subscription = Notifications.addNotificationReceivedListener(() => {
+      void load();
+    });
+    return () => subscription.remove();
   }, [load]);
 
   const markRead = useCallback(async (id: string) => {
