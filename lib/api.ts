@@ -94,6 +94,21 @@ export async function apiGoogleAuth(idToken: string, locale: string): Promise<Au
   return res.data;
 }
 
+export async function apiAppleAuth(
+  idToken: string,
+  appleUser: string,
+  locale: string,
+  fullName?: string | null
+): Promise<AuthResponse> {
+  const res = await api.post<AuthResponse>('/auth/apple', {
+    idToken,
+    appleUser,
+    locale,
+    fullName,
+  });
+  return res.data;
+}
+
 export async function apiForgotPassword(email: string): Promise<{ message: string }> {
   const res = await api.post<{ message: string }>('/auth/forgot-password', { email });
   return res.data;
@@ -614,7 +629,9 @@ export async function apiDeleteAccount(): Promise<DeleteAccountResponse> {
 }
 
 export async function apiCancelDeletion(
-  credentials: { email: string; password: string } | { idToken: string }
+  credentials:
+    | { email: string; password: string }
+    | { idToken: string; provider: 'google' | 'apple' }
 ): Promise<AuthResponse> {
   const res = await api.post<AuthResponse>('/auth/cancel-deletion', credentials);
   return res.data;

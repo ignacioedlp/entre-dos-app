@@ -14,7 +14,11 @@
     },
     "ios": {
       "supportsTablet": false,
-      "bundleIdentifier": "com.entredos.app"
+      "usesAppleSignIn": true,
+      "bundleIdentifier": "com.entredos.app",
+      "infoPlist": {
+        "CFBundleAllowMixedLocalizations": true
+      }
     },
     "android": {
       "adaptiveIcon": {
@@ -33,6 +37,7 @@
     "plugins": [
       "expo-router",
       "expo-font",
+      "expo-apple-authentication",
       [
         "expo-image-picker",
         {

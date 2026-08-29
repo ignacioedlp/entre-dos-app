@@ -1,10 +1,11 @@
-import { View, TextInput, StyleSheet, Pressable, Modal } from 'react-native';
-import { useState, useMemo } from 'react';
+import { View, TextInput, StyleSheet, Pressable, Modal, Platform } from 'react-native';
+import { useState, useMemo, useEffect } from 'react';
 import { useForm, Controller } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { AntDesign, Feather, Ionicons } from '@expo/vector-icons';
+import * as AppleAuthentication from 'expo-apple-authentication';
 import { useRouter } from 'expo-router';
 import { useTranslation } from 'react-i18next';
 import { Logo } from '../../components/ui/Logo';
@@ -24,16 +25,28 @@ export default function LoginScreen() {
   const [showPassword, setShowPassword] = useState(false);
   const [apiError, setApiError] = useState<string | null>(null);
   const [googleLoading, setGoogleLoading] = useState(false);
+  const [appleLoading, setAppleLoading] = useState(false);
+  const [appleAvailable, setAppleAvailable] = useState(false);
   const [deletionPending, setDeletionPending] = useState<{
     scheduledFor: string;
-    credentials: { email: string; password: string } | { idToken: string };
+    credentials:
+      | { email: string; password: string }
+      | { idToken: string; provider: 'google' | 'apple' };
   } | null>(null);
   const [cancellingDeletion, setCancellingDeletion] = useState(false);
-  const { login, googleLogin, updateProfile } = useAuth();
+  const { login, googleLogin, appleLogin, updateProfile } = useAuth();
   const { t } = useTranslation('auth');
   const inputFontSize = useScaledFontSize(16);
   const colors = useColors();
   const styles = useMemo(() => createStyles(colors), [colors]);
+
+  useEffect(() => {
+    if (Platform.OS === 'ios') {
+      AppleAuthentication.isAvailableAsync()
+        .then(setAppleAvailable)
+        .catch(() => setAppleAvailable(false));
+    }
+  }, []);
 
   const schema = z.object({
     email: z.string().email(t('login.errorEmail')),
@@ -66,13 +79,34 @@ export default function LoginScreen() {
       if (err instanceof DeletionPendingError && err.idToken) {
         setDeletionPending({
           scheduledFor: err.deletionScheduledFor,
-          credentials: { idToken: err.idToken },
+          credentials: { idToken: err.idToken, provider: 'google' },
         });
       } else {
         setApiError(t('login.errorGoogle'));
       }
     } finally {
       setGoogleLoading(false);
+    }
+  };
+
+  const handleAppleLogin = async () => {
+    if (appleLoading || googleLoading || isSubmitting) return;
+    try {
+      setApiError(null);
+      setAppleLoading(true);
+      const profile = await appleLogin();
+      navigateAfterLogin(profile);
+    } catch (err: any) {
+      if (err instanceof DeletionPendingError && err.idToken && err.provider) {
+        setDeletionPending({
+          scheduledFor: err.deletionScheduledFor,
+          credentials: { idToken: err.idToken, provider: err.provider },
+        });
+      } else if (err?.code !== 'ERR_REQUEST_CANCELED') {
+        setApiError(t('login.errorApple'));
+      }
+    } finally {
+      setAppleLoading(false);
     }
   };
 
@@ -235,6 +269,18 @@ export default function LoginScreen() {
           </Typography>
         </Pressable>
 
+        {Platform.OS === 'ios' && appleAvailable && (
+          <View style={styles.appleButtonWrapper}>
+            <AppleAuthentication.AppleAuthenticationButton
+              buttonType={AppleAuthentication.AppleAuthenticationButtonType.SIGN_IN}
+              buttonStyle={AppleAuthentication.AppleAuthenticationButtonStyle.BLACK}
+              cornerRadius={9999}
+              style={styles.appleButton}
+              onPress={handleAppleLogin}
+            />
+          </View>
+        )}
+
         <Pressable style={styles.registerLink} onPress={() => router.push('/(auth)/register')}>
           <Typography variant="body" baseFontSize={14} color={colors.textSecondary}>
             {t('login.noAccount')}
@@ -375,6 +421,18 @@ function createStyles(colors: ThemeColors) {
       backgroundColor: '#ffffff',
       borderRadius: 9999,
       paddingVertical: 16,
+    },
+    appleButtonWrapper: {
+      height: 56,
+      marginTop: 12,
+      borderWidth: 1,
+      borderColor: 'rgba(255, 255, 255, 0.64)',
+      borderRadius: 9999,
+      paddingHorizontal: 1,
+      paddingVertical: 3,
+    },
+    appleButton: {
+      flex: 1,
     },
     googleButtonPressed: {
       opacity: 0.85,
