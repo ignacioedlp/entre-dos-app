@@ -59,6 +59,9 @@ const delay = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 function showRewardedAd(claim: Extract<ExtraCardClaimResponse, { status: 'ad_required' }>) {
   return new Promise<void>((resolve, reject) => {
     const ad = RewardedAd.createForAdRequest(claim.adUnitId, {
+      // Entre Dos does not request ATT or use the IDFA. Keep every rewarded
+      // ad request non-personalized, irrespective of the UMP regional choice.
+      requestNonPersonalizedAdsOnly: true,
       serverSideVerificationOptions: {
         userId: claim.userId,
         customData: claim.customData,

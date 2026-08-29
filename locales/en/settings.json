@@ -165,8 +165,8 @@
         "body": "You have the right to access, correct, or delete your personal information at any time. You can request a copy of your data or ask for its deletion by contacting us directly."
       },
       {
-        "title": "6. Cookies and Similar Technologies",
-        "body": "Google AdMob may use identifiers, local storage, and technical data to provide rewarded ads. We do not request cross-app tracking permission in this MVP. Where applicable, you can review or change your consent from the ad privacy options."
+        "title": "6. Advertising and Similar Technologies",
+        "body": "We show non-personalized rewarded ads through Google AdMob. We do not request Apple's App Tracking Transparency (ATT) permission, access the IDFA, or use data from other apps or websites to personalize ads. AdMob may process device identifiers, approximate IP address, diagnostics, performance, and ad interactions for technical delivery, frequency capping, fraud prevention, and aggregated reporting. Where applicable, you can review or change your consent from the ad privacy options."
       },
       {
         "title": "7. Minors",

@@ -165,8 +165,8 @@
         "body": "Tenés derecho a acceder, corregir o eliminar tu información personal en cualquier momento. Podés solicitar una copia de tus datos o pedir que se eliminen contactándonos directamente."
       },
       {
-        "title": "6. Cookies y tecnologías similares",
-        "body": "Google AdMob puede utilizar identificadores, almacenamiento local y datos técnicos para mostrar publicidad recompensada. No solicitamos permiso de seguimiento entre aplicaciones en este MVP. Cuando corresponda, podés revisar o cambiar tu consentimiento desde las opciones de privacidad de anuncios."
+        "title": "6. Publicidad y tecnologías similares",
+        "body": "Mostramos anuncios recompensados no personalizados mediante Google AdMob. No solicitamos el permiso de Seguimiento de Apple (ATT), no accedemos al IDFA ni usamos datos de otras apps o sitios para personalizar anuncios. AdMob puede procesar identificadores del dispositivo, dirección IP aproximada, diagnósticos, rendimiento e interacciones con anuncios para entrega técnica, límite de frecuencia, prevención de fraude y reportes agregados. Cuando corresponda, podés revisar o cambiar tu consentimiento desde las opciones de privacidad de anuncios."
       },
       {
         "title": "7. Menores de edad",
