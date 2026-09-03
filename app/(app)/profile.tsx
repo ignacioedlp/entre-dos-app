@@ -17,10 +17,12 @@ import { useColors } from '@/context/ThemeContext';
 import { Ionicons } from '@expo/vector-icons';
 import { router } from 'expo-router';
 import { useTranslation } from 'react-i18next';
-import { useMutation } from '@tanstack/react-query';
+import { useMutation, useQuery } from '@tanstack/react-query';
+import moment from 'moment';
+import 'moment/locale/es';
 
 import { useAuth } from '@/context/AuthContext';
-import { apiUpdateDisplayName } from '@/lib/api';
+import { apiGetCoupleStatus, apiUpdateDisplayName } from '@/lib/api';
 import { useAvatarUpload } from '@/hooks/useAvatarUpload';
 import { Typography } from '@/components/ui/Typography';
 import { useScaledFontSize } from '@/context/FontScaleContext';
@@ -61,6 +63,21 @@ export default function ProfileScreen() {
       setEditing(false);
     },
   });
+
+  const { data: coupleStatus, isLoading: coupleLoading } = useQuery({
+    queryKey: ['couple-status'],
+    queryFn: apiGetCoupleStatus,
+  });
+
+  const couple = coupleStatus?.couple;
+  const partner = couple
+    ? couple.userAId === user?.userId
+      ? { name: couple.userBDisplayName, avatarUrl: couple.userBImageUrl }
+      : { name: couple.userADisplayName, avatarUrl: couple.userAImageUrl }
+    : null;
+  const yearsTogether = couple?.anniversary
+    ? Math.max(0, moment().diff(moment(couple.anniversary), 'years'))
+    : null;
 
   function startEditing() {
     setNameValue(user?.displayName ?? '');
@@ -163,6 +180,82 @@ export default function ProfileScreen() {
           </View>
         )}
       </View>
+
+      <View style={styles.relationshipSection}>
+        <View style={styles.sectionHeading}>
+          <Typography variant="label" color={colors.textMuted} style={styles.sectionLabel}>
+            {t('relationship.title')}
+          </Typography>
+          {couple && (
+            <Pressable
+              accessibilityRole="button"
+              accessibilityLabel={t('profile.manageRelationship')}
+              onPress={() => router.push('/settings/relationship')}
+              hitSlop={8}
+            >
+              <Typography variant="bodyBold" baseFontSize={13} color={colors.accent}>
+                {t('profile.manage')}
+              </Typography>
+            </Pressable>
+          )}
+        </View>
+
+        {coupleLoading ? (
+          <View style={styles.relationshipLoading}>
+            <ActivityIndicator color={colors.accent} />
+          </View>
+        ) : couple && partner ? (
+          <Pressable
+            accessibilityRole="button"
+            accessibilityLabel={t('profile.manageRelationship')}
+            onPress={() => router.push('/settings/relationship')}
+            style={({ pressed }) => [styles.relationshipCard, pressed && styles.cardPressed]}
+          >
+            <View style={styles.partnerAvatarWrap}>
+              {partner.avatarUrl ? (
+                <Image source={{ uri: partner.avatarUrl }} style={styles.partnerAvatar} />
+              ) : (
+                <View style={[styles.partnerAvatar, styles.partnerAvatarPlaceholder]}>
+                  <Ionicons name="person" size={26} color={colors.textMuted} />
+                </View>
+              )}
+              <View style={styles.heartBadge}>
+                <Ionicons name="heart" size={12} color="#fff" />
+              </View>
+            </View>
+            <View style={styles.relationshipInfo}>
+              <Typography variant="bodyBold" baseFontSize={17} numberOfLines={1}>
+                {partner.name ?? t('profile.partner')}
+              </Typography>
+              <Typography variant="body" baseFontSize={13} color={colors.textSecondary}>
+                {yearsTogether !== null
+                  ? t('profile.togetherYears', { count: yearsTogether })
+                  : t('profile.anniversaryEmpty')}
+              </Typography>
+            </View>
+            <Ionicons name="chevron-forward" size={20} color={colors.textMuted} />
+          </Pressable>
+        ) : (
+          <Pressable
+            accessibilityRole="button"
+            onPress={() => router.push('/(auth)/link')}
+            style={({ pressed }) => [styles.relationshipCard, pressed && styles.cardPressed]}
+          >
+            <View style={[styles.partnerAvatar, styles.unlinkedIcon]}>
+              <Ionicons name="heart-outline" size={26} color={colors.accent} />
+            </View>
+            <View style={styles.relationshipInfo}>
+              <Typography variant="bodyBold" baseFontSize={17}>
+                {t('profile.linkRelationship')}
+              </Typography>
+              <Typography variant="body" baseFontSize={13} color={colors.textSecondary}>
+                {t('profile.linkRelationshipDescription')}
+              </Typography>
+            </View>
+            <Ionicons name="chevron-forward" size={20} color={colors.textMuted} />
+          </Pressable>
+        )}
+      </View>
     </ScrollView>
   );
 }
@@ -187,7 +280,7 @@ function createStyles(colors: ThemeColors) {
     // Avatar
     avatarSection: {
       alignItems: 'center',
-      marginBottom: 32,
+      marginBottom: 38,
       gap: 12,
     },
     avatarContainer: {
@@ -271,6 +364,78 @@ function createStyles(colors: ThemeColors) {
     cancelBtn: {
       alignItems: 'center',
       paddingVertical: 4,
+    },
+    relationshipSection: {
+      paddingHorizontal: 24,
+      paddingBottom: 32,
+    },
+    sectionHeading: {
+      flexDirection: 'row',
+      justifyContent: 'space-between',
+      alignItems: 'center',
+      marginBottom: 12,
+    },
+    sectionLabel: {
+      textTransform: 'uppercase',
+      letterSpacing: 1,
+    },
+    relationshipLoading: {
+      height: 92,
+      alignItems: 'center',
+      justifyContent: 'center',
+      borderTopWidth: 1,
+      borderBottomWidth: 1,
+      borderColor: colors.border,
+    },
+    relationshipCard: {
+      minHeight: 92,
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: 14,
+      paddingVertical: 14,
+      borderTopWidth: 1,
+      borderBottomWidth: 1,
+      borderColor: colors.border,
+    },
+    cardPressed: {
+      opacity: 0.72,
+    },
+    partnerAvatarWrap: {
+      position: 'relative',
+    },
+    partnerAvatar: {
+      width: 58,
+      height: 58,
+      borderRadius: 29,
+    },
+    partnerAvatarPlaceholder: {
+      backgroundColor: colors.surfaceAlt,
+      borderWidth: 1,
+      borderColor: colors.border,
+      alignItems: 'center',
+      justifyContent: 'center',
+    },
+    heartBadge: {
+      position: 'absolute',
+      right: -3,
+      bottom: -3,
+      width: 22,
+      height: 22,
+      borderRadius: 11,
+      backgroundColor: colors.accent,
+      borderWidth: 2,
+      borderColor: colors.background,
+      alignItems: 'center',
+      justifyContent: 'center',
+    },
+    relationshipInfo: {
+      flex: 1,
+      gap: 3,
+    },
+    unlinkedIcon: {
+      backgroundColor: 'rgba(255, 59, 92, 0.12)',
+      alignItems: 'center',
+      justifyContent: 'center',
     },
   });
 }

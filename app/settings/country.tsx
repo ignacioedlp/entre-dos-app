@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { StyleSheet, View, Pressable } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
@@ -12,26 +12,35 @@ import { Toast } from 'toastify-react-native';
 import { SUPPORTED_COUNTRIES } from '../../lib/countries';
 import { Typography } from '@/components/ui/Typography';
 
+function normalizeCountryCode(country: string | null | undefined) {
+  return country?.trim().toUpperCase() ?? null;
+}
+
 export default function CountrySettingsScreen() {
   const insets = useSafeAreaInsets();
   const router = useRouter();
   const { t, i18n } = useTranslation('settings');
   const { user, updateProfile } = useAuth();
-  const [selectedCountry, setSelectedCountry] = useState<string | null>(user?.country ?? null);
+  const [selectedCountry, setSelectedCountry] = useState<string | null>(() =>
+    normalizeCountryCode(user?.country)
+  );
   const [isLoading, setIsLoading] = useState(false);
   const colors = useColors();
   const styles = useMemo(() => createStyles(colors), [colors]);
+
+  useEffect(() => {
+    setSelectedCountry(normalizeCountryCode(user?.country));
+  }, [user?.country]);
 
   const handleSelectCountry = async (countryCode: string) => {
     setSelectedCountry(countryCode);
     setIsLoading(true);
     try {
-      await api.put('/profiles/me', { country: countryCode });
-      if (user) {
-        updateProfile({
-          ...user,
-          country: countryCode,
-        });
+      const response = await api.put<{ profile: typeof user }>('/profiles/me', {
+        country: countryCode,
+      });
+      if (response.data.profile) {
+        updateProfile(response.data.profile);
       }
       setIsLoading(false);
     } catch {
@@ -65,6 +74,8 @@ export default function CountrySettingsScreen() {
             key={country.code}
             onPress={() => handleSelectCountry(country.code)}
             disabled={isLoading}
+            accessibilityRole="radio"
+            accessibilityState={{ selected: isSelected }}
             style={[styles.row, idx === 0 && styles.rowFirst, isLoading && styles.rowDisabled]}
           >
             {country.flag}

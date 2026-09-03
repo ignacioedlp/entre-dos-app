@@ -43,7 +43,7 @@ export function CylinderCard({
 }: CylinderCardProps) {
   const rarity = RARITY_MAP[card.rarity] ?? 'comun';
   const glow = rarityGlow[rarity];
-  const { t } = useTranslation('common');
+  const { t } = useTranslation(['common', 'home']);
 
   const categoryLabel = t(`category.${card.category}`, {
     defaultValue: card.category.toUpperCase(),
@@ -89,6 +89,7 @@ export function CylinderCard({
             title: card.title,
             description: card.description,
             packIcon: card.packIcon,
+            extraLabel: card.extraUnlock ? t('home:extraCard.badge') : undefined,
             event: card.event
               ? {
                   icon: card.event.icon,

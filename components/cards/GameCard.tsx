@@ -1,6 +1,7 @@
 import { StyleSheet } from 'react-native';
 import Animated from 'react-native-reanimated';
 import { LinearGradient } from 'expo-linear-gradient';
+import { Ionicons } from '@expo/vector-icons';
 import { rarityColor, rarityTextColor, RarityKey } from '../../constants/colors';
 import { Typography } from '../ui/Typography';
 import { CategoryWatermark } from './CategoryWatermark';
@@ -19,6 +20,8 @@ export interface GameCardData {
   description?: string;
   packIcon?: string;
   event?: EventBadgeData | null;
+  extraLabel?: string;
+  specialWatermark?: 'sparkles';
 }
 
 interface GameCardProps {
@@ -26,13 +29,20 @@ interface GameCardProps {
   width?: number;
   rotation?: number; // degrees for scattered layout
   style?: object;
+  variant?: 'full' | 'thumbnail';
 }
 
-export function GameCard({ card, width = 10, rotation = 0, style }: GameCardProps) {
+export function GameCard({
+  card,
+  width = 10,
+  rotation = 0,
+  style,
+  variant = 'full',
+}: GameCardProps) {
   const bg = rarityColor[card.rarity];
   const fg = rarityTextColor[card.rarity];
   const h = width * (4 / 3);
-  const watermarkSize = Math.round(width * 0.40);
+  const watermarkSize = Math.round(width * 0.4);
 
   return (
     <Animated.View
@@ -42,6 +52,7 @@ export function GameCard({ card, width = 10, rotation = 0, style }: GameCardProp
           width,
           height: h,
           backgroundColor: bg,
+          borderRadius: variant === 'thumbnail' ? 12 : 24,
           transform: [{ rotate: `${rotation}deg` }],
         },
         style,
@@ -62,58 +73,94 @@ export function GameCard({ card, width = 10, rotation = 0, style }: GameCardProp
         </Animated.View>
       )}
 
-      <Animated.View style={styles.inner}>
-        {/* Rarity label */}
-        <Animated.View style={{ gap: 10 }}>
-          {/* Event badge — top-left corner */}
-          <Animated.View
-            style={{
-              flexDirection: 'row',
-              alignItems: 'center',
-              justifyContent: 'space-between',
-              gap: 8,
-              width: '100%',
-            }}
-          >
-            <Typography variant="cardLabel" color={fg}>
-              {card.label}
-            </Typography>
+      {card.specialWatermark && (
+        <Animated.View style={styles.watermark} pointerEvents="none">
+          <Ionicons name={card.specialWatermark} color={fg} size={watermarkSize} />
+        </Animated.View>
+      )}
 
-            {card.event && (
-              <Animated.View style={[styles.badge, { borderColor: card.event.color + '55' }]}>
-                <Typography
-                  variant="cardLabel"
-                  color={card.event.color}
-                  baseFontSize={9}
-                  style={{ opacity: 1, letterSpacing: 1.5 }}
+      {variant === 'full' && (
+        <Animated.View style={styles.inner}>
+          {/* Rarity label */}
+          <Animated.View style={{ gap: 10 }}>
+            {/* Event badge — top-left corner */}
+            <Animated.View
+              style={{
+                flexDirection: 'row',
+                alignItems: 'center',
+                justifyContent: 'space-between',
+                gap: 8,
+                width: '100%',
+              }}
+            >
+              <Typography variant="cardLabel" color={fg}>
+                {card.label}
+              </Typography>
+
+              {(card.event || card.extraLabel) && (
+                <Animated.View
+                  style={[
+                    styles.badge,
+                    {
+                      borderColor: card.event ? card.event.color + '55' : fg + '55',
+                    },
+                  ]}
                 >
-                  {card.event.name}
-                </Typography>
-              </Animated.View>
-            )}
+                  <Typography
+                    variant="cardLabel"
+                    color={card.event?.color ?? fg}
+                    baseFontSize={9}
+                    style={{ opacity: 1, letterSpacing: 1.5 }}
+                  >
+                    {card.extraLabel ?? card.event?.name}
+                  </Typography>
+                </Animated.View>
+              )}
+            </Animated.View>
+            <Typography
+              variant="cardTitle"
+              color={fg}
+              baseFontSize={24}
+              baseLineHeight={28}
+              numberOfLines={4}
+            >
+              {card.title}
+            </Typography>
           </Animated.View>
+          <Typography
+            variant="body"
+            color={fg}
+            baseFontSize={14}
+            baseLineHeight={18}
+            numberOfLines={4}
+          >
+            {card.description}
+          </Typography>
+        </Animated.View>
+      )}
+
+      {variant === 'thumbnail' && (
+        <Animated.View style={styles.thumbnailInner}>
           <Typography
             variant="cardTitle"
             color={fg}
-            baseFontSize={24}
-            baseLineHeight={28}
-            numberOfLines={4}
+            baseFontSize={18}
+            baseLineHeight={21}
+            numberOfLines={2}
           >
             {card.title}
           </Typography>
+          <Typography
+            variant="body"
+            color={fg}
+            baseFontSize={12}
+            baseLineHeight={15}
+            numberOfLines={3}
+          >
+            {card.description}
+          </Typography>
         </Animated.View>
-
-        {/* Card subtitle — bottom */}
-        <Typography
-          variant="body"
-          color={fg}
-          baseFontSize={14}
-          baseLineHeight={18}
-          numberOfLines={4}
-        >
-          {card.description}
-        </Typography>
-      </Animated.View>
+      )}
     </Animated.View>
   );
 }
@@ -140,6 +187,10 @@ const styles = StyleSheet.create({
     opacity: 0.11,
   },
   inner: {
+    flex: 1,
+    justifyContent: 'space-between',
+  },
+  thumbnailInner: {
     flex: 1,
     justifyContent: 'space-between',
   },

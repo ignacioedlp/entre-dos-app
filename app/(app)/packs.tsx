@@ -5,10 +5,11 @@ import Animated, { FadeInDown, ReduceMotion } from 'react-native-reanimated';
 
 import { PackCard } from '../../components/cards/PackCard';
 import { useColors } from '../../context/ThemeContext';
-import { apiGetPacks, apiGetEntitlements } from '../../lib/api';
+import { apiGetPacks, apiGetEntitlements, Pack } from '../../lib/api';
 import { useTranslation } from 'react-i18next';
 import { useRevenueCat } from '../../context/RevenueCatContext';
 import { Typography } from '@/components/ui/Typography';
+import { router } from 'expo-router';
 
 const CARD_PADDING = 24;
 const packEntrance = (delay: number) =>
@@ -68,6 +69,17 @@ export default function PacksScreen() {
   const isPremium = isSubscribed || entitlements?.premium === true;
 
   const packs = data?.packs.sort((a, b) => Number(b.isBase) - Number(a.isBase)) ?? [];
+  const customCardsPack: Pack = {
+    id: 'custom-cards',
+    slug: 'custom-cards',
+    isBase: false,
+    priceUsd: 0,
+    color: 'passion',
+    name: t('packs.customCards'),
+    subtitle: t('packs.customCardsSubtitle'),
+    description: t('packs.customCardsDescription'),
+    owned: true,
+  };
 
   const styles = createStyles(colors);
 
@@ -86,9 +98,11 @@ export default function PacksScreen() {
           {t('packs.subtitle')}
         </Typography>
         {isPremium && (
-          <Typography variant="label" color={colors.accent} style={styles.subscribedBadge}>
-            {t('packs.subscribed')}
-          </Typography>
+          <View style={styles.premiumActions}>
+            <Typography variant="label" color={colors.accent} style={styles.subscribedBadge}>
+              {t('packs.subscribed')}
+            </Typography>
+          </View>
         )}
       </Animated.View>
 
@@ -123,6 +137,15 @@ export default function PacksScreen() {
               <PackCard pack={pack} isPremium={isPremium} />
             </Animated.View>
           ))}
+          {isPremium && (
+            <Animated.View entering={packEntrance(160 + packs.length * 80)}>
+              <PackCard
+                isPremium
+                onPress={() => router.push('/custom-cards')}
+                pack={customCardsPack}
+              />
+            </Animated.View>
+          )}
         </ScrollView>
       )}
     </View>
@@ -144,8 +167,8 @@ const createStyles = (colors: ReturnType<typeof useColors>) =>
     },
     subscribedBadge: {
       letterSpacing: 1,
-      marginTop: 8,
     },
+    premiumActions: { marginTop: 12 },
     scroll: {
       flex: 1,
     },

@@ -1,18 +1,30 @@
 import * as Sentry from '@sentry/react-native';
-import { createContext, useContext, useState, ReactNode, useEffect } from 'react';
+import { createContext, useCallback, useContext, useState, ReactNode, useEffect } from 'react';
 import * as Localization from 'expo-localization';
 import { GoogleSignin } from '@react-native-google-signin/google-signin';
-import { apiLogin, apiRegister, apiGoogleAuth, apiResetPassword } from '../lib/api';
+import * as AppleAuthentication from 'expo-apple-authentication';
+import { useQueryClient } from '@tanstack/react-query';
+import { useRouter } from 'expo-router';
+import {
+  apiLogin,
+  apiRegister,
+  apiGoogleAuth,
+  apiAppleAuth,
+  apiResetPassword,
+  subscribeToUnauthorized,
+} from '../lib/api';
 import { clearAll, getProfile, getToken, ProfileData, setProfile, setToken } from '../lib/storage';
 import i18n from '@/i18n';
 
 export class DeletionPendingError extends Error {
   deletionScheduledFor: string;
   idToken?: string;
-  constructor(deletionScheduledFor: string, idToken?: string) {
+  provider?: 'google' | 'apple';
+  constructor(deletionScheduledFor: string, idToken?: string, provider?: 'google' | 'apple') {
     super('ACCOUNT_DELETION_PENDING');
     this.deletionScheduledFor = deletionScheduledFor;
     this.idToken = idToken;
+    this.provider = provider;
   }
 }
 
@@ -30,6 +42,7 @@ interface AuthState {
 interface AuthContextValue extends AuthState {
   login: (email: string, password: string) => Promise<ProfileData>;
   googleLogin: () => Promise<ProfileData>;
+  appleLogin: () => Promise<ProfileData>;
   register: (email: string, password: string, passwordConfirm: string) => Promise<void>;
   resetPassword: (token: string, password: string) => Promise<ProfileData>;
   logout: () => void;
@@ -39,10 +52,21 @@ interface AuthContextValue extends AuthState {
 const AuthContext = createContext<AuthContextValue | undefined>(undefined);
 
 export function AuthProvider({ children }: { children: ReactNode }) {
+  const router = useRouter();
+  const queryClient = useQueryClient();
   const [state, setState] = useState<AuthState>(() => ({
     user: getProfile(),
     token: getToken(),
   }));
+
+  const resetSession = useCallback(() => {
+    clearAll();
+    queryClient.clear();
+    setState({ user: null, token: null });
+    router.replace('/(auth)/welcome');
+  }, [queryClient, router]);
+
+  useEffect(() => subscribeToUnauthorized(resetSession), [resetSession]);
 
   useEffect(() => {
     if (state.user) {
@@ -115,7 +139,52 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       if (code === 'ACCOUNT_DELETION_PENDING') {
         throw new DeletionPendingError(
           err.response.data.deletionScheduledFor ?? '',
-          idToken ?? undefined
+          idToken ?? undefined,
+          'google'
+        );
+      }
+      throw err;
+    }
+  }
+
+  async function appleLogin(): Promise<ProfileData> {
+    let idToken: string | null = null;
+    try {
+      const credential = await AppleAuthentication.signInAsync({
+        requestedScopes: [
+          AppleAuthentication.AppleAuthenticationScope.FULL_NAME,
+          AppleAuthentication.AppleAuthenticationScope.EMAIL,
+        ],
+      });
+      idToken = credential.identityToken;
+      if (!idToken || !credential.user) {
+        throw new Error('No Apple identity token or user identifier received');
+      }
+      const deviceLang = Localization.getLocales()[0]?.languageCode ?? 'es';
+      const locale = deviceLang === 'en' ? 'en' : 'es';
+      const fullName = [credential.fullName?.givenName, credential.fullName?.familyName]
+        .filter(Boolean)
+        .join(' ');
+      const { accessToken, profile } = await apiAppleAuth(
+        idToken,
+        credential.user,
+        locale,
+        fullName
+      );
+      persistSession(accessToken, profile);
+      i18n.changeLanguage(profile.locale);
+      return profile;
+    } catch (err: any) {
+      // Cancelling the native sheet is an expected user action, not an error to report.
+      if (err?.code !== 'ERR_REQUEST_CANCELED') {
+        Sentry.captureException(err, { tags: { flow: 'apple_login' } });
+      }
+      const code = err?.response?.data?.code;
+      if (code === 'ACCOUNT_DELETION_PENDING') {
+        throw new DeletionPendingError(
+          err.response.data.deletionScheduledFor ?? '',
+          idToken ?? undefined,
+          'apple'
         );
       }
       throw err;
@@ -130,8 +199,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }
 
   function logout(): void {
-    clearAll();
-    setState({ user: null, token: null });
+    resetSession();
   }
 
   function updateProfile(profile: ProfileData): void {
@@ -145,6 +213,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         ...state,
         login,
         googleLogin,
+        appleLogin,
         register,
         resetPassword,
         logout,

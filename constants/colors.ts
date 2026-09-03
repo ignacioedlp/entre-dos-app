@@ -68,7 +68,7 @@ export const lightColors = {
   glare: 'rgba(255, 255, 255, 0.3)',
 } as const;
 
-export type ThemeColors = typeof darkColors;
+export type ThemeColors = { [Key in keyof typeof darkColors]: string };
 
 /** Default export kept for convenience — always the dark palette */
 export const Colors = darkColors;

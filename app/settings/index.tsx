@@ -1,5 +1,5 @@
 import { useMemo, useState } from 'react';
-import { View, StyleSheet, Pressable, Modal } from 'react-native';
+import { View, StyleSheet, Pressable, Modal, ScrollView } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
@@ -57,6 +57,11 @@ export default function SettingsScreen() {
       icon: 'notifications-outline',
     },
     {
+      label: t('menu.feedback'),
+      route: '/settings/feedback',
+      icon: 'musical-notes-outline',
+    },
+    {
       label: t('menu.language'),
       route: '/settings/language',
       icon: 'language-outline',
@@ -75,11 +80,6 @@ export default function SettingsScreen() {
       label: t('menu.country'),
       route: '/settings/country',
       icon: 'earth-outline',
-    },
-    {
-      label: t('menu.relationship'),
-      route: '/settings/relationship',
-      icon: 'heart-outline',
     },
     ...(isPurchaser
       ? [
@@ -126,7 +126,11 @@ export default function SettingsScreen() {
         </Typography>
       </View>
 
-      <View style={styles.content}>
+      <ScrollView
+        style={styles.content}
+        contentContainerStyle={[styles.scrollContent, { paddingBottom: insets.bottom + 16 }]}
+        showsVerticalScrollIndicator={false}
+      >
         <View>
           {MENU_ITEMS.map((item, index) => (
             <Pressable
@@ -142,7 +146,7 @@ export default function SettingsScreen() {
           ))}
         </View>
 
-        <View style={[styles.footer, { paddingBottom: insets.bottom + 16 }]}>
+        <View style={styles.footer}>
           <Button label={t('signOut')} onPress={() => setLogoutVisible(true)} variant="accent" />
           <Pressable onPress={() => setDeleteVisible(true)} style={styles.deleteAccountBtn}>
             <Typography variant="label" color={colors.pasion} style={styles.deleteAccountLabel}>
@@ -150,7 +154,7 @@ export default function SettingsScreen() {
             </Typography>
           </Pressable>
         </View>
-      </View>
+      </ScrollView>
 
       <Modal
         visible={logoutVisible}
@@ -285,6 +289,9 @@ function createStyles(colors: ThemeColors) {
     },
     content: {
       flex: 1,
+    },
+    scrollContent: {
+      flexGrow: 1,
       justifyContent: 'space-between',
     },
     row: {

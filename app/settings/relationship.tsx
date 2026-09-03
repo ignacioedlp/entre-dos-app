@@ -11,7 +11,7 @@ import {
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
-import { useMemo, useRef, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useTranslation } from 'react-i18next';
 import moment from 'moment';
@@ -25,8 +25,146 @@ import { useAuth } from '@/context/AuthContext';
 import i18n from '@/i18n';
 import { Typography } from '@/components/ui/Typography';
 import { useScaledFontSize } from '@/context/FontScaleContext';
+import Animated, {
+  cancelAnimation,
+  Easing,
+  interpolate,
+  useAnimatedStyle,
+  useReducedMotion,
+  useSharedValue,
+  withDelay,
+  withRepeat,
+  withSequence,
+  withTiming,
+} from 'react-native-reanimated';
 
 const AVATAR_SIZE = 80;
+const TRAIL_HEARTS = [
+  { distance: 23, size: 15, delay: 0 },
+  { distance: 43, size: 12, delay: 230 },
+  { distance: 61, size: 9, delay: 460 },
+  { distance: 76, size: 7, delay: 690 },
+] as const;
+
+const connectionStyles = StyleSheet.create({
+  visual: {
+    width: 164,
+    height: 30,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+});
+
+function HeartTrail({
+  direction,
+  distance,
+  size,
+  delay,
+  color,
+}: (typeof TRAIL_HEARTS)[number] & { direction: 1 | -1; color: string }) {
+  const reducedMotion = useReducedMotion();
+  const progress = useSharedValue(0);
+
+  useEffect(() => {
+    if (reducedMotion) {
+      cancelAnimation(progress);
+      progress.value = 0;
+      return;
+    }
+
+    progress.value = withRepeat(
+      withSequence(
+        withDelay(delay, withTiming(1, { duration: 2100, easing: Easing.out(Easing.quad) })),
+        withTiming(0, { duration: 0 })
+      ),
+      -1,
+      false
+    );
+
+    return () => cancelAnimation(progress);
+  }, [delay, progress, reducedMotion]);
+
+  const animatedStyle = useAnimatedStyle(() => ({
+    opacity: reducedMotion
+      ? 0.48
+      : interpolate(progress.value, [0, 0.18, 0.76, 1], [0.16, 0.82, 0.36, 0.16]),
+    transform: [
+      { translateX: direction * distance },
+      { scale: reducedMotion ? 1 : interpolate(progress.value, [0, 0.18, 1], [0.8, 1, 0.8]) },
+    ],
+  }));
+
+  return (
+    <Animated.View
+      pointerEvents="none"
+      style={[
+        {
+          position: 'absolute',
+          left: '50%',
+          top: '50%',
+          width: size,
+          height: size,
+          marginLeft: -size / 2,
+          marginTop: -size / 2,
+        },
+        animatedStyle,
+      ]}
+    >
+      <Ionicons name="heart" size={size} color={color} />
+    </Animated.View>
+  );
+}
+
+function AnimatedConnection() {
+  const colors = useColors();
+  const reducedMotion = useReducedMotion();
+  const heartScale = useSharedValue(1);
+
+  useEffect(() => {
+    if (reducedMotion) {
+      cancelAnimation(heartScale);
+      heartScale.value = 1;
+      return;
+    }
+
+    heartScale.value = withRepeat(
+      withSequence(
+        withTiming(1.08, { duration: 800, easing: Easing.inOut(Easing.quad) }),
+        withTiming(1, { duration: 800, easing: Easing.inOut(Easing.quad) })
+      ),
+      -1,
+      false
+    );
+
+    return () => cancelAnimation(heartScale);
+  }, [heartScale, reducedMotion]);
+
+  const heartStyle = useAnimatedStyle(() => ({
+    transform: [{ scale: heartScale.value }],
+  }));
+
+  return (
+    <View style={connectionStyles.visual} pointerEvents="none">
+      {TRAIL_HEARTS.flatMap((heart) => [
+        <HeartTrail
+          key={`left-${heart.distance}`}
+          {...heart}
+          direction={-1}
+          color={colors.accent}
+        />,
+        <HeartTrail
+          key={`right-${heart.distance}`}
+          {...heart}
+          direction={1}
+          color={colors.accent}
+        />,
+      ])}
+      <Animated.View style={heartStyle}>
+        <Ionicons name="heart" size={22} color={colors.accent} />
+      </Animated.View>
+    </View>
+  );
+}
 
 export default function RelationshipScreen() {
   const insets = useSafeAreaInsets();
@@ -196,7 +334,7 @@ export default function RelationshipScreen() {
               </View>
 
               <View style={styles.connector}>
-                <Ionicons name="heart" size={22} color={colors.accent} />
+                <AnimatedConnection />
                 <Typography
                   variant="body"
                   baseFontSize={11}

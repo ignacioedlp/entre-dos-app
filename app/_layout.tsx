@@ -1,7 +1,7 @@
 import * as Sentry from '@sentry/react-native';
 import { vexo } from 'vexo-analytics';
 import { useEffect } from 'react';
-import { Stack } from 'expo-router';
+import { Stack, useRouter } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
 import * as SplashScreen from 'expo-splash-screen';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
@@ -15,6 +15,7 @@ import {
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { AuthProvider } from '../context/AuthContext';
 import { RevenueCatProvider } from '../context/RevenueCatContext';
+import { AdsProvider } from '../context/AdsContext';
 import { FontScaleProvider } from '../context/FontScaleContext';
 import { ThemeProvider, useTheme } from '../context/ThemeContext';
 import ToastManager from 'toastify-react-native';
@@ -57,6 +58,7 @@ function ThemedStatusBar() {
 }
 
 function RootLayout() {
+  const router = useRouter();
   const [fontsLoaded, fontError] = useFonts({
     Inter_400Regular,
     Inter_700Bold,
@@ -71,17 +73,36 @@ function RootLayout() {
 
   // Notification listeners (foreground receive + tap response)
   useEffect(() => {
-    const receivedSub = Notifications.addNotificationReceivedListener((_notification) => {
-      // Notification received while app is in foreground — handler above manages display
+    let active = true;
+    Notifications.getLastNotificationResponseAsync()
+      .then((response) => {
+        const playId = response?.notification.request.content.data?.cardPlayId;
+        if (active && playId) {
+          router.push({ pathname: '/play-thread', params: { playId: String(playId) } });
+          Notifications.clearLastNotificationResponseAsync();
+        }
+      })
+      .catch(() => undefined);
+    const receivedSub = Notifications.addNotificationReceivedListener((notification) => {
+      const playId = notification.request.content.data?.cardPlayId;
+      if (playId) queryClient.invalidateQueries({ queryKey: ['play-thread', String(playId)] });
+      if (notification.request.content.data?.type === 'extra_card_unlocked') {
+        queryClient.invalidateQueries({ queryKey: ['deck'] });
+        queryClient.invalidateQueries({ queryKey: ['notifications'] });
+      }
     });
-    const responseSub = Notifications.addNotificationResponseReceivedListener((_response) => {
-      // User tapped a notification — add navigation logic here when needed
+    const responseSub = Notifications.addNotificationResponseReceivedListener((response) => {
+      const playId = response.notification.request.content.data?.cardPlayId;
+      if (playId) {
+        router.push({ pathname: '/play-thread', params: { playId: String(playId) } });
+      }
     });
     return () => {
+      active = false;
       receivedSub.remove();
       responseSub.remove();
     };
-  }, []);
+  }, [router]);
 
   if (!fontsLoaded && !fontError) {
     return null;
@@ -92,45 +113,48 @@ function RootLayout() {
       <SafeAreaProvider>
         <QueryClientProvider client={queryClient}>
           <AuthProvider>
-            <RevenueCatProvider>
-              <ThemeProvider>
-                <FontScaleProvider>
-                  <NotificationSetup />
-                  <ThemedStatusBar />
-                  <Stack screenOptions={{ headerShown: false }}>
-                    <Stack.Screen name="index" />
-                    <Stack.Screen name="(auth)" />
-                    <Stack.Screen name="(app)" />
-                    <Stack.Screen
-                      name="play-card"
-                      options={{
-                        presentation: 'formSheet',
-                        headerShown: false,
-                        sheetAllowedDetents: [0.5],
-                        sheetInitialDetentIndex: 0,
-                        sheetGrabberVisible: true,
-                        sheetCornerRadius: 16,
-                      }}
+            <AdsProvider>
+              <RevenueCatProvider>
+                <ThemeProvider>
+                  <FontScaleProvider>
+                    <NotificationSetup />
+                    <ThemedStatusBar />
+                    <Stack screenOptions={{ headerShown: false }}>
+                      <Stack.Screen name="index" />
+                      <Stack.Screen name="(auth)" />
+                      <Stack.Screen name="(app)" />
+                      <Stack.Screen
+                        name="play-card"
+                        options={{
+                          presentation: 'formSheet',
+                          headerShown: false,
+                          sheetAllowedDetents: [0.5],
+                          sheetInitialDetentIndex: 0,
+                          sheetGrabberVisible: true,
+                          sheetCornerRadius: 16,
+                        }}
+                      />
+                      <Stack.Screen
+                        name="paywall"
+                        options={{
+                          presentation: 'pageSheet',
+                          headerShown: false,
+                        }}
+                      />
+                      <Stack.Screen name="notifications" options={{ headerShown: false }} />
+                      <Stack.Screen name="play-thread" options={{ headerShown: false }} />
+                    </Stack>
+                    <ToastManager
+                      config={toastConfig}
+                      showProgressBar
+                      animationStyle="fade"
+                      position="top"
+                      topOffset={56}
                     />
-                    <Stack.Screen
-                      name="paywall"
-                      options={{
-                        presentation: 'pageSheet',
-                        headerShown: false,
-                      }}
-                    />
-                    <Stack.Screen name="notifications" options={{ headerShown: false }} />
-                  </Stack>
-                  <ToastManager
-                    config={toastConfig}
-                    showProgressBar
-                    animationStyle="fade"
-                    position="top"
-                    topOffset={56}
-                  />
-                </FontScaleProvider>
-              </ThemeProvider>
-            </RevenueCatProvider>
+                  </FontScaleProvider>
+                </ThemeProvider>
+              </RevenueCatProvider>
+            </AdsProvider>
           </AuthProvider>
         </QueryClientProvider>
       </SafeAreaProvider>

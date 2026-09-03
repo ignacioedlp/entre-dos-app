@@ -5,14 +5,18 @@ import { useColors } from '@/context/ThemeContext';
 interface ToggleProps {
   value: boolean;
   onToggle: () => void;
+  accessibilityLabel?: string;
 }
 
-export function Toggle({ value, onToggle }: ToggleProps) {
+export function Toggle({ value, onToggle, accessibilityLabel }: ToggleProps) {
   const colors = useColors();
 
   return (
     <Pressable
       onPress={onToggle}
+      accessibilityRole="switch"
+      accessibilityLabel={accessibilityLabel}
+      accessibilityState={{ checked: value }}
       hitSlop={8}
       style={{
         width: 50,

@@ -14,8 +14,10 @@
     },
     "ios": {
       "supportsTablet": false,
+      "usesAppleSignIn": true,
       "bundleIdentifier": "com.entredos.app",
       "infoPlist": {
+        "CFBundleAllowMixedLocalizations": true,
         "ITSAppUsesNonExemptEncryption": false
       }
     },
@@ -36,6 +38,14 @@
     "plugins": [
       "expo-router",
       "expo-font",
+      "expo-apple-authentication",
+      [
+        "expo-image-picker",
+        {
+          "photosPermission": "Permite a Entre Dos elegir fotos para los recuerdos compartidos.",
+          "cameraPermission": "Permite a Entre Dos tomar fotos para los recuerdos compartidos."
+        }
+      ],
       [
         "expo-notifications",
         {
@@ -45,6 +55,9 @@
       [
         "expo-build-properties",
         {
+          "android": {
+            "extraProguardRules": "-keep class com.google.android.gms.internal.consent_sdk.** { *; }"
+          },
           "ios": {
             "extraPods": [
               {

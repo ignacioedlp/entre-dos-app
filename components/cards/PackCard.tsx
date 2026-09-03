@@ -69,9 +69,10 @@ interface PackCardProps {
   pack: Pack;
   half?: boolean;
   isPremium?: boolean;
+  onPress?: () => void;
 }
 
-export function PackCard({ pack, half, isPremium }: PackCardProps) {
+export function PackCard({ pack, half, isPremium, onPress }: PackCardProps) {
   const theme = getPackTheme(pack.color);
   const cardWidth = half ? HALF_CARD : SCREEN_WIDTH - CARD_PADDING * 2;
   const { t } = useTranslation('home');
@@ -99,8 +100,8 @@ export function PackCard({ pack, half, isPremium }: PackCardProps) {
     }
   }
 
-  return (
-    <View style={[styles.card, { backgroundColor: theme.bg, width: cardWidth }]}>
+  const content = (
+    <>
       <Typography variant="label" color={theme.subText} style={styles.priceLabel}>
         {formatPrice(pack.isBase)}
       </Typography>
@@ -140,8 +141,24 @@ export function PackCard({ pack, half, isPremium }: PackCardProps) {
           </Typography>
         </TouchableOpacity>
       )}
-    </View>
+    </>
   );
+
+  const cardStyle = [styles.card, { backgroundColor: theme.bg, width: cardWidth }];
+  if (onPress) {
+    return (
+      <TouchableOpacity
+        accessibilityRole="button"
+        activeOpacity={0.85}
+        onPress={onPress}
+        style={cardStyle}
+      >
+        {content}
+      </TouchableOpacity>
+    );
+  }
+
+  return <View style={cardStyle}>{content}</View>;
 }
 
 const styles = StyleSheet.create({

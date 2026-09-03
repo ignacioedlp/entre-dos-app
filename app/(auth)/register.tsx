@@ -7,12 +7,13 @@ import {
   KeyboardAvoidingView,
   Platform,
 } from 'react-native';
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import { useForm, Controller } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { AntDesign, Feather } from '@expo/vector-icons';
+import * as AppleAuthentication from 'expo-apple-authentication';
 import { useRouter } from 'expo-router';
 import { useTranslation } from 'react-i18next';
 import { Logo } from '../../components/ui/Logo';
@@ -30,11 +31,21 @@ export default function RegisterScreen() {
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [apiError, setApiError] = useState<string | null>(null);
   const [googleLoading, setGoogleLoading] = useState(false);
-  const { register, googleLogin } = useAuth();
+  const [appleLoading, setAppleLoading] = useState(false);
+  const [appleAvailable, setAppleAvailable] = useState(false);
+  const { register, googleLogin, appleLogin } = useAuth();
   const { t } = useTranslation('auth');
   const inputFontSize = useScaledFontSize(16);
   const colors = useColors();
   const styles = useMemo(() => createStyles(colors), [colors]);
+
+  useEffect(() => {
+    if (Platform.OS === 'ios') {
+      AppleAuthentication.isAvailableAsync()
+        .then(setAppleAvailable)
+        .catch(() => setAppleAvailable(false));
+    }
+  }, []);
 
   const schema = z
     .object({
@@ -67,6 +78,24 @@ export default function RegisterScreen() {
       setApiError(t('register.errorGeneric'));
     } finally {
       setGoogleLoading(false);
+    }
+  };
+
+  const handleAppleLogin = async () => {
+    if (appleLoading || googleLoading || isSubmitting) return;
+    try {
+      setApiError(null);
+      setAppleLoading(true);
+      const profile = await appleLogin();
+      if (!profile.coupleId) router.replace('/(auth)/link');
+      else if (!profile.onboardingCompleted) router.replace('/(auth)/onboarding');
+      else router.replace('/(app)/');
+    } catch (err: any) {
+      if (err?.code !== 'ERR_REQUEST_CANCELED') {
+        setApiError(t('register.errorApple'));
+      }
+    } finally {
+      setAppleLoading(false);
     }
   };
 
@@ -269,6 +298,18 @@ export default function RegisterScreen() {
             </Typography>
           </Pressable>
 
+          {Platform.OS === 'ios' && appleAvailable && (
+            <View style={styles.appleButtonWrapper}>
+              <AppleAuthentication.AppleAuthenticationButton
+                buttonType={AppleAuthentication.AppleAuthenticationButtonType.CONTINUE}
+                buttonStyle={AppleAuthentication.AppleAuthenticationButtonStyle.BLACK}
+                cornerRadius={9999}
+                style={styles.appleButton}
+                onPress={handleAppleLogin}
+              />
+            </View>
+          )}
+
           <Pressable style={styles.loginLink} onPress={() => router.replace('/(auth)/login')}>
             <Typography variant="body" baseFontSize={14} color={colors.textSecondary}>
               {t('register.hasAccount')}
@@ -375,6 +416,18 @@ function createStyles(colors: ThemeColors) {
       backgroundColor: '#ffffff',
       borderRadius: 9999,
       paddingVertical: 16,
+    },
+    appleButtonWrapper: {
+      height: 56,
+      marginTop: 12,
+      borderWidth: 1,
+      borderColor: 'rgba(255, 255, 255, 0.64)',
+      borderRadius: 9999,
+      paddingHorizontal: 1,
+      paddingVertical: 3,
+    },
+    appleButton: {
+      flex: 1,
     },
     googleButtonPressed: {
       opacity: 0.85,

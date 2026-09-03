@@ -12,14 +12,22 @@
     "notifications": "NOTIFICACIONES",
     "language": "IDIOMA",
     "country": "PAÍS",
-    "relationship": "MI RELACIÓN",
     "terms": "TÉRMINOS Y CONDICIONES",
     "privacy": "POLÍTICAS DE PRIVACIDAD",
     "faq": "PREGUNTAS FRECUENTES",
     "subscription": "GESTIONAR SUSCRIPCIÓN",
     "restorePurchases": "RESTAURAR COMPRAS",
+    "feedback": "SONIDOS Y VIBRACIÓN",
     "fontSize": "TAMAÑO DE FUENTE",
     "theme": "TEMA"
+  },
+  "feedback": {
+    "back": "Volver a configuración",
+    "title": "SONIDOS Y VIBRACIÓN.",
+    "soundTitle": "Sonidos",
+    "soundDescription": "Reproducir sonidos breves al abrir paquetes y completar acciones.",
+    "hapticsTitle": "Vibración",
+    "hapticsDescription": "Sentir una respuesta sutil al seleccionar y confirmar acciones."
   },
   "fontSize": {
     "title": "TAMAÑO DE FUENTE.",
@@ -54,7 +62,16 @@
     "noCardsYet": "Aún no jugaste cartas",
     "changePhoto": "Cambiar Foto",
     "camera": "Cámara",
-    "gallery": "Galería"
+    "gallery": "Galería",
+    "manage": "Gestionar",
+    "manageRelationship": "Gestionar mi relación",
+    "partner": "Tu pareja",
+    "togetherYears_zero": "Menos de un año juntos",
+    "togetherYears_one": "Hace un año juntos",
+    "togetherYears_other": "Hace {{count}} años juntos",
+    "anniversaryEmpty": "Establezcan su fecha especial",
+    "linkRelationship": "Vinculá a tu pareja",
+    "linkRelationshipDescription": "Compartí el juego y creen recuerdos juntos"
   },
   "relationship": {
     "title": "MI RELACIÓN.",
@@ -123,7 +140,9 @@
   },
   "privacy": {
     "title": "POLÍTICAS DE PRIVACIDAD.",
-    "lastUpdated": "Última actualización: Marzo 2026",
+    "lastUpdated": "Última actualización: Agosto 2026",
+    "adPreferences": "OPCIONES DE PRIVACIDAD DE ANUNCIOS",
+    "adPreferencesUnavailable": "Las opciones de privacidad no están disponibles ahora.",
     "items": [
       {
         "title": "1. Información que recopilamos",
@@ -146,8 +165,8 @@
         "body": "Tenés derecho a acceder, corregir o eliminar tu información personal en cualquier momento. Podés solicitar una copia de tus datos o pedir que se eliminen contactándonos directamente."
       },
       {
-        "title": "6. Cookies y tecnologías similares",
-        "body": "Utilizamos tecnologías de seguimiento para mejorar la funcionalidad de la aplicación y analizar patrones de uso. Podés gestionar estas preferencias desde la configuración de tu dispositivo."
+        "title": "6. Publicidad y tecnologías similares",
+        "body": "Mostramos anuncios recompensados no personalizados mediante Google AdMob. No solicitamos el permiso de Seguimiento de Apple (ATT), no accedemos al IDFA ni usamos datos de otras apps o sitios para personalizar anuncios. AdMob puede procesar identificadores del dispositivo, dirección IP aproximada, diagnósticos, rendimiento e interacciones con anuncios para entrega técnica, límite de frecuencia, prevención de fraude y reportes agregados. Cuando corresponda, podés revisar o cambiar tu consentimiento desde las opciones de privacidad de anuncios."
       },
       {
         "title": "7. Menores de edad",

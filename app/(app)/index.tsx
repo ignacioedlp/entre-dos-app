@@ -1,8 +1,8 @@
-import { useRef, useEffect, useMemo, useState } from 'react';
+import { useRef, useEffect, useMemo, useState, useCallback } from 'react';
 import { View, StyleSheet, Dimensions, ScrollView, Pressable } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { useTranslation } from 'react-i18next';
 import Animated, {
   useSharedValue,
@@ -18,6 +18,7 @@ import Animated, {
 } from 'react-native-reanimated';
 import { Gesture, GestureDetector } from 'react-native-gesture-handler';
 import { Ionicons } from '@expo/vector-icons';
+import { Toast } from 'toastify-react-native';
 
 import { WeekTimeline } from '../../components/cards/WeekTimeline';
 import { CylinderCard, CARD_HEIGHT } from '../../components/carousel/CylinderCard';
@@ -25,9 +26,19 @@ import { PartnerLastPlay } from '../../components/cards/PartnerLastPlay';
 import { AllPlayedState } from '../../components/home/AllPlayedState';
 import { useColors } from '../../context/ThemeContext';
 import { useAuth } from '../../context/AuthContext';
-import { apiGetDeck, apiGetHistory, DeckCard } from '../../lib/api';
+import {
+  apiGetDeck,
+  apiGetHistory,
+  apiOpenWeeklyPack,
+  DeckCard,
+  DeckResponse,
+} from '../../lib/api';
 import { useNotificationList } from '../../hooks/use-notification-list';
 import { Typography } from '../../components/ui/Typography';
+import { WeeklyPackOpening } from '../../components/deck/WeeklyPackOpening';
+import { ExtraCardReward } from '../../components/deck/ExtraCardReward';
+import { storage } from '../../lib/storage';
+import { triggerFeedback } from '../../lib/feedback';
 
 const { width: SCREEN_WIDTH } = Dimensions.get('window');
 const HOME_AUTO_REFRESH_MS = 30_000;
@@ -75,6 +86,7 @@ function HomeSkeleton({ styles }: { styles: ReturnType<typeof createStyles> }) {
 export default function HomeScreen() {
   const insets = useSafeAreaInsets();
   const router = useRouter();
+  const queryClient = useQueryClient();
   const { user } = useAuth();
   const { t } = useTranslation('home');
   const colors = useColors();
@@ -109,11 +121,34 @@ export default function HomeScreen() {
     });
   const cardsRef = useRef<DeckCard[]>([]);
   cardsRef.current = cards;
+  const hasExtraCardSlot = data?.extraCard?.state === 'available';
+  const carouselItemCount = cards.length + (hasExtraCardSlot ? 1 : 0);
+  const carouselItemCountRef = useRef(carouselItemCount);
+  carouselItemCountRef.current = carouselItemCount;
 
   const rotation = useSharedValue(0);
   const activeIndex = useSharedValue(0);
   const dragY = useSharedValue(0);
+  const cardsForGesture = useSharedValue<DeckCard[]>([]);
   const [activeCardIndex, setActiveCardIndex] = useState(0);
+  const [packVisible, setPackVisible] = useState(false);
+  const syncingPackKey = useRef<string | null>(null);
+  const activeCardIndexRef = useRef(0);
+  const cardIds = `${cards.map((card) => card.id).join('|')}|extra:${hasExtraCardSlot}`;
+
+  useEffect(() => {
+    const nextIndex = Math.min(
+      activeCardIndexRef.current,
+      Math.max(carouselItemCountRef.current - 1, 0)
+    );
+
+    activeCardIndexRef.current = nextIndex;
+    activeIndex.value = nextIndex;
+    rotation.value = nextIndex;
+    dragY.value = 0;
+    cardsForGesture.value = cardsRef.current;
+    setActiveCardIndex(nextIndex);
+  }, [activeIndex, cardIds, cardsForGesture, dragY, rotation]);
 
   const chevron1Opacity = useSharedValue(1);
   const chevron2Opacity = useSharedValue(1);
@@ -143,9 +178,12 @@ export default function HomeScreen() {
     navigateToCard(card);
   }
 
-  function goTo(i: number) {
-    if (!cardsRef.current.length) return;
-    const clamped = Math.max(0, Math.min(cardsRef.current.length - 1, i));
+  function goTo(i: number, feedback: 'selection' | 'cardSwipe' = 'selection') {
+    if (!carouselItemCountRef.current) return;
+    const clamped = Math.max(0, Math.min(carouselItemCountRef.current - 1, i));
+    if (clamped === activeCardIndexRef.current) return;
+    triggerFeedback(feedback);
+    activeCardIndexRef.current = clamped;
     setActiveCardIndex(clamped);
     activeIndex.value = clamped;
     rotation.value = withSpring(clamped, { damping: 18, stiffness: 200 });
@@ -182,7 +220,7 @@ export default function HomeScreen() {
       }
     })
     .onEnd((e) => {
-      const list = cardsRef.current;
+      const list = cardsForGesture.value;
       if (!list.length) return;
 
       const isHorizontalSwipe =
@@ -192,12 +230,16 @@ export default function HomeScreen() {
 
       if (isHorizontalSwipe) {
         const direction = e.translationX < 0 ? 1 : -1;
-        runOnJS(goTo)(activeIndex.value + direction);
+        runOnJS(goTo)(activeIndex.value + direction, 'cardSwipe');
         return;
       }
 
       if (dragY.value > 80) {
         const card = list[activeIndex.value];
+        if (!card) {
+          dragY.value = withSpring(0, { damping: 18, stiffness: 200 });
+          return;
+        }
         dragY.value = withTiming(CARD_HEIGHT * 1.3, { duration: 260 }, () => {
           runOnJS(doNavigate)(card);
         });
@@ -208,138 +250,241 @@ export default function HomeScreen() {
     });
 
   const partnerLastPlay = historyData?.history.find((p) => p.userId !== user?.userId) ?? null;
+  const weeklyCards = allCards.filter((card) => !card.event && card.status === 'active');
+  const weeklyPackKey = data?.weeklyPack
+    ? `weekly-pack.v1.handled.${user?.userId ?? 'anonymous'}.${data.weeklyPack.weekStart}`
+    : null;
+
+  useEffect(() => {
+    if (!data?.weeklyPack.openingRequired || !weeklyPackKey || weeklyCards.length === 0) {
+      setPackVisible(false);
+      return;
+    }
+
+    if (!storage.getBoolean(weeklyPackKey)) {
+      setPackVisible(true);
+      return;
+    }
+
+    if (syncingPackKey.current === weeklyPackKey) return;
+    syncingPackKey.current = weeklyPackKey;
+    void apiOpenWeeklyPack(data.weeklyPack.weekStart)
+      .then(() => queryClient.invalidateQueries({ queryKey: ['deck'] }))
+      .catch(() => {
+        syncingPackKey.current = null;
+      });
+  }, [data?.weeklyPack, queryClient, weeklyCards.length, weeklyPackKey]);
+
+  const claimWeeklyPack = useCallback(async () => {
+    if (!data?.weeklyPack || !weeklyPackKey) return false;
+    storage.set(weeklyPackKey, true);
+    try {
+      const result = await apiOpenWeeklyPack(data.weeklyPack.weekStart);
+      queryClient.setQueryData<DeckResponse>(['deck'], (current) =>
+        current
+          ? { ...current, weeklyPack: { ...current.weeklyPack, openingRequired: false } }
+          : current
+      );
+      return result.shouldAnimate;
+    } catch {
+      Toast.warn(t('weeklyPack.error'));
+      return true;
+    }
+  }, [data?.weeklyPack, queryClient, t, weeklyPackKey]);
+
+  const skipWeeklyPack = useCallback(() => {
+    if (!data?.weeklyPack || !weeklyPackKey) return;
+    storage.set(weeklyPackKey, true);
+    setPackVisible(false);
+    void apiOpenWeeklyPack(data.weeklyPack.weekStart)
+      .then(() => queryClient.invalidateQueries({ queryKey: ['deck'] }))
+      .catch(() => undefined);
+  }, [data?.weeklyPack, queryClient, weeklyPackKey]);
+
+  const completeWeeklyPack = useCallback(() => setPackVisible(false), []);
 
   const showAllPlayed = !isLoading && allCards.length > 0 && cards.length === 0;
   const showNeverDealt = !isLoading && allCards.length === 0;
 
   return (
     <View style={[createStyles(colors).root, { paddingTop: insets.top + 20 }]}>
-      <Animated.View entering={homeEntrance(0)} style={createStyles(colors).header}>
-        <Typography variant="heading" style={styles.greeting}>
-          {t('screen.greeting')}
-        </Typography>
-        <View style={styles.headerActions}>
-          <Pressable onPress={() => router.push('/notifications')}>
-            <Ionicons name="notifications-outline" size={24} color={colors.textPrimary} />
-            {hasUnread && <View style={styles.badge} />}
-          </Pressable>
-        </View>
-      </Animated.View>
-
-      <ScrollView showsVerticalScrollIndicator={false} style={styles.scroll}>
-        {isLoading ? (
-          <HomeSkeleton styles={styles} />
-        ) : showNeverDealt ? (
-          <View style={styles.empty}>
-            <Typography variant="heading" baseFontSize={48} style={styles.emoji}>
-              🃏
-            </Typography>
-            <Typography variant="swissTitle" style={styles.emptyTitle}>
-              {t('screen.emptyTitle')}
-            </Typography>
-            <Typography
-              variant="body"
-              baseFontSize={15}
-              baseLineHeight={22}
-              color={colors.textSecondary}
-              style={styles.emptyBody}
-            >
-              {t('screen.emptyDescription')}
-            </Typography>
+      <WeeklyPackOpening
+        visible={packVisible}
+        cards={weeklyCards}
+        onClaim={claimWeeklyPack}
+        onSkip={skipWeeklyPack}
+        onComplete={completeWeeklyPack}
+      />
+      <View
+        style={styles.homeContent}
+        accessibilityElementsHidden={packVisible}
+        importantForAccessibility={packVisible ? 'no-hide-descendants' : 'auto'}
+      >
+        <Animated.View entering={homeEntrance(0)} style={createStyles(colors).header}>
+          <Typography variant="heading" style={styles.greeting}>
+            {t('screen.greeting')}
+          </Typography>
+          <View style={styles.headerActions}>
+            <Pressable onPress={() => router.push('/notifications')}>
+              <Ionicons name="notifications-outline" size={24} color={colors.textPrimary} />
+              {hasUnread && <View style={styles.badge} />}
+            </Pressable>
           </View>
-        ) : showAllPlayed ? (
-          <AllPlayedState />
-        ) : (
-          <View style={styles.carouselSection}>
-            {partnerLastPlay && (
-              <Animated.View entering={homeEntrance(70)}>
-                <PartnerLastPlay play={partnerLastPlay} />
-              </Animated.View>
-            )}
-            <Animated.View entering={homeEntrance(100)} style={styles.container}>
-              <View style={styles.sectionHeader}>
-                <Typography
-                  variant="cardLabel"
-                  color={colors.textMuted}
-                  style={{ opacity: 1, letterSpacing: 2.5 }}
-                >
-                  {t('screen.deckTitle')}
-                </Typography>
-                <Pressable
-                  onPress={handleRandomCard}
-                  disabled={cards.length <= 1}
-                  style={{ opacity: cards.length <= 1 ? 0.3 : 1 }}
-                >
-                  <Ionicons name="shuffle" size={20} color={colors.textMuted} />
-                </Pressable>
-              </View>
-              <View style={styles.divider} />
-            </Animated.View>
-            <Animated.View entering={homeEntrance(170)}>
-              <GestureDetector gesture={pan}>
-                <Animated.View style={styles.carouselHitArea}>
-                  <View style={styles.carouselStage}>
-                    {orderedCards.map(({ card, index }) => (
-                      <CylinderCard
-                        key={card.id}
-                        card={card}
-                        index={index}
-                        rotation={rotation}
-                        dragY={dragY}
-                        activeIndex={activeIndex}
-                        onTap={() => goTo(index)}
-                      />
-                    ))}
-                    <Pressable
-                      accessibilityLabel="Previous card"
-                      disabled={activeCardIndex === 0}
-                      onPress={() => goTo(activeCardIndex - 1)}
-                      style={[styles.carouselNavigationZone, styles.carouselNavigationZoneLeft]}
-                    />
-                    <Pressable
-                      accessibilityLabel="Next card"
-                      disabled={activeCardIndex === cards.length - 1}
-                      onPress={() => goTo(activeCardIndex + 1)}
-                      style={[styles.carouselNavigationZone, styles.carouselNavigationZoneRight]}
-                    />
-                  </View>
-                </Animated.View>
-              </GestureDetector>
-            </Animated.View>
+        </Animated.View>
 
-            <Animated.View entering={homeEntrance(230)} style={styles.hint}>
+        <ScrollView showsVerticalScrollIndicator={false} style={styles.scroll}>
+          {isLoading ? (
+            <HomeSkeleton styles={styles} />
+          ) : showNeverDealt ? (
+            <View style={styles.empty}>
+              <Typography variant="heading" baseFontSize={48} style={styles.emoji}>
+                🃏
+              </Typography>
+              <Typography variant="swissTitle" style={styles.emptyTitle}>
+                {t('screen.emptyTitle')}
+              </Typography>
               <Typography
                 variant="body"
-                baseFontSize={14}
-                baseLineHeight={20}
+                baseFontSize={15}
+                baseLineHeight={22}
                 color={colors.textSecondary}
-                style={styles.hintText}
+                style={styles.emptyBody}
               >
-                {t('screen.deckHint')}
+                {t('screen.emptyDescription')}
               </Typography>
-              <View style={styles.chevrons}>
-                <Animated.View style={chevron1Style}>
-                  <Ionicons name="chevron-down" size={18} color={colors.textMuted} />
+              {data?.extraCard ? <ExtraCardReward extraCard={data.extraCard} /> : null}
+            </View>
+          ) : showAllPlayed ? (
+            <AllPlayedState
+              extraCardAction={
+                data?.extraCard ? <ExtraCardReward extraCard={data.extraCard} /> : undefined
+              }
+            />
+          ) : (
+            <View style={styles.carouselSection}>
+              {partnerLastPlay && (
+                <Animated.View entering={homeEntrance(70)}>
+                  <PartnerLastPlay play={partnerLastPlay} />
                 </Animated.View>
-                <Animated.View style={[chevron2Style, { marginTop: -10 }]}>
-                  <Ionicons name="chevron-down" size={18} color={colors.textMuted} />
-                </Animated.View>
-                <Animated.View style={[chevron3Style, { marginTop: -10 }]}>
-                  <Ionicons name="chevron-down" size={18} color={colors.textMuted} />
-                </Animated.View>
-              </View>
-            </Animated.View>
-          </View>
-        )}
+              )}
+              <Animated.View entering={homeEntrance(100)} style={styles.container}>
+                <View style={styles.sectionHeader}>
+                  <Typography
+                    variant="cardLabel"
+                    color={colors.textMuted}
+                    style={{ opacity: 1, letterSpacing: 2.5 }}
+                  >
+                    {t('screen.deckTitle')}
+                  </Typography>
+                  <View style={styles.deckActions}>
+                    <View
+                      accessibilityLabel={t('cardSwap.remaining', {
+                        count: data?.weeklyChanges.remaining ?? 0,
+                      })}
+                      style={styles.swapCount}
+                    >
+                      <Ionicons name="swap-horizontal" size={20} color={colors.textMuted} />
+                      <Typography variant="cardLabel" color={colors.textMuted} baseFontSize={12}>
+                        {data?.weeklyChanges.remaining ?? 0}
+                      </Typography>
+                    </View>
+                    <Pressable
+                      onPress={handleRandomCard}
+                      disabled={cards.length <= 1}
+                      accessibilityLabel={t('screen.randomCard')}
+                      style={[
+                        styles.shuffleButton,
+                        cards.length <= 1 && styles.shuffleButtonDisabled,
+                      ]}
+                    >
+                      <Ionicons name="shuffle" size={20} color={colors.textMuted} />
+                    </Pressable>
+                  </View>
+                </View>
+                <View style={styles.divider} />
+              </Animated.View>
+              <Animated.View entering={homeEntrance(170)}>
+                <GestureDetector gesture={pan}>
+                  <Animated.View style={styles.carouselHitArea}>
+                    <View style={styles.carouselStage}>
+                      {orderedCards.map(({ card, index }) => (
+                        <CylinderCard
+                          key={card.id}
+                          card={card}
+                          index={index}
+                          rotation={rotation}
+                          dragY={dragY}
+                          activeIndex={activeIndex}
+                          onTap={() => goTo(index)}
+                        />
+                      ))}
+                      {hasExtraCardSlot && data?.extraCard ? (
+                        <ExtraCardReward
+                          extraCard={data.extraCard}
+                          carousel={{
+                            index: cards.length,
+                            rotation,
+                            activeIndex,
+                            isActive: activeCardIndex === cards.length,
+                            onFocus: () => goTo(cards.length),
+                          }}
+                        />
+                      ) : null}
+                      <Pressable
+                        accessibilityLabel="Previous card"
+                        disabled={activeCardIndex === 0}
+                        onPress={() => goTo(activeCardIndex - 1)}
+                        style={[styles.carouselNavigationZone, styles.carouselNavigationZoneLeft]}
+                      />
+                      <Pressable
+                        accessibilityLabel="Next card"
+                        disabled={activeCardIndex === carouselItemCount - 1}
+                        onPress={() => goTo(activeCardIndex + 1)}
+                        style={[styles.carouselNavigationZone, styles.carouselNavigationZoneRight]}
+                      />
+                    </View>
+                  </Animated.View>
+                </GestureDetector>
+              </Animated.View>
 
-        <Animated.View entering={homeEntrance(300)}>
-          <WeekTimeline
-            plays={historyData?.history ?? []}
-            isLoading={isHistoryLoading}
-            currentUserId={user?.userId ?? ''}
-          />
-        </Animated.View>
-      </ScrollView>
+              <Animated.View entering={homeEntrance(230)} style={styles.hint}>
+                <Typography
+                  variant="body"
+                  baseFontSize={14}
+                  baseLineHeight={20}
+                  color={colors.textSecondary}
+                  style={styles.hintText}
+                >
+                  {t(
+                    hasExtraCardSlot && activeCardIndex === cards.length
+                      ? 'extraCard.deckHint'
+                      : 'screen.deckHint'
+                  )}
+                </Typography>
+                <View style={styles.chevrons}>
+                  <Animated.View style={chevron1Style}>
+                    <Ionicons name="chevron-down" size={18} color={colors.textMuted} />
+                  </Animated.View>
+                  <Animated.View style={[chevron2Style, { marginTop: -10 }]}>
+                    <Ionicons name="chevron-down" size={18} color={colors.textMuted} />
+                  </Animated.View>
+                  <Animated.View style={[chevron3Style, { marginTop: -10 }]}>
+                    <Ionicons name="chevron-down" size={18} color={colors.textMuted} />
+                  </Animated.View>
+                </View>
+              </Animated.View>
+            </View>
+          )}
+
+          <Animated.View entering={homeEntrance(300)}>
+            <WeekTimeline
+              plays={historyData?.history ?? []}
+              isLoading={isHistoryLoading}
+              currentUserId={user?.userId ?? ''}
+            />
+          </Animated.View>
+        </ScrollView>
+      </View>
     </View>
   );
 }
@@ -350,6 +495,7 @@ function createStyles(colors: ReturnType<typeof useColors>) {
       flex: 1,
       backgroundColor: colors.background,
     },
+    homeContent: { flex: 1 },
     scroll: {
       flex: 1,
     },
@@ -372,6 +518,22 @@ function createStyles(colors: ReturnType<typeof useColors>) {
       flexDirection: 'row',
       alignItems: 'center',
       gap: 14,
+    },
+    deckActions: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: 12,
+    },
+    swapCount: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: 6,
+    },
+    shuffleButton: {
+      padding: 2,
+    },
+    shuffleButtonDisabled: {
+      opacity: 0.3,
     },
     eventCountPill: {
       width: 10,

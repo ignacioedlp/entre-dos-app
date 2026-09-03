@@ -1,6 +1,15 @@
 import axios from 'axios';
 import { clearAll, getToken, ProfileData } from './storage';
 
+type UnauthorizedListener = () => void;
+
+const unauthorizedListeners = new Set<UnauthorizedListener>();
+
+export function subscribeToUnauthorized(listener: UnauthorizedListener): () => void {
+  unauthorizedListeners.add(listener);
+  return () => unauthorizedListeners.delete(listener);
+}
+
 export const api = axios.create({
   baseURL:
     process.env.EXPO_PUBLIC_API_URL ??
@@ -29,6 +38,7 @@ api.interceptors.response.use(
     // actually sent and rejected by the API.
     if (error.response?.status === 401 && authorization?.startsWith('Bearer ')) {
       clearAll();
+      unauthorizedListeners.forEach((listener) => listener());
     }
     return Promise.reject(error);
   }
@@ -84,6 +94,21 @@ export async function apiGoogleAuth(idToken: string, locale: string): Promise<Au
   return res.data;
 }
 
+export async function apiAppleAuth(
+  idToken: string,
+  appleUser: string,
+  locale: string,
+  fullName?: string | null
+): Promise<AuthResponse> {
+  const res = await api.post<AuthResponse>('/auth/apple', {
+    idToken,
+    appleUser,
+    locale,
+    fullName,
+  });
+  return res.data;
+}
+
 export async function apiForgotPassword(email: string): Promise<{ message: string }> {
   const res = await api.post<{ message: string }>('/auth/forgot-password', { email });
   return res.data;
@@ -131,6 +156,10 @@ export interface DeckCard {
   rarity: 'common' | 'rare' | 'epic' | 'legendary';
   packIcon?: string;
   event?: EventBadge | null;
+  extraUnlock?: {
+    source: 'rewarded_ad' | 'premium';
+    unlockedBy: { id: string; displayName: string; avatarUrl: string };
+  } | null;
 }
 
 export interface EventBadge {
@@ -156,6 +185,19 @@ export interface ActiveEventsResponse {
 
 export interface DeckResponse {
   cards: DeckCard[];
+  weeklyPack: {
+    weekStart: string;
+    openingRequired: boolean;
+  };
+  weeklyChanges: {
+    limit: number;
+    remaining: number;
+  };
+  extraCard: {
+    weekStart: string;
+    state: 'available' | 'claimed' | 'unavailable';
+    requiresAd: boolean;
+  };
 }
 
 export async function apiGetDeck(): Promise<DeckResponse> {
@@ -166,13 +208,69 @@ export async function apiGetDeck(): Promise<DeckResponse> {
   return res.data;
 }
 
+export interface WeeklyPackOpenResponse {
+  weekStart: string;
+  shouldAnimate: boolean;
+}
+
+export async function apiOpenWeeklyPack(weekStart: string): Promise<WeeklyPackOpenResponse> {
+  const res = await api.put<WeeklyPackOpenResponse>('/deck/weekly-pack/open', { weekStart });
+  return res.data;
+}
+
+export type ExtraCardClaimResponse =
+  | { status: 'granted'; card: DeckCard }
+  | {
+      status: 'ad_required';
+      attemptId: string;
+      adUnitId: string;
+      userId: string;
+      customData: string;
+    };
+
+export async function apiClaimExtraCard(platform: 'ios' | 'android') {
+  const response = await api.post<ExtraCardClaimResponse>('/deck/extra-card/claim', { platform });
+  return response.data;
+}
+
+export type ExtraCardAttemptResponse =
+  | { status: 'pending' | 'expired' }
+  | { status: 'granted'; card: DeckCard };
+
+export async function apiGetExtraCardAttempt(attemptId: string) {
+  const response = await api.get<ExtraCardAttemptResponse>(
+    `/deck/extra-card/attempts/${attemptId}`,
+    { timeout: 1800 }
+  );
+  return response.data;
+}
+
 export async function apiGetActiveEvents(): Promise<ActiveEventsResponse> {
   const res = await api.get<ActiveEventsResponse>('/events/active/');
   return res.data;
 }
 
-export async function apiPlayCard(deckCardId: string): Promise<void> {
-  await api.post(`/deck/${deckCardId}/play`);
+export interface CardPlay {
+  id: string;
+  userDeckId: string;
+  userId: string;
+  coupleId: string;
+  playedAt: string;
+}
+
+export async function apiPlayCard(deckCardId: string): Promise<CardPlay> {
+  const res = await api.post<{ cardPlay: CardPlay }>(`/deck/${deckCardId}/play`);
+  return res.data.cardPlay;
+}
+
+export interface CardSwapResponse {
+  card: DeckCard;
+  changesRemaining: number;
+}
+
+export async function apiSwapCard(deckCardId: string): Promise<CardSwapResponse> {
+  const res = await api.post<CardSwapResponse>(`/deck/${deckCardId}/swap`);
+  return res.data;
 }
 
 export interface CardHistoryItem {
@@ -181,7 +279,6 @@ export interface CardHistoryItem {
   userId: string;
   userName: string | null;
   coupleId: string;
-  note: string | null;
   playedAt: string;
   title: string;
   description: string;
@@ -197,6 +294,156 @@ export interface HistoryResponse {
 export async function apiGetHistory(): Promise<HistoryResponse> {
   const res = await api.get<HistoryResponse>('/deck/history');
   return res.data;
+}
+
+export interface PlayThreadUser {
+  id: string;
+  displayName: string;
+  avatarUrl: string;
+}
+
+export interface PlayThreadCard {
+  id: string;
+  title: string;
+  description: string;
+  category: 'date' | 'action' | 'home';
+  rarity: 'common' | 'rare' | 'epic' | 'legendary';
+  event?: EventBadge | null;
+}
+
+export interface PlayComment {
+  id: string;
+  author: PlayThreadUser;
+  body: string;
+  createdAt: string;
+}
+
+export type PlayReactionType = 'heart' | 'heart_eyes' | 'laugh' | 'fire' | 'raised_hands';
+
+export interface PlayReaction {
+  id: string;
+  user: PlayThreadUser;
+  type: PlayReactionType;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface PlaySchedule {
+  scheduledAt: string;
+  timeZone: string;
+  hasTime: boolean;
+  updatedBy: PlayThreadUser | null;
+  updatedAt: string;
+}
+
+export interface PlayThread {
+  id: string;
+  playedAt: string;
+  updatedAt: string;
+  playedBy: PlayThreadUser;
+  card: PlayThreadCard;
+  schedule: PlaySchedule | null;
+  comments: PlayComment[];
+  reactions: PlayReaction[];
+  photo: PlayPhoto | null;
+}
+
+export interface PlayPhoto {
+  status: 'pending' | 'approved' | 'rejected' | 'error';
+  url?: string;
+}
+
+export interface AlbumMoment {
+  id: string;
+  playedAt: string;
+  playedBy: PlayThreadUser;
+  card: PlayThreadCard;
+  photo: PlayPhoto | null;
+  commentCount: number;
+  reactionCount: number;
+}
+
+export interface AlbumMomentsResponse {
+  moments: AlbumMoment[];
+  nextCursor: string | null;
+}
+
+export async function apiGetAlbumMoments(cursor?: string | null): Promise<AlbumMomentsResponse> {
+  const res = await api.get<AlbumMomentsResponse>('/album/moments', {
+    params: { limit: 20, ...(cursor ? { cursor } : {}) },
+  });
+  return res.data;
+}
+
+export async function apiGetPlayThread(playId: string): Promise<PlayThread> {
+  const res = await api.get<{ thread: PlayThread }>(`/deck/plays/${playId}/thread`);
+  return res.data.thread;
+}
+
+export async function apiCreatePlayComment(
+  playId: string,
+  body: string,
+  idempotencyKey: string
+): Promise<PlayComment> {
+  const res = await api.post<{ comment: PlayComment }>(`/deck/plays/${playId}/comments`, {
+    body,
+    idempotencyKey,
+  });
+  return res.data.comment;
+}
+
+export interface PlayScheduleInput {
+  date: string;
+  time: string | null;
+  timeZone: string;
+}
+
+export async function apiUpdatePlaySchedule(
+  playId: string,
+  input: PlayScheduleInput
+): Promise<PlaySchedule> {
+  const res = await api.put<{ schedule: PlaySchedule }>(`/deck/plays/${playId}/schedule`, input);
+  return res.data.schedule;
+}
+
+export async function apiDeletePlaySchedule(playId: string): Promise<void> {
+  await api.delete(`/deck/plays/${playId}/schedule`);
+}
+
+export async function apiUpdatePlayReaction(
+  playId: string,
+  type: PlayReactionType
+): Promise<PlayReaction> {
+  const res = await api.put<{ reaction: PlayReaction }>(`/deck/plays/${playId}/reaction`, {
+    type,
+  });
+  return res.data.reaction;
+}
+
+export async function apiDeletePlayReaction(playId: string): Promise<void> {
+  await api.delete(`/deck/plays/${playId}/reaction`);
+}
+
+export async function apiUploadPlayPhoto(
+  playId: string,
+  image: { uri: string; mimeType?: string | null; fileName?: string | null },
+  idempotencyKey: string
+): Promise<PlayPhoto | null> {
+  const form = new FormData();
+  form.append('idempotencyKey', idempotencyKey);
+  form.append('image', {
+    uri: image.uri,
+    type: image.mimeType || 'image/jpeg',
+    name: image.fileName || 'play-photo.jpg',
+  } as unknown as Blob);
+  const res = await api.post<{ photo: PlayPhoto | null }>(`/deck/plays/${playId}/photo`, form, {
+    headers: { 'Content-Type': 'multipart/form-data' },
+  });
+  return res.data.photo;
+}
+
+export async function apiDeletePlayPhoto(playId: string): Promise<void> {
+  await api.delete(`/deck/plays/${playId}/photo`);
 }
 
 export interface Pack {
@@ -221,6 +468,62 @@ export async function apiGetPacks(): Promise<PacksResponse> {
   // Authorization header when iOS follows it.
   const res = await api.get<PacksResponse>('/packs/');
   return res.data;
+}
+
+export type CardCategory = 'date' | 'action' | 'home';
+export type CardRarity = 'common' | 'rare' | 'legendary';
+
+export interface CustomCard {
+  id: string;
+  title: string;
+  description: string;
+  category: CardCategory;
+  rarity: CardRarity;
+  isActive: boolean;
+  isArchived: boolean;
+  creatorId: string;
+  createdAt: string;
+  updatedAt: string;
+  canEdit: boolean;
+}
+
+export interface CustomCardsResponse {
+  cards: CustomCard[];
+  limit: number;
+  rarityLimits: Record<CardRarity, number>;
+}
+
+export interface CustomCardInput {
+  title: string;
+  description: string;
+  category: CardCategory;
+  rarity: CardRarity;
+}
+
+export async function apiGetCustomCards(): Promise<CustomCardsResponse> {
+  const res = await api.get<CustomCardsResponse>('/cards/custom');
+  return res.data;
+}
+
+export async function apiCreateCustomCard(input: CustomCardInput): Promise<CustomCard> {
+  const res = await api.post<{ card: CustomCard }>('/cards/custom', input);
+  return res.data.card;
+}
+
+export async function apiUpdateCustomCard(
+  cardId: string,
+  input: CustomCardInput
+): Promise<CustomCard> {
+  const res = await api.patch<{ card: CustomCard }>(`/cards/custom/${cardId}`, input);
+  return res.data.card;
+}
+
+export async function apiSetCustomCardActive(
+  cardId: string,
+  isActive: boolean
+): Promise<CustomCard> {
+  const res = await api.patch<{ card: CustomCard }>(`/cards/custom/${cardId}`, { isActive });
+  return res.data.card;
 }
 
 // Subscriptions / Entitlements
@@ -326,7 +629,9 @@ export async function apiDeleteAccount(): Promise<DeleteAccountResponse> {
 }
 
 export async function apiCancelDeletion(
-  credentials: { email: string; password: string } | { idToken: string }
+  credentials:
+    | { email: string; password: string }
+    | { idToken: string; provider: 'google' | 'apple' }
 ): Promise<AuthResponse> {
   const res = await api.post<AuthResponse>('/auth/cancel-deletion', credentials);
   return res.data;

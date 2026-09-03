@@ -1,5 +1,5 @@
 import { useEffect } from 'react';
-import { View, StyleSheet, Dimensions } from 'react-native';
+import { View, StyleSheet, Dimensions, Pressable } from 'react-native';
 import Animated, {
   useSharedValue,
   useAnimatedStyle,
@@ -12,6 +12,7 @@ import Animated, {
 import { LinearGradient } from 'expo-linear-gradient';
 import { Ionicons } from '@expo/vector-icons';
 import { useTranslation } from 'react-i18next';
+import { useRouter } from 'expo-router';
 
 import { RarityKey, rarityColor, rarityGlow, rarityTextColor } from '../../constants/colors';
 import { CardHistoryItem } from '../../lib/api';
@@ -38,6 +39,7 @@ export function PartnerLastPlay({ play }: PartnerLastPlayProps) {
   const fg = rarityTextColor[rarity];
   const glow = rarityGlow[rarity];
   const { t } = useTranslation(['home', 'common']);
+  const router = useRouter();
 
   function timeAgo(iso: string): string {
     const mins = Math.floor((Date.now() - new Date(iso).getTime()) / 60000);
@@ -91,7 +93,9 @@ export function PartnerLastPlay({ play }: PartnerLastPlayProps) {
   });
 
   return (
-    <View
+    <Pressable
+      accessibilityLabel={t('home:playThread.openThread', { title: play.title })}
+      onPress={() => router.push({ pathname: '/play-thread', params: { playId: play.id } })}
       style={[
         styles.container,
         {
@@ -156,7 +160,7 @@ export function PartnerLastPlay({ play }: PartnerLastPlayProps) {
           </Animated.View>
         </View>
       </View>
-    </View>
+    </Pressable>
   );
 }
 

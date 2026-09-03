@@ -35,7 +35,7 @@ export default function OnboardingScreen() {
   const insets = useSafeAreaInsets();
   const { user, updateProfile } = useAuth();
   const { t, i18n: languageI18n } = useTranslation('auth');
-  const inputFontSize = useScaledFontSize(18);
+  const inputFontSize = useScaledFontSize(16);
   const colors = useColors();
   const styles = useMemo(() => createStyles(colors), [colors]);
 
@@ -311,14 +311,12 @@ function createStyles(colors: ThemeColors) {
       marginBottom: 40,
     },
     input: {
-      backgroundColor: colors.surface,
-      borderRadius: 16,
-      borderWidth: 1,
-      borderColor: colors.border,
-      paddingHorizontal: 20,
-      paddingVertical: 18,
+      paddingHorizontal: 18,
+      paddingVertical: 16,
       fontFamily: 'Inter_400Regular',
       color: colors.textPrimary,
+      borderBottomWidth: 1,
+      borderColor: '#EDF1F3',
     },
     languageList: {
       gap: 12,

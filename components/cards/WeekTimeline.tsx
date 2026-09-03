@@ -1,6 +1,7 @@
 import moment from 'moment';
-import { View, StyleSheet } from 'react-native';
+import { View, StyleSheet, Pressable } from 'react-native';
 import { useTranslation } from 'react-i18next';
+import { useRouter } from 'expo-router';
 
 import { CardHistoryItem } from '../../lib/api';
 import { RarityKey, rarityColor, rarityGlow, ThemeColors } from '../../constants/colors';
@@ -77,6 +78,7 @@ function TimelineEntry({
   styles: ReturnType<typeof createStyles>;
 }) {
   const { t } = useTranslation(['home', 'common']);
+  const router = useRouter();
   const rarity = RARITY_MAP[play.rarity] ?? 'comun';
   const dotColor = rarityColor[rarity];
   const dotGlow = rarityGlow[rarity];
@@ -94,7 +96,11 @@ function TimelineEntry({
   });
 
   return (
-    <View style={styles.row}>
+    <Pressable
+      accessibilityLabel={t('home:playThread.openThread', { title: play.title })}
+      onPress={() => router.push({ pathname: '/play-thread', params: { playId: play.id } })}
+      style={({ pressed }) => [styles.row, pressed && styles.rowPressed]}
+    >
       <View style={styles.leftCol}>
         <View
           style={[
@@ -194,7 +200,7 @@ function TimelineEntry({
           </Typography>
         ) : null}
       </View>
-    </View>
+    </Pressable>
   );
 }
 
@@ -277,6 +283,9 @@ const createStyles = (colors: ThemeColors) =>
     },
     row: {
       flexDirection: 'row',
+    },
+    rowPressed: {
+      opacity: 0.72,
     },
     leftCol: {
       width: 28,

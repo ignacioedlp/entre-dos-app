@@ -39,19 +39,6 @@ export default function NotificationsScreen() {
           borderTopColor: colors.border,
         }}
       >
-        <View
-          style={{
-            width: 40,
-            height: 40,
-            borderRadius: 20,
-            backgroundColor: colors.pasion + '18',
-            alignItems: 'center',
-            justifyContent: 'center',
-            marginRight: 12,
-          }}
-        >
-          <MaterialIcons name="notifications-none" size={20} color={colors.pasion} />
-        </View>
         <View style={{ flex: 1 }}>
           <Typography variant="bodyBold">{t('notifications.toggleLabel')}</Typography>
           <Typography
