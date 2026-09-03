@@ -17,7 +17,8 @@
       "usesAppleSignIn": true,
       "bundleIdentifier": "com.entredos.app",
       "infoPlist": {
-        "CFBundleAllowMixedLocalizations": true
+        "CFBundleAllowMixedLocalizations": true,
+        "ITSAppUsesNonExemptEncryption": false
       }
     },
     "android": {
