@@ -4,7 +4,7 @@ import { useForm, Controller } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { AntDesign, Feather, Ionicons } from '@expo/vector-icons';
+import { AntDesign, Feather, FontAwesome, Ionicons } from '@expo/vector-icons';
 import * as AppleAuthentication from 'expo-apple-authentication';
 import { useRouter } from 'expo-router';
 import { useTranslation } from 'react-i18next';
@@ -270,15 +270,22 @@ export default function LoginScreen() {
         </Pressable>
 
         {Platform.OS === 'ios' && appleAvailable && (
-          <View style={styles.appleButtonWrapper}>
-            <AppleAuthentication.AppleAuthenticationButton
-              buttonType={AppleAuthentication.AppleAuthenticationButtonType.SIGN_IN}
-              buttonStyle={AppleAuthentication.AppleAuthenticationButtonStyle.BLACK}
-              cornerRadius={9999}
-              style={styles.appleButton}
-              onPress={handleAppleLogin}
-            />
-          </View>
+          <Pressable
+            style={({ pressed }) => [
+              styles.appleButton,
+              pressed && styles.socialButtonPressed,
+              (appleLoading || isSubmitting) && styles.socialButtonDisabled,
+            ]}
+            onPress={handleAppleLogin}
+            disabled={appleLoading || isSubmitting}
+            accessibilityRole="button"
+            accessibilityLabel={t('login.apple')}
+          >
+            <FontAwesome name="apple" size={21} color={colors.textPrimary} />
+            <Typography variant="button" color={colors.textPrimary}>
+              {appleLoading ? t('login.submitting') : t('login.apple')}
+            </Typography>
+          </Pressable>
         )}
 
         <Pressable style={styles.registerLink} onPress={() => router.push('/(auth)/register')}>
@@ -422,21 +429,27 @@ function createStyles(colors: ThemeColors) {
       borderRadius: 9999,
       paddingVertical: 16,
     },
-    appleButtonWrapper: {
-      height: 56,
-      marginTop: 12,
-      borderWidth: 1,
-      borderColor: 'rgba(255, 255, 255, 0.64)',
-      borderRadius: 9999,
-      paddingHorizontal: 1,
-      paddingVertical: 3,
-    },
     appleButton: {
-      flex: 1,
+      minHeight: 52,
+      borderWidth: 1,
+      borderColor: colors.border,
+      borderRadius: 9999,
+      backgroundColor: colors.surface,
+      flexDirection: 'row',
+      alignItems: 'center',
+      justifyContent: 'center',
+      gap: 10,
     },
     googleButtonPressed: {
       opacity: 0.85,
       transform: [{ scale: 0.98 }],
+    },
+    socialButtonPressed: {
+      opacity: 0.85,
+      transform: [{ scale: 0.98 }],
+    },
+    socialButtonDisabled: {
+      opacity: 0.4,
     },
     registerLink: {
       alignSelf: 'center',
