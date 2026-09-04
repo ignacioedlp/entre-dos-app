@@ -1,5 +1,4 @@
-import type { ExpoConfig } from 'expo/config';
-import base from './app.json';
+import type { ConfigContext, ExpoConfig } from 'expo/config';
 
 const GOOGLE_SAMPLE_APP_ID_IOS = 'ca-app-pub-3940256099942544~1458002511';
 const GOOGLE_SAMPLE_APP_ID_ANDROID = 'ca-app-pub-3940256099942544~3347511713';
@@ -13,12 +12,10 @@ function appId(name: string, value: string | undefined, fallback: string) {
   return value ?? fallback;
 }
 
-const baseConfig = base.expo as ExpoConfig;
-
-export default (): ExpoConfig => ({
-  ...baseConfig,
+export default ({ config }: ConfigContext): ExpoConfig => ({
+  ...config,
   plugins: [
-    ...(baseConfig.plugins ?? []),
+    ...(config.plugins ?? []),
     [
       'react-native-google-mobile-ads',
       {
