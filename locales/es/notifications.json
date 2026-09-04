@@ -28,6 +28,8 @@
   "alert": {
     "disabledTitle": "Notificaciones desactivadas",
     "disabledMessage": "Para recibir notificaciones, activálas en la Configuración de tu dispositivo.",
+    "enableFailedTitle": "No pudimos activar las notificaciones",
+    "enableFailedMessage": "Verificá tu conexión e intentá nuevamente.",
     "cancel": "Cancelar",
     "openSettings": "Abrir configuración"
   }

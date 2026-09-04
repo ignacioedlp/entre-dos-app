@@ -581,6 +581,11 @@ export async function unregisterPushNotifications(): Promise<void> {
   await api.delete('/push/unregister');
 }
 
+export async function apiGetProfile(): Promise<ProfileData> {
+  const res = await api.get<{ profile: ProfileData }>('/profiles/me');
+  return res.data.profile;
+}
+
 export async function apiUpdateLocale(locale: 'es' | 'en'): Promise<ProfileData> {
   const res = await api.put<{ profile: ProfileData }>('/profiles/me', { locale });
   return res.data.profile;

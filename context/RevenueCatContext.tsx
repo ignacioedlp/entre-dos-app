@@ -88,14 +88,14 @@ export function RevenueCatProvider({ children }: { children: ReactNode }) {
 
     const keyName = Platform.select({
       android: 'EXPO_PUBLIC_RC_API_KEY_ANDROID',
-      ios: 'EXPO_PUBLIC_RC_API_IOS',
+      ios: 'EXPO_PUBLIC_RC_API_IOS_KEY',
       default: 'EXPO_PUBLIC_RC_API_KEY',
     });
 
     const apiKey =
       Platform.select({
         android: process.env.EXPO_PUBLIC_RC_API_KEY_ANDROID,
-        ios: process.env.EXPO_PUBLIC_RC_API_IOS,
+        ios: process.env.EXPO_PUBLIC_RC_API_IOS_KEY,
         default: process.env.EXPO_PUBLIC_RC_API_KEY,
       }) ?? process.env.EXPO_PUBLIC_RC_API_KEY;
 

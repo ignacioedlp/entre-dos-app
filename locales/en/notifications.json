@@ -28,6 +28,8 @@
   "alert": {
     "disabledTitle": "Notifications Disabled",
     "disabledMessage": "To receive notifications, please enable them in your device Settings.",
+    "enableFailedTitle": "We couldn't enable notifications",
+    "enableFailedMessage": "Check your connection and try again.",
     "cancel": "Cancel",
     "openSettings": "Open Settings"
   }
