@@ -56,7 +56,6 @@
         "expo-build-properties",
         {
           "android": {
-            "kotlinVersion": "2.3.0",
             "extraProguardRules": "-keep class com.google.android.gms.internal.consent_sdk.** { *; }"
           },
           "ios": {

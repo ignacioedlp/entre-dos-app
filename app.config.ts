@@ -12,21 +12,22 @@ function appId(name: string, value: string | undefined, fallback: string) {
   return value ?? fallback;
 }
 
-export default ({ config }: ConfigContext): ExpoConfig => ({
-  ...config,
-  plugins: [
-    ...(config.plugins ?? []),
-    [
-      'react-native-google-mobile-ads',
-      {
-        iosAppId: appId('ADMOB_APP_ID_IOS', ADMOB_APP_ID_IOS, GOOGLE_SAMPLE_APP_ID_IOS),
-        androidAppId: appId(
-          'ADMOB_APP_ID_ANDROID',
-          ADMOB_APP_ID_ANDROID,
-          GOOGLE_SAMPLE_APP_ID_ANDROID
-        ),
-        delayAppMeasurementInit: true,
-      },
+export default ({ config }: ConfigContext): ExpoConfig =>
+  ({
+    ...config,
+    plugins: [
+      ...(config.plugins ?? []),
+      [
+        'react-native-google-mobile-ads',
+        {
+          iosAppId: appId('ADMOB_APP_ID_IOS', ADMOB_APP_ID_IOS, GOOGLE_SAMPLE_APP_ID_IOS),
+          androidAppId: appId(
+            'ADMOB_APP_ID_ANDROID',
+            ADMOB_APP_ID_ANDROID,
+            GOOGLE_SAMPLE_APP_ID_ANDROID
+          ),
+          delayAppMeasurementInit: true,
+        },
+      ],
     ],
-  ],
-});
+  }) as ExpoConfig;
