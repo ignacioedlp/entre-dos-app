@@ -22,14 +22,13 @@ import type { ThemeColors } from '@/constants/colors';
 import { Typography } from '@/components/ui/Typography';
 import { Button } from '@/components/ui/Button';
 
-type Phase = 'sealed' | 'claiming' | 'opening' | 'revealing';
+type Phase = 'sealed' | 'claiming' | 'opening';
 
 const TEAR_DISTANCE = 190;
 const TEAR_THRESHOLD = 0.7;
 
 interface WeeklyPackOpeningProps {
   visible: boolean;
-  cards: DeckCard[];
   onClaim: () => Promise<boolean>;
   onSkip: () => void;
   onComplete: () => void;
@@ -74,7 +73,6 @@ export function WeeklyCardReveal({
 
 export function WeeklyPackOpening({
   visible,
-  cards,
   onClaim,
   onSkip,
   onComplete,
@@ -85,7 +83,6 @@ export function WeeklyPackOpening({
   const progress = useSharedValue(0);
   const openProgress = useSharedValue(0);
   const [phase, setPhase] = useState<Phase>('sealed');
-  const [revealIndex, setRevealIndex] = useState(0);
   const [reduceMotion, setReduceMotion] = useState(false);
   const openingRef = useRef(false);
   const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -99,37 +96,18 @@ export function WeeklyPackOpening({
   useEffect(() => {
     if (!visible) {
       setPhase('sealed');
-      setRevealIndex(0);
       openingRef.current = false;
       progress.value = 0;
       openProgress.value = 0;
     }
   }, [openProgress, progress, visible]);
 
-  useEffect(() => {
-    if (phase !== 'revealing') return;
-    if (reduceMotion || cards.length === 0) {
-      timerRef.current = setTimeout(onComplete, 350);
-      return () => {
-        if (timerRef.current) clearTimeout(timerRef.current);
-      };
-    }
-
-    if (revealIndex >= cards.length - 1) {
-      timerRef.current = setTimeout(onComplete, 650);
-    } else {
-      timerRef.current = setTimeout(
-        () => {
-          setRevealIndex((current) => current + 1);
-          triggerFeedback('selection');
-        },
-        Math.min(420, 2600 / cards.length)
-      );
-    }
-    return () => {
+  useEffect(
+    () => () => {
       if (timerRef.current) clearTimeout(timerRef.current);
-    };
-  }, [cards.length, onComplete, phase, reduceMotion, revealIndex]);
+    },
+    []
+  );
 
   async function beginOpening() {
     if (openingRef.current) return;
@@ -146,9 +124,7 @@ export function WeeklyPackOpening({
     openProgress.value = withTiming(1, { duration: reduceMotion ? 120 : 480 });
     timerRef.current = setTimeout(
       () => {
-        setPhase('revealing');
-        setRevealIndex(0);
-        triggerFeedback('packReveal');
+        onComplete();
       },
       reduceMotion ? 140 : 520
     );
@@ -157,7 +133,9 @@ export function WeeklyPackOpening({
   const tearGesture = Gesture.Pan()
     .enabled(phase === 'sealed')
     .activeOffsetX(8)
-    .failOffsetY([-30, 30])
+    // Android users naturally introduce a little vertical movement while
+    // dragging the seal. Keep this a horizontal gesture without rejecting it.
+    .failOffsetY([-80, 80])
     .onUpdate((event) => {
       progress.value = Math.max(0, Math.min(1, event.translationX / TEAR_DISTANCE));
     })
@@ -200,8 +178,6 @@ export function WeeklyPackOpening({
     opacity: interpolate(openProgress.value, [0, 0.25, 1], [0, 0.35, 1]),
   }));
 
-  const activeCard = cards[Math.min(revealIndex, Math.max(cards.length - 1, 0))];
-
   return (
     <Modal
       visible={visible}
@@ -211,126 +187,99 @@ export function WeeklyPackOpening({
       onRequestClose={phase === 'sealed' ? onSkip : undefined}
     >
       <View style={styles.root} accessibilityViewIsModal>
-        {phase !== 'revealing' ? (
-          <View style={styles.sealedContent}>
-            <View style={styles.copy}>
-              <Typography variant="cardLabel" color={colors.pasion} style={styles.eyebrow}>
-                {t('weeklyPack.eyebrow')}
-              </Typography>
-              <Typography
-                variant="heading"
-                baseFontSize={34}
-                baseLineHeight={37}
-                color="#FFFFFF"
-                style={styles.title}
-              >
-                {t('weeklyPack.title')}
-              </Typography>
-              <Typography variant="body" color="rgba(255,255,255,.62)" style={styles.description}>
-                {t('weeklyPack.description')}
-              </Typography>
-            </View>
+        <View style={styles.sealedContent}>
+          <View style={styles.copy}>
+            <Typography variant="cardLabel" color={colors.pasion} style={styles.eyebrow}>
+              {t('weeklyPack.eyebrow')}
+            </Typography>
+            <Typography
+              variant="heading"
+              baseFontSize={34}
+              baseLineHeight={37}
+              color="#FFFFFF"
+              style={styles.title}
+            >
+              {t('weeklyPack.title')}
+            </Typography>
+            <Typography variant="body" color="rgba(255,255,255,.62)" style={styles.description}>
+              {t('weeklyPack.description')}
+            </Typography>
+          </View>
 
-            <GestureDetector gesture={tearGesture}>
-              <Animated.View
-                accessible
-                accessibilityRole="button"
-                accessibilityLabel={t('weeklyPack.gestureHint')}
-                accessibilityHint={t('weeklyPack.description')}
-                onAccessibilityTap={beginOpening}
-                style={styles.packetStage}
-              >
-                <View pointerEvents="none" style={styles.packetGlow}>
-                  <Svg width="100%" height="100%" viewBox="0 0 374 454">
-                    <Defs>
-                      <RadialGradient id="packetBacklight" cx="50%" cy="48%" r="50%">
-                        <Stop offset="0%" stopColor={colors.pasion} stopOpacity={0.42} />
-                        <Stop offset="38%" stopColor={colors.pasion} stopOpacity={0.24} />
-                        <Stop offset="72%" stopColor={colors.pasion} stopOpacity={0.09} />
-                        <Stop offset="100%" stopColor={colors.pasion} stopOpacity={0} />
-                      </RadialGradient>
-                    </Defs>
-                    <Ellipse cx="187" cy="227" rx="184" ry="224" fill="url(#packetBacklight)" />
-                  </Svg>
-                </View>
+          <GestureDetector gesture={tearGesture}>
+            <Animated.View
+              collapsable={false}
+              accessible
+              accessibilityRole="button"
+              accessibilityLabel={t('weeklyPack.gestureHint')}
+              accessibilityHint={t('weeklyPack.description')}
+              onAccessibilityTap={beginOpening}
+              style={styles.packetStage}
+            >
+              <View pointerEvents="none" style={styles.packetGlow}>
+                <Svg width="100%" height="100%" viewBox="0 0 374 454">
+                  <Defs>
+                    <RadialGradient id="packetBacklight" cx="50%" cy="48%" r="50%">
+                      <Stop offset="0%" stopColor={colors.pasion} stopOpacity={0.42} />
+                      <Stop offset="38%" stopColor={colors.pasion} stopOpacity={0.24} />
+                      <Stop offset="72%" stopColor={colors.pasion} stopOpacity={0.09} />
+                      <Stop offset="100%" stopColor={colors.pasion} stopOpacity={0} />
+                    </RadialGradient>
+                  </Defs>
+                  <Ellipse cx="187" cy="227" rx="184" ry="224" fill="url(#packetBacklight)" />
+                </Svg>
+              </View>
 
-                <Animated.View style={[styles.cardStack, cardStackStyle]} pointerEvents="none">
-                  <View style={[styles.previewCard, styles.previewCardLeft]} />
-                  <View style={[styles.previewCard, styles.previewCardRight]} />
-                  <View style={[styles.previewCard, styles.previewCardCenter]} />
-                </Animated.View>
+              <Animated.View style={[styles.cardStack, cardStackStyle]} pointerEvents="none">
+                <View style={[styles.previewCard, styles.previewCardLeft]} />
+                <View style={[styles.previewCard, styles.previewCardRight]} />
+                <View style={[styles.previewCard, styles.previewCardCenter]} />
+              </Animated.View>
 
-                <Animated.View style={[styles.packet, packetBodyStyle]}>
-                  <Image
-                    source={require('../../assets/images/weekly-pack-minimal.png')}
-                    resizeMode="contain"
-                    style={styles.packetImage}
-                    accessibilityIgnoresInvertColors
-                  />
+              <Animated.View style={[styles.packet, packetBodyStyle]}>
+                <Image
+                  source={require('../../assets/images/weekly-pack-minimal.png')}
+                  resizeMode="contain"
+                  style={styles.packetImage}
+                  accessibilityIgnoresInvertColors
+                />
 
-                  <Animated.View style={[styles.tearStrip, tearStripStyle]} pointerEvents="none">
-                    <View style={styles.tearLine} />
-                    <Animated.View style={[styles.cutProgress, cutStyle]} />
-                    <Animated.View style={[styles.seal, sealStyle]}>
-                      <Ionicons name="heart-outline" size={20} color="#FFFFFF" />
-                    </Animated.View>
-                    <Ionicons
-                      name="arrow-forward"
-                      size={18}
-                      color="#FFFFFF"
-                      style={styles.tearArrow}
-                    />
+                <Animated.View style={[styles.tearStrip, tearStripStyle]} pointerEvents="none">
+                  <View style={styles.tearLine} />
+                  <Animated.View style={[styles.cutProgress, cutStyle]} />
+                  <Animated.View style={[styles.seal, sealStyle]}>
+                    <Ionicons name="heart-outline" size={20} color="#FFFFFF" />
                   </Animated.View>
+                  <Ionicons
+                    name="arrow-forward"
+                    size={18}
+                    color="#FFFFFF"
+                    style={styles.tearArrow}
+                  />
                 </Animated.View>
               </Animated.View>
-            </GestureDetector>
+            </Animated.View>
+          </GestureDetector>
 
-            <View style={styles.actions}>
-              <Button
-                label={phase === 'claiming' ? t('weeklyPack.opening') : t('weeklyPack.open')}
-                onPress={beginOpening}
-                disabled={phase !== 'sealed'}
-              />
-              <Pressable
-                accessibilityRole="button"
-                accessibilityLabel={t('weeklyPack.skip')}
-                disabled={phase !== 'sealed'}
-                onPress={onSkip}
-                style={styles.skipButton}
-              >
-                <Typography variant="button" color="rgba(255,255,255,.42)">
-                  {t('weeklyPack.skip')}
-                </Typography>
-              </Pressable>
-            </View>
+          <View style={styles.actions}>
+            <Button
+              label={phase === 'claiming' ? t('weeklyPack.opening') : t('weeklyPack.open')}
+              onPress={beginOpening}
+              disabled={phase !== 'sealed'}
+            />
+            <Pressable
+              accessibilityRole="button"
+              accessibilityLabel={t('weeklyPack.skip')}
+              disabled={phase !== 'sealed'}
+              onPress={onSkip}
+              style={styles.skipButton}
+            >
+              <Typography variant="button" color="rgba(255,255,255,.42)">
+                {t('weeklyPack.skip')}
+              </Typography>
+            </Pressable>
           </View>
-        ) : (
-          <Animated.View
-            entering={FadeIn.duration(reduceMotion ? 100 : 260)}
-            style={styles.revealContent}
-          >
-            <Typography variant="cardLabel" color={colors.pasion} style={styles.eyebrow}>
-              {t('weeklyPack.revealing')}
-            </Typography>
-            {activeCard ? (
-              <WeeklyCardReveal
-                key={activeCard.id}
-                card={activeCard}
-                index={revealIndex}
-                total={cards.length}
-                reduceMotion={reduceMotion}
-              />
-            ) : null}
-            <View style={styles.revealDots}>
-              {cards.map((card, index) => (
-                <View
-                  key={card.id}
-                  style={[styles.revealDot, index <= revealIndex && styles.revealDotActive]}
-                />
-              ))}
-            </View>
-          </Animated.View>
-        )}
+        </View>
       </View>
     </Modal>
   );

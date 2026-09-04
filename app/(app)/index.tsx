@@ -310,7 +310,6 @@ export default function HomeScreen() {
     <View style={[createStyles(colors).root, { paddingTop: insets.top + 20 }]}>
       <WeeklyPackOpening
         visible={packVisible}
-        cards={weeklyCards}
         onClaim={claimWeeklyPack}
         onSkip={skipWeeklyPack}
         onComplete={completeWeeklyPack}
