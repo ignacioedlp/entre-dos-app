@@ -19,6 +19,37 @@ import i18n from '@/i18n';
 import { Typography } from '../../components/ui/Typography';
 import { useScaledFontSize } from '../../context/FontScaleContext';
 
+function getGoogleErrorDetails(error: unknown): string {
+  if (!error || typeof error !== 'object') {
+    return String(error);
+  }
+
+  const googleError = error as {
+    code?: unknown;
+    message?: unknown;
+    response?: {
+      status?: unknown;
+      data?: unknown;
+    };
+  };
+  const details: string[] = [];
+
+  if (googleError.code != null) details.push(`code: ${String(googleError.code)}`);
+  if (googleError.message != null) details.push(`message: ${String(googleError.message)}`);
+  if (googleError.response?.status != null) {
+    details.push(`status: ${String(googleError.response.status)}`);
+  }
+  if (googleError.response?.data != null) {
+    try {
+      details.push(`response: ${JSON.stringify(googleError.response.data)}`);
+    } catch {
+      details.push(`response: ${String(googleError.response.data)}`);
+    }
+  }
+
+  return details.length > 0 ? details.join(' | ') : String(error);
+}
+
 export default function LoginScreen() {
   const insets = useSafeAreaInsets();
   const router = useRouter();
@@ -82,7 +113,7 @@ export default function LoginScreen() {
           credentials: { idToken: err.idToken, provider: 'google' },
         });
       } else {
-        setApiError(t('login.errorGoogle'));
+        setApiError(`DEBUG GOOGLE V2 — ${t('login.errorGoogle')} ${getGoogleErrorDetails(err)}`);
       }
     } finally {
       setGoogleLoading(false);

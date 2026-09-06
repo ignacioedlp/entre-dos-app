@@ -9,6 +9,12 @@
   "signOut": "Sign Out",
   "settings": "Settings",
   "close": "Close",
+  "update": {
+    "title": "New version available",
+    "message": "The update is ready. Restart the app to apply it.",
+    "restart": "Restart now",
+    "restarting": "Restarting..."
+  },
   "category": {
     "date": "Date",
     "action": "Action",

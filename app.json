@@ -30,6 +30,9 @@
       },
       "predictiveBackGestureEnabled": false,
       "package": "com.entredos.app",
+      "permissions": [
+        "com.google.android.gms.permission.AD_ID"
+      ],
       "googleServicesFile": "./google-services.json"
     },
     "web": {

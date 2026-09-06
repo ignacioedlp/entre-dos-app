@@ -9,6 +9,12 @@
   "signOut": "Cerrar sesión",
   "settings": "Configuración",
   "close": "Cerrar",
+  "update": {
+    "title": "Nueva versión disponible",
+    "message": "La actualización está lista. Reiniciá la app para aplicarla.",
+    "restart": "Reiniciar ahora",
+    "restarting": "Reiniciando..."
+  },
   "category": {
     "date": "Cita",
     "action": "Acción",
