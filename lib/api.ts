@@ -152,6 +152,7 @@ export interface DeckCard {
   expiresAt: string;
   title: string;
   description: string;
+  suggestions: string[];
   category: 'date' | 'action' | 'home';
   rarity: 'common' | 'rare' | 'epic' | 'legendary';
   packIcon?: string;
@@ -308,6 +309,7 @@ export interface PlayThreadCard {
   id: string;
   title: string;
   description: string;
+  suggestions: string[];
   category: 'date' | 'action' | 'home';
   rarity: 'common' | 'rare' | 'epic' | 'legendary';
   event?: EventBadge | null;

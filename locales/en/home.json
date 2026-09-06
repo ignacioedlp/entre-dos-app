@@ -28,7 +28,8 @@
     "success": "Card played!",
     "saving": "SAVING...",
     "errorSave": "Could not save the play. Please try again.",
-    "errorLoad": "Could not load the card."
+    "errorLoad": "Could not load the card.",
+    "suggestionsTitle": "IDEAS TO SHARE"
   },
   "cardSwap": {
     "remaining_one": "{{count}} CHANGE",
@@ -50,6 +51,7 @@
     "retry": "TRY AGAIN",
     "playedBy": "PLAYED BY {{name}}",
     "openThread": "Open thread for {{title}}",
+    "suggestionsTitle": "IDEAS TO SHARE",
     "scheduleTitle": "Coordinated date",
     "scheduleEmpty": "You haven't agreed on a date yet.",
     "add": "ADD",

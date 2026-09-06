@@ -168,6 +168,7 @@ export default function PlayThreadScreen() {
   const [scheduleOpen, setScheduleOpen] = useState(false);
   const [scheduleDate, setScheduleDate] = useState(() => new Date(Date.now() + 86400000));
   const [includeTime, setIncludeTime] = useState(false);
+  const [suggestionsOpen, setSuggestionsOpen] = useState(false);
 
   const threadQuery = useQuery({
     queryKey: ['play-thread', playId],
@@ -429,6 +430,39 @@ export default function PlayThreadScreen() {
                 {thread.card.description}
               </Typography>
             </View>
+
+            {(thread.card.suggestions?.length ?? 0) > 0 && (
+              <View style={styles.section}>
+                <Pressable
+                  accessibilityRole="button"
+                  accessibilityState={{ expanded: suggestionsOpen }}
+                  onPress={() => setSuggestionsOpen((open) => !open)}
+                  style={({ pressed }) => [styles.sectionHeader, pressed && styles.suggestionsPressed]}
+                >
+                  <View style={styles.sectionTitleRow}>
+                    <Ionicons name="bulb-outline" size={18} color={colors.pasion} />
+                    <Typography variant="bodyBold">{t('playThread.suggestionsTitle')}</Typography>
+                  </View>
+                  <Ionicons
+                    name={suggestionsOpen ? 'chevron-up' : 'chevron-down'}
+                    size={18}
+                    color={colors.pasion}
+                  />
+                </Pressable>
+                {suggestionsOpen && (
+                  <View style={styles.suggestionsList}>
+                    {thread.card.suggestions.map((suggestion, index) => (
+                      <View key={`${index}-${suggestion}`} style={styles.suggestionItem}>
+                        <Typography variant="bodyBold" color={colors.pasion}>•</Typography>
+                        <Typography variant="body" color={colors.textSecondary} style={styles.suggestionText}>
+                          {suggestion}
+                        </Typography>
+                      </View>
+                    ))}
+                  </View>
+                )}
+              </View>
+            )}
 
             <View style={styles.section}>
               <View style={styles.sectionHeader}>
@@ -853,6 +887,10 @@ function createStyles(colors: ThemeColors) {
     },
     sectionHeader: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
     sectionTitleRow: { flexDirection: 'row', alignItems: 'center', gap: 8 },
+    suggestionsPressed: { opacity: 0.7 },
+    suggestionsList: { gap: 10 },
+    suggestionItem: { flexDirection: 'row', gap: 8, alignItems: 'flex-start' },
+    suggestionText: { flex: 1 },
     photo: { width: '100%', aspectRatio: 1, borderRadius: 16, backgroundColor: colors.surfaceAlt },
     photoPending: { flexDirection: 'row', alignItems: 'center', gap: 10, paddingVertical: 10 },
     photoActions: { flexDirection: 'row', gap: 12 },

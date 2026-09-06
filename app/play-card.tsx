@@ -29,6 +29,7 @@ export default function CardDetailSheet() {
   const playing = useRef(false);
   const [isPlaying, setIsPlaying] = useState(false);
   const [isSwapping, setIsSwapping] = useState(false);
+  const [suggestionsOpen, setSuggestionsOpen] = useState(false);
   const [confirmAttempt, setConfirmAttempt] = useState(0);
   const { t } = useTranslation('home');
   const colors = useColors();
@@ -191,6 +192,37 @@ export default function CardDetailSheet() {
         >
           {card.description}
         </Typography>
+        {(card.suggestions?.length ?? 0) > 0 && (
+          <View style={styles.suggestions}>
+            <Pressable
+              accessibilityRole="button"
+              accessibilityState={{ expanded: suggestionsOpen }}
+              onPress={() => setSuggestionsOpen((open) => !open)}
+              style={({ pressed }) => [styles.suggestionsToggle, pressed && styles.suggestionsPressed]}
+            >
+              <Typography variant="bodyBold" baseFontSize={13} color={colors.pasion}>
+                {t('playCard.suggestionsTitle')}
+              </Typography>
+              <Ionicons
+                name={suggestionsOpen ? 'chevron-up' : 'chevron-down'}
+                size={18}
+                color={colors.pasion}
+              />
+            </Pressable>
+            {suggestionsOpen && (
+              <View style={styles.suggestionsList}>
+                {card.suggestions.map((suggestion, index) => (
+                  <View key={`${index}-${suggestion}`} style={styles.suggestionItem}>
+                    <Typography variant="bodyBold" color={colors.pasion}>•</Typography>
+                    <Typography variant="body" baseFontSize={14} color={colors.textSecondary} style={styles.suggestionText}>
+                      {suggestion}
+                    </Typography>
+                  </View>
+                ))}
+              </View>
+            )}
+          </View>
+        )}
       </View>
 
       <View style={styles.footer}>
@@ -245,6 +277,22 @@ function createStyles(colors: ThemeColors) {
     cardDescription: {
       textTransform: 'uppercase',
     },
+    suggestions: {
+      marginTop: 6,
+      borderTopWidth: 1,
+      borderTopColor: colors.border,
+      paddingTop: 12,
+    },
+    suggestionsToggle: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      justifyContent: 'space-between',
+      minHeight: 30,
+    },
+    suggestionsPressed: { opacity: 0.7 },
+    suggestionsList: { gap: 10, paddingTop: 10 },
+    suggestionItem: { flexDirection: 'row', gap: 8, alignItems: 'flex-start' },
+    suggestionText: { flex: 1 },
     footer: {
       paddingHorizontal: 24,
       marginTop: 'auto',
