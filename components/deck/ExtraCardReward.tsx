@@ -8,6 +8,7 @@ import {
   StyleSheet,
   View,
 } from 'react-native';
+import * as Sentry from '@sentry/react-native';
 import { useQueryClient } from '@tanstack/react-query';
 import { useTranslation } from 'react-i18next';
 import { Toast } from 'toastify-react-native';
@@ -56,6 +57,16 @@ const SIDE_ROTATION = 8;
 
 const delay = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 
+function adErrorDiagnostics(error: unknown) {
+  if (!(error instanceof Error)) return { message: String(error) };
+  const nativeError = error as Error & { code?: unknown };
+  return {
+    name: nativeError.name,
+    message: nativeError.message,
+    code: typeof nativeError.code === 'string' ? nativeError.code : undefined,
+  };
+}
+
 function showRewardedAd(claim: Extract<ExtraCardClaimResponse, { status: 'ad_required' }>) {
   return new Promise<void>((resolve, reject) => {
     const ad = RewardedAd.createForAdRequest(claim.adUnitId, {
@@ -83,15 +94,22 @@ function showRewardedAd(claim: Extract<ExtraCardClaimResponse, { status: 'ad_req
     };
     subscriptions.push(
       ad.addAdEventListener(RewardedAdEventType.LOADED, () => {
+        // This timeout only protects the loading phase. Rewarded videos can
+        // legitimately last longer than 20 seconds, so leaving it active
+        // would remove EARNED_REWARD listeners while the ad is still playing.
+        clearTimeout(loadTimeout);
+        if (__DEV__) console.info('[ads] Rewarded ad loaded');
         void ad.show().catch(fail);
       }),
       ad.addAdEventListener(RewardedAdEventType.EARNED_REWARD, () => {
+        if (__DEV__) console.info('[ads] Client earned rewarded ad');
         earned = true;
         settled = true;
         cleanup();
         resolve();
       }),
       ad.addAdEventListener(AdEventType.CLOSED, () => {
+        if (__DEV__) console.info(`[ads] Rewarded ad closed; earned=${earned}`);
         if (!earned && !settled) {
           fail(new Error('rewarded-ad-closed'));
         }
@@ -148,16 +166,19 @@ export function ExtraCardReward({ extraCard, carousel }: ExtraCardRewardProps) {
   async function pollAttempt(attemptId: string) {
     setPhase('confirming');
     const deadline = Date.now() + 30_000;
+    let pollDelay = 400;
     while (Date.now() < deadline) {
       try {
         const result = await apiGetExtraCardAttempt(attemptId);
+        if (__DEV__) console.info(`[ads] Reward attempt status=${result.status}`);
         if (result.status === 'granted') return result.card;
         if (result.status === 'expired') throw new Error('rewarded-attempt-expired');
       } catch (error) {
         if (error instanceof Error && error.message === 'rewarded-attempt-expired') throw error;
         // A transient polling error must not discard a reward awaiting SSV.
       }
-      await delay(Math.min(2000, Math.max(deadline - Date.now(), 0)));
+      await delay(Math.min(pollDelay, Math.max(deadline - Date.now(), 0)));
+      pollDelay = Math.min(pollDelay * 2, 2000);
     }
     return null;
   }
@@ -165,6 +186,7 @@ export function ExtraCardReward({ extraCard, carousel }: ExtraCardRewardProps) {
   async function claim() {
     if (phase !== 'idle') return;
     setPhase('preparing');
+    let stage: 'claim' | 'initialization' | 'load' | 'verification' = 'claim';
     try {
       const result = await apiClaimExtraCard(Platform.OS === 'android' ? 'android' : 'ios');
       if (result.status === 'granted') {
@@ -172,10 +194,13 @@ export function ExtraCardReward({ extraCard, carousel }: ExtraCardRewardProps) {
         return;
       }
 
+      stage = 'initialization';
       const ready = await ensureReady();
       if (!ready) throw new Error('ads-consent-unavailable');
       setPhase('loading');
+      stage = 'load';
       await showRewardedAd(result);
+      stage = 'verification';
       const card = await pollAttempt(result.attemptId);
       if (card) {
         applyGrantedCard(card);
@@ -184,6 +209,17 @@ export function ExtraCardReward({ extraCard, carousel }: ExtraCardRewardProps) {
         void queryClient.invalidateQueries({ queryKey: ['deck'] });
       }
     } catch (error) {
+      const diagnostics = adErrorDiagnostics(error);
+      Sentry.captureException(error, {
+        tags: { area: 'ads', flow: 'extra-card', stage, platform: Platform.OS },
+        extra: diagnostics,
+      });
+      if (__DEV__) {
+        // Keep the native Google Mobile Ads error code visible during local QA.
+        console.info(
+          `[ads] Extra-card rewarded ad failed ${JSON.stringify({ stage, ...diagnostics })}`
+        );
+      }
       const closed = error instanceof Error && error.message === 'rewarded-ad-closed';
       Toast.warn(t(closed ? 'extraCard.closed' : 'extraCard.unavailable'));
     } finally {

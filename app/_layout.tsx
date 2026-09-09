@@ -220,7 +220,7 @@ function RootLayout() {
                         options={{
                           presentation: 'formSheet',
                           headerShown: false,
-                          sheetAllowedDetents: [0.5],
+                          sheetAllowedDetents: [0.5, 0.75, 1],
                           sheetInitialDetentIndex: 0,
                           sheetGrabberVisible: true,
                           sheetCornerRadius: 16,

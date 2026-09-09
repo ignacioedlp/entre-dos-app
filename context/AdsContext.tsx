@@ -32,7 +32,17 @@ async function initializeAds(): Promise<boolean> {
       }
     })();
   }
-  return initializationPromise;
+
+  const currentAttempt = initializationPromise;
+  const initialized = await currentAttempt;
+
+  // A denied/unfinished consent flow or a temporary UMP failure must not
+  // poison the provider for the rest of the app session. Keep successful
+  // initialization cached, but allow the next user action to try again.
+  if (!initialized && initializationPromise === currentAttempt) {
+    initializationPromise = null;
+  }
+  return initialized;
 }
 
 export function AdsProvider({ children }: { children: ReactNode }) {

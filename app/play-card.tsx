@@ -1,6 +1,6 @@
 import { useRef, useMemo, useState } from 'react';
-import { Alert, Pressable, StyleSheet, View } from 'react-native';
-import { useLocalSearchParams, useRouter } from 'expo-router';
+import { Alert, Platform, Pressable, StyleSheet, View } from 'react-native';
+import { Stack, useLocalSearchParams, useRouter } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Toast } from 'toastify-react-native';
 import { useQueryClient } from '@tanstack/react-query';
@@ -142,106 +142,140 @@ export default function CardDetailSheet() {
   const rarity = RARITY_MAP[card.rarity] ?? 'comun';
   const cardBg = rarityColor[rarity];
   const isPlayed = card.status === 'played';
+  const footerContent = isPlayed ? (
+    <View style={styles.playedBanner}>
+      <Typography variant="bodyBold" baseFontSize={15} color={colors.textSecondary}>
+        {t('playCard.played')}
+      </Typography>
+    </View>
+  ) : (
+    <SwipeToConfirm
+      key={confirmAttempt}
+      onConfirm={() => handleConfirm(card.id)}
+      disabled={isPlaying}
+      label={isPlaying ? t('playCard.saving') : undefined}
+    />
+  );
 
   return (
-    <View style={[styles.root, { paddingTop: insets.top + 24, paddingBottom: insets.bottom + 24 }]}>
-      <View style={styles.header}>
-        <Typography variant="heading" baseFontSize={24} baseLineHeight={28} style={styles.title}>
-          {t('playCard.title')}
-        </Typography>
-        <Typography variant="body" baseFontSize={14} baseLineHeight={20}>
-          {t('playCard.description')}
-        </Typography>
-      </View>
-
-      <View style={styles.body}>
-        <View style={styles.cardTitleRow}>
-          <Typography
-            variant="swissTitle"
-            baseFontSize={32}
-            baseLineHeight={34}
-            color={cardBg}
-            style={styles.cardTitle}
-          >
-            {card.title}
-          </Typography>
-          {!isPlayed && !card.event && changesRemaining > 0 && (
-            <Pressable
-              accessibilityRole="button"
-              accessibilityLabel={t('cardSwap.button')}
-              disabled={isPlaying || isSwapping || changesRemaining <= 0}
-              onPress={() => handleSwap(card.id)}
-              style={({ pressed }) => [
-                styles.swapButton,
-                (isPlaying || isSwapping || changesRemaining <= 0) && styles.swapButtonDisabled,
-                pressed && styles.swapButtonPressed,
-              ]}
-            >
-              <Ionicons name="swap-horizontal" size={16} color={colors.pasion} />
-              <Typography variant="bodyBold" baseFontSize={12} color={colors.pasion}>
-                {isSwapping ? t('cardSwap.swapping') : t('cardSwap.button')}
-              </Typography>
-            </Pressable>
-          )}
-        </View>
-        <Typography
-          variant="body"
-          baseFontSize={12}
-          baseLineHeight={18}
-          style={styles.cardDescription}
-        >
-          {card.description}
-        </Typography>
-        {(card.suggestions?.length ?? 0) > 0 && (
-          <View style={styles.suggestions}>
-            <Pressable
-              accessibilityRole="button"
-              accessibilityState={{ expanded: suggestionsOpen }}
-              onPress={() => setSuggestionsOpen((open) => !open)}
-              style={({ pressed }) => [styles.suggestionsToggle, pressed && styles.suggestionsPressed]}
-            >
-              <Typography variant="bodyBold" baseFontSize={13} color={colors.pasion}>
-                {t('playCard.suggestionsTitle')}
-              </Typography>
-              <Ionicons
-                name={suggestionsOpen ? 'chevron-up' : 'chevron-down'}
-                size={18}
-                color={colors.pasion}
-              />
-            </Pressable>
-            {suggestionsOpen && (
-              <View style={styles.suggestionsList}>
-                {card.suggestions.map((suggestion, index) => (
-                  <View key={`${index}-${suggestion}`} style={styles.suggestionItem}>
-                    <Typography variant="bodyBold" color={colors.pasion}>•</Typography>
-                    <Typography variant="body" baseFontSize={14} color={colors.textSecondary} style={styles.suggestionText}>
-                      {suggestion}
-                    </Typography>
+    <>
+      <Stack.Screen
+        options={
+          Platform.OS === 'android'
+            ? {
+                unstable_sheetFooter: () => (
+                  <View
+                    style={[styles.androidFooter, { paddingBottom: Math.max(insets.bottom, 16) }]}
+                  >
+                    {footerContent}
                   </View>
-                ))}
-              </View>
+                ),
+              }
+            : undefined
+        }
+      />
+      <View
+        style={[
+          styles.root,
+          {
+            paddingTop: 36,
+            paddingBottom: Platform.OS === 'android' ? 0 : insets.bottom + 24,
+          },
+        ]}
+      >
+        <View style={styles.header}>
+          <Typography variant="heading" baseFontSize={24} baseLineHeight={28} style={styles.title}>
+            {t('playCard.title')}
+          </Typography>
+          <Typography variant="body" baseFontSize={14} baseLineHeight={20}>
+            {t('playCard.description')}
+          </Typography>
+        </View>
+
+        <View style={styles.body}>
+          <View style={styles.cardTitleRow}>
+            <Typography
+              variant="swissTitle"
+              baseFontSize={32}
+              baseLineHeight={34}
+              color={cardBg}
+              style={styles.cardTitle}
+            >
+              {card.title}
+            </Typography>
+            {!isPlayed && !card.event && changesRemaining > 0 && (
+              <Pressable
+                accessibilityRole="button"
+                accessibilityLabel={t('cardSwap.button')}
+                disabled={isPlaying || isSwapping || changesRemaining <= 0}
+                onPress={() => handleSwap(card.id)}
+                style={({ pressed }) => [
+                  styles.swapButton,
+                  (isPlaying || isSwapping || changesRemaining <= 0) && styles.swapButtonDisabled,
+                  pressed && styles.swapButtonPressed,
+                ]}
+              >
+                <Ionicons name="swap-horizontal" size={16} color={colors.pasion} />
+                <Typography variant="bodyBold" baseFontSize={12} color={colors.pasion}>
+                  {isSwapping ? t('cardSwap.swapping') : t('cardSwap.button')}
+                </Typography>
+              </Pressable>
             )}
           </View>
-        )}
-      </View>
+          <Typography
+            variant="body"
+            baseFontSize={12}
+            baseLineHeight={18}
+            style={styles.cardDescription}
+          >
+            {card.description}
+          </Typography>
+          {(card.suggestions?.length ?? 0) > 0 && (
+            <View style={styles.suggestions}>
+              <Pressable
+                accessibilityRole="button"
+                accessibilityState={{ expanded: suggestionsOpen }}
+                onPress={() => setSuggestionsOpen((open) => !open)}
+                style={({ pressed }) => [
+                  styles.suggestionsToggle,
+                  pressed && styles.suggestionsPressed,
+                ]}
+              >
+                <Typography variant="bodyBold" baseFontSize={13} color={colors.pasion}>
+                  {t('playCard.suggestionsTitle')}
+                </Typography>
+                <Ionicons
+                  name={suggestionsOpen ? 'chevron-up' : 'chevron-down'}
+                  size={18}
+                  color={colors.pasion}
+                />
+              </Pressable>
+              {suggestionsOpen && (
+                <View style={styles.suggestionsList}>
+                  {card.suggestions.map((suggestion, index) => (
+                    <View key={`${index}-${suggestion}`} style={styles.suggestionItem}>
+                      <Typography variant="bodyBold" color={colors.pasion}>
+                        •
+                      </Typography>
+                      <Typography
+                        variant="body"
+                        baseFontSize={14}
+                        color={colors.textSecondary}
+                        style={styles.suggestionText}
+                      >
+                        {suggestion}
+                      </Typography>
+                    </View>
+                  ))}
+                </View>
+              )}
+            </View>
+          )}
+        </View>
 
-      <View style={styles.footer}>
-        {isPlayed ? (
-          <View style={styles.playedBanner}>
-            <Typography variant="bodyBold" baseFontSize={15} color={colors.textSecondary}>
-              {t('playCard.played')}
-            </Typography>
-          </View>
-        ) : (
-          <SwipeToConfirm
-            key={confirmAttempt}
-            onConfirm={() => handleConfirm(card.id)}
-            disabled={isPlaying}
-            label={isPlaying ? t('playCard.saving') : undefined}
-          />
-        )}
+        {Platform.OS !== 'android' && <View style={styles.footer}>{footerContent}</View>}
       </View>
-    </View>
+    </>
   );
 }
 
@@ -296,6 +330,11 @@ function createStyles(colors: ThemeColors) {
     footer: {
       paddingHorizontal: 24,
       marginTop: 'auto',
+    },
+    androidFooter: {
+      backgroundColor: colors.surface,
+      paddingHorizontal: 24,
+      paddingTop: 12,
     },
     swapButton: {
       flexDirection: 'row',
