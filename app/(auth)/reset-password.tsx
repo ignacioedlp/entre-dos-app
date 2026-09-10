@@ -113,11 +113,15 @@ export default function ResetPasswordScreen() {
       style={styles.keyboardAvoid}
       behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
     >
-      <View style={[styles.root, { paddingTop: insets.top + 24 }]}>
+      <View style={styles.root}>
         <ScrollView
           style={styles.scroll}
-          contentContainerStyle={styles.scrollContent}
+          contentContainerStyle={[
+            styles.scrollContent,
+            { paddingTop: insets.top + 24, paddingBottom: insets.bottom + 24 },
+          ]}
           keyboardShouldPersistTaps="handled"
+          keyboardDismissMode={Platform.OS === 'ios' ? 'interactive' : 'on-drag'}
           showsVerticalScrollIndicator={false}
         >
           <View style={styles.header}>
@@ -231,15 +235,15 @@ export default function ResetPasswordScreen() {
               </Typography>
             )}
           </View>
-        </ScrollView>
 
-        <View style={[styles.ctaArea, { paddingBottom: insets.bottom + 24 }]}>
-          <Button
-            label={isSubmitting ? t('resetPassword.submitting') : t('resetPassword.submit')}
-            onPress={handleSubmit(onSubmit)}
-            disabled={isSubmitting}
-          />
-        </View>
+          <View style={styles.ctaArea}>
+            <Button
+              label={isSubmitting ? t('resetPassword.submitting') : t('resetPassword.submit')}
+              onPress={handleSubmit(onSubmit)}
+              disabled={isSubmitting}
+            />
+          </View>
+        </ScrollView>
       </View>
     </KeyboardAvoidingView>
   );
@@ -253,19 +257,19 @@ function createStyles(colors: ThemeColors) {
     root: {
       flex: 1,
       backgroundColor: colors.background,
-      paddingHorizontal: 24,
     },
     scroll: {
       flex: 1,
     },
     scrollContent: {
       flexGrow: 1,
+      paddingHorizontal: 24,
     },
     header: {
       marginBottom: 48,
     },
     content: {
-      flex: 1,
+      flexGrow: 1,
     },
     title: {
       marginBottom: 12,

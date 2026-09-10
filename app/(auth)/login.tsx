@@ -1,4 +1,13 @@
-import { View, TextInput, StyleSheet, Pressable, Modal, Platform } from 'react-native';
+import {
+  View,
+  TextInput,
+  StyleSheet,
+  Pressable,
+  Modal,
+  Platform,
+  ScrollView,
+  KeyboardAvoidingView,
+} from 'react-native';
 import { useState, useMemo, useEffect } from 'react';
 import { useForm, Controller } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -147,161 +156,187 @@ export default function LoginScreen() {
   };
 
   return (
-    <View style={[styles.root, { paddingTop: insets.top + 24 }]}>
-      <View style={styles.header}>
-        <Logo size="lg" />
-      </View>
+    <KeyboardAvoidingView
+      style={styles.keyboardAvoid}
+      behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+    >
+      <ScrollView
+        style={styles.root}
+        contentContainerStyle={[
+          styles.scrollContent,
+          { paddingTop: insets.top + 24, paddingBottom: insets.bottom + 24 },
+        ]}
+        keyboardShouldPersistTaps="handled"
+        keyboardDismissMode={Platform.OS === 'ios' ? 'interactive' : 'on-drag'}
+        showsVerticalScrollIndicator={false}
+      >
+        <View style={styles.header}>
+          <Logo size="lg" />
+        </View>
 
-      <View style={styles.content}>
-        <Typography variant="swissTitle" baseFontSize={40} baseLineHeight={40} style={styles.title}>
-          {t('login.title')}
-        </Typography>
-        <Typography variant="body" color={colors.textSecondary} style={styles.subtitle}>
-          {t('login.subtitle')}
-        </Typography>
-
-        <Typography variant="body" baseFontSize={14}>
-          {t('login.email')}
-        </Typography>
-        <Controller
-          control={control}
-          name="email"
-          render={({ field: { onChange, onBlur, value } }) => (
-            <TextInput
-              style={[styles.input, { fontSize: inputFontSize }, errors.email && styles.inputError]}
-              placeholder={t('login.emailPlaceholder')}
-              placeholderTextColor={colors.textMuted}
-              keyboardType="email-address"
-              autoCapitalize="none"
-              autoCorrect={false}
-              onBlur={onBlur}
-              onChangeText={onChange}
-              value={value}
-            />
-          )}
-        />
-        {errors.email && (
-          <Typography variant="caption" color={colors.pasion} style={styles.errorText}>
-            {errors.email.message}
+        <View style={styles.content}>
+          <Typography
+            variant="swissTitle"
+            baseFontSize={40}
+            baseLineHeight={40}
+            style={styles.title}
+          >
+            {t('login.title')}
           </Typography>
-        )}
+          <Typography variant="body" color={colors.textSecondary} style={styles.subtitle}>
+            {t('login.subtitle')}
+          </Typography>
 
-        <Typography variant="body" baseFontSize={14} style={styles.labelPassword}>
-          {t('login.password')}
-        </Typography>
-        <Controller
-          control={control}
-          name="password"
-          render={({ field: { onChange, onBlur, value } }) => (
-            <View style={styles.passwordWrapper}>
+          <Typography variant="body" baseFontSize={14}>
+            {t('login.email')}
+          </Typography>
+          <Controller
+            control={control}
+            name="email"
+            render={({ field: { onChange, onBlur, value } }) => (
               <TextInput
                 style={[
                   styles.input,
-                  styles.passwordInput,
                   { fontSize: inputFontSize },
-                  errors.password && styles.inputError,
+                  errors.email && styles.inputError,
                 ]}
-                placeholder={t('login.passwordPlaceholder')}
+                placeholder={t('login.emailPlaceholder')}
                 placeholderTextColor={colors.textMuted}
-                secureTextEntry={!showPassword}
+                keyboardType="email-address"
                 autoCapitalize="none"
                 autoCorrect={false}
                 onBlur={onBlur}
                 onChangeText={onChange}
                 value={value}
               />
-              <Pressable
-                onPress={() => setShowPassword((v) => !v)}
-                style={styles.eyeButton}
-                hitSlop={8}
-              >
-                <Feather
-                  name={showPassword ? 'eye-off' : 'eye'}
-                  size={20}
-                  color={colors.textMuted}
-                />
-              </Pressable>
-            </View>
+            )}
+          />
+          {errors.email && (
+            <Typography variant="caption" color={colors.pasion} style={styles.errorText}>
+              {errors.email.message}
+            </Typography>
           )}
-        />
-        {errors.password && (
-          <Typography variant="caption" color={colors.pasion} style={styles.errorText}>
-            {errors.password.message}
+
+          <Typography variant="body" baseFontSize={14} style={styles.labelPassword}>
+            {t('login.password')}
           </Typography>
-        )}
+          <Controller
+            control={control}
+            name="password"
+            render={({ field: { onChange, onBlur, value } }) => (
+              <View style={styles.passwordWrapper}>
+                <TextInput
+                  style={[
+                    styles.input,
+                    styles.passwordInput,
+                    { fontSize: inputFontSize },
+                    errors.password && styles.inputError,
+                  ]}
+                  placeholder={t('login.passwordPlaceholder')}
+                  placeholderTextColor={colors.textMuted}
+                  secureTextEntry={!showPassword}
+                  autoCapitalize="none"
+                  autoCorrect={false}
+                  onBlur={onBlur}
+                  onChangeText={onChange}
+                  value={value}
+                />
+                <Pressable
+                  onPress={() => setShowPassword((v) => !v)}
+                  style={styles.eyeButton}
+                  hitSlop={8}
+                >
+                  <Feather
+                    name={showPassword ? 'eye-off' : 'eye'}
+                    size={20}
+                    color={colors.textMuted}
+                  />
+                </Pressable>
+              </View>
+            )}
+          />
+          {errors.password && (
+            <Typography variant="caption" color={colors.pasion} style={styles.errorText}>
+              {errors.password.message}
+            </Typography>
+          )}
 
-        <Pressable style={styles.forgotLink} onPress={() => router.push('/(auth)/forgot-password')}>
-          <Typography variant="caption" color={colors.textSecondary} style={styles.forgotText}>
-            {t('login.forgotPassword')}
-          </Typography>
-        </Pressable>
-
-        {apiError && (
-          <Typography variant="caption" color={colors.pasion} style={styles.errorText}>
-            {apiError}
-          </Typography>
-        )}
-      </View>
-
-      <View style={[styles.ctaArea, { paddingBottom: insets.bottom + 24 }]}>
-        <Button
-          label={isSubmitting ? t('login.submitting') : t('login.submit')}
-          onPress={handleSubmit(onSubmit)}
-          disabled={isSubmitting}
-        />
-
-        <View style={styles.divider}>
-          <View style={styles.dividerLine} />
-          <Typography variant="caption" color={colors.textMuted}>
-            {t('login.or')}
-          </Typography>
-          <View style={styles.dividerLine} />
-        </View>
-
-        <Pressable
-          style={({ pressed }) => [styles.googleButton, pressed && styles.googleButtonPressed]}
-          onPress={handleGoogleLogin}
-          disabled={googleLoading || isSubmitting}
-        >
-          <AntDesign name="google" size={18} color="#1a1a1a" />
-          <Typography variant="button" color="#1a1a1a">
-            {googleLoading ? t('login.submitting') : t('login.google')}
-          </Typography>
-        </Pressable>
-
-        {Platform.OS === 'ios' && appleAvailable && (
           <Pressable
-            style={({ pressed }) => [
-              styles.appleButton,
-              pressed && styles.socialButtonPressed,
-              (appleLoading || isSubmitting) && styles.socialButtonDisabled,
-            ]}
-            onPress={handleAppleLogin}
-            disabled={appleLoading || isSubmitting}
-            accessibilityRole="button"
-            accessibilityLabel={t('login.apple')}
+            style={styles.forgotLink}
+            onPress={() => router.push('/(auth)/forgot-password')}
           >
-            <FontAwesome name="apple" size={21} color={colors.textPrimary} />
-            <Typography variant="button" color={colors.textPrimary}>
-              {appleLoading ? t('login.submitting') : t('login.apple')}
+            <Typography variant="caption" color={colors.textSecondary} style={styles.forgotText}>
+              {t('login.forgotPassword')}
             </Typography>
           </Pressable>
-        )}
 
-        <Pressable style={styles.registerLink} onPress={() => router.push('/(auth)/register')}>
-          <Typography variant="body" baseFontSize={14} color={colors.textSecondary}>
-            {t('login.noAccount')}
-            <Typography
-              variant="bodyBold"
-              baseFontSize={14}
-              color={colors.accent}
-              style={styles.registerLinkAccent}
-            >
-              {t('login.registerLink')}
+          {apiError && (
+            <Typography variant="caption" color={colors.pasion} style={styles.errorText}>
+              {apiError}
             </Typography>
-          </Typography>
-        </Pressable>
-      </View>
+          )}
+        </View>
+
+        <View style={styles.ctaArea}>
+          <Button
+            label={isSubmitting ? t('login.submitting') : t('login.submit')}
+            onPress={handleSubmit(onSubmit)}
+            disabled={isSubmitting}
+          />
+
+          <View style={styles.divider}>
+            <View style={styles.dividerLine} />
+            <Typography variant="caption" color={colors.textMuted}>
+              {t('login.or')}
+            </Typography>
+            <View style={styles.dividerLine} />
+          </View>
+
+          <Pressable
+            style={({ pressed }) => [styles.googleButton, pressed && styles.googleButtonPressed]}
+            onPress={handleGoogleLogin}
+            disabled={googleLoading || isSubmitting}
+          >
+            <AntDesign name="google" size={18} color="#1a1a1a" />
+            <Typography variant="button" color="#1a1a1a">
+              {googleLoading ? t('login.submitting') : t('login.google')}
+            </Typography>
+          </Pressable>
+
+          {Platform.OS === 'ios' && appleAvailable && (
+            <Pressable
+              style={({ pressed }) => [
+                styles.appleButton,
+                pressed && styles.socialButtonPressed,
+                (appleLoading || isSubmitting) && styles.socialButtonDisabled,
+              ]}
+              onPress={handleAppleLogin}
+              disabled={appleLoading || isSubmitting}
+              accessibilityRole="button"
+              accessibilityLabel={t('login.apple')}
+            >
+              <FontAwesome name="apple" size={21} color={colors.textPrimary} />
+              <Typography variant="button" color={colors.textPrimary}>
+                {appleLoading ? t('login.submitting') : t('login.apple')}
+              </Typography>
+            </Pressable>
+          )}
+
+          <Pressable style={styles.registerLink} onPress={() => router.push('/(auth)/register')}>
+            <Typography variant="body" baseFontSize={14} color={colors.textSecondary}>
+              {t('login.noAccount')}
+              <Typography
+                variant="bodyBold"
+                baseFontSize={14}
+                color={colors.accent}
+                style={styles.registerLinkAccent}
+              >
+                {t('login.registerLink')}
+              </Typography>
+            </Typography>
+          </Pressable>
+        </View>
+      </ScrollView>
 
       <Modal
         visible={!!deletionPending}
@@ -345,22 +380,29 @@ export default function LoginScreen() {
           </View>
         </View>
       </Modal>
-    </View>
+    </KeyboardAvoidingView>
   );
 }
 
 function createStyles(colors: ThemeColors) {
   return StyleSheet.create({
+    keyboardAvoid: {
+      flex: 1,
+      backgroundColor: colors.background,
+    },
     root: {
       flex: 1,
       backgroundColor: colors.background,
+    },
+    scrollContent: {
+      flexGrow: 1,
       paddingHorizontal: 24,
     },
     header: {
       marginBottom: 48,
     },
     content: {
-      flex: 1,
+      flexGrow: 1,
     },
     title: {
       marginBottom: 12,

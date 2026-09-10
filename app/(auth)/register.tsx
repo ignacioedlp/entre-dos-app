@@ -114,11 +114,15 @@ export default function RegisterScreen() {
       style={styles.keyboardAvoid}
       behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
     >
-      <View style={[styles.root, { paddingTop: insets.top + 24 }]}>
+      <View style={styles.root}>
         <ScrollView
           style={styles.scroll}
-          contentContainerStyle={styles.scrollContent}
+          contentContainerStyle={[
+            styles.scrollContent,
+            { paddingTop: insets.top + 24, paddingBottom: insets.bottom + 24 },
+          ]}
           keyboardShouldPersistTaps="handled"
+          keyboardDismissMode={Platform.OS === 'ios' ? 'interactive' : 'on-drag'}
           showsVerticalScrollIndicator={false}
         >
           <View style={styles.header}>
@@ -270,67 +274,67 @@ export default function RegisterScreen() {
               {t('register.termsAndConditions')}
             </Typography>
           </View>
-        </ScrollView>
 
-        <View style={[styles.ctaArea, { paddingBottom: insets.bottom + 24 }]}>
-          <Button
-            label={isSubmitting ? t('register.submitting') : t('register.submit')}
-            onPress={handleSubmit(onSubmit)}
-            disabled={isSubmitting}
-          />
+          <View style={styles.ctaArea}>
+            <Button
+              label={isSubmitting ? t('register.submitting') : t('register.submit')}
+              onPress={handleSubmit(onSubmit)}
+              disabled={isSubmitting}
+            />
 
-          <View style={styles.divider}>
-            <View style={styles.dividerLine} />
-            <Typography variant="caption" color={colors.textMuted}>
-              {t('register.or')}
-            </Typography>
-            <View style={styles.dividerLine} />
-          </View>
+            <View style={styles.divider}>
+              <View style={styles.dividerLine} />
+              <Typography variant="caption" color={colors.textMuted}>
+                {t('register.or')}
+              </Typography>
+              <View style={styles.dividerLine} />
+            </View>
 
-          <Pressable
-            style={({ pressed }) => [styles.googleButton, pressed && styles.googleButtonPressed]}
-            onPress={handleGoogleLogin}
-            disabled={googleLoading || isSubmitting}
-          >
-            <AntDesign name="google" size={18} color="#1a1a1a" />
-            <Typography variant="button" color="#1a1a1a">
-              {googleLoading ? t('register.submitting') : t('register.google')}
-            </Typography>
-          </Pressable>
-
-          {Platform.OS === 'ios' && appleAvailable && (
             <Pressable
-              style={({ pressed }) => [
-                styles.appleButton,
-                pressed && styles.socialButtonPressed,
-                (appleLoading || isSubmitting) && styles.socialButtonDisabled,
-              ]}
-              onPress={handleAppleLogin}
-              disabled={appleLoading || isSubmitting}
-              accessibilityRole="button"
-              accessibilityLabel={t('register.apple')}
+              style={({ pressed }) => [styles.googleButton, pressed && styles.googleButtonPressed]}
+              onPress={handleGoogleLogin}
+              disabled={googleLoading || isSubmitting}
             >
-              <FontAwesome name="apple" size={21} color={colors.textPrimary} />
-              <Typography variant="button" color={colors.textPrimary}>
-                {appleLoading ? t('register.submitting') : t('register.apple')}
+              <AntDesign name="google" size={18} color="#1a1a1a" />
+              <Typography variant="button" color="#1a1a1a">
+                {googleLoading ? t('register.submitting') : t('register.google')}
               </Typography>
             </Pressable>
-          )}
 
-          <Pressable style={styles.loginLink} onPress={() => router.replace('/(auth)/login')}>
-            <Typography variant="body" baseFontSize={14} color={colors.textSecondary}>
-              {t('register.hasAccount')}
-              <Typography
-                variant="bodyBold"
-                baseFontSize={14}
-                color={colors.accent}
-                style={styles.loginLinkAccent}
+            {Platform.OS === 'ios' && appleAvailable && (
+              <Pressable
+                style={({ pressed }) => [
+                  styles.appleButton,
+                  pressed && styles.socialButtonPressed,
+                  (appleLoading || isSubmitting) && styles.socialButtonDisabled,
+                ]}
+                onPress={handleAppleLogin}
+                disabled={appleLoading || isSubmitting}
+                accessibilityRole="button"
+                accessibilityLabel={t('register.apple')}
               >
-                {t('register.signInLink')}
+                <FontAwesome name="apple" size={21} color={colors.textPrimary} />
+                <Typography variant="button" color={colors.textPrimary}>
+                  {appleLoading ? t('register.submitting') : t('register.apple')}
+                </Typography>
+              </Pressable>
+            )}
+
+            <Pressable style={styles.loginLink} onPress={() => router.replace('/(auth)/login')}>
+              <Typography variant="body" baseFontSize={14} color={colors.textSecondary}>
+                {t('register.hasAccount')}
+                <Typography
+                  variant="bodyBold"
+                  baseFontSize={14}
+                  color={colors.accent}
+                  style={styles.loginLinkAccent}
+                >
+                  {t('register.signInLink')}
+                </Typography>
               </Typography>
-            </Typography>
-          </Pressable>
-        </View>
+            </Pressable>
+          </View>
+        </ScrollView>
       </View>
     </KeyboardAvoidingView>
   );
@@ -344,19 +348,19 @@ function createStyles(colors: ThemeColors) {
     root: {
       flex: 1,
       backgroundColor: colors.background,
-      paddingHorizontal: 24,
     },
     scroll: {
       flex: 1,
     },
     scrollContent: {
       flexGrow: 1,
+      paddingHorizontal: 24,
     },
     header: {
       marginBottom: 48,
     },
     content: {
-      flex: 1,
+      flexGrow: 1,
     },
     title: {
       marginBottom: 12,

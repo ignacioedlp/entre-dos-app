@@ -9,6 +9,9 @@ import {
   TouchableOpacity,
   ActivityIndicator,
   Pressable,
+  ScrollView,
+  KeyboardAvoidingView,
+  Platform,
 } from 'react-native';
 import * as Clipboard from 'expo-clipboard';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -118,143 +121,178 @@ export default function WaitingScreen() {
 
   if (mode === 'join') {
     return (
-      <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
-        <View style={[styles.root, { paddingTop: insets.top + 16 }]}>
-          <View style={styles.header}>
-            <Pressable
-              accessibilityRole="button"
-              accessibilityLabel={t('link.back')}
-              onPress={handleBack}
-              style={styles.backBtn}
-            >
-              <Ionicons name="arrow-back" size={22} color={colors.background} />
-            </Pressable>
-          </View>
+      <KeyboardAvoidingView
+        style={styles.keyboardAvoid}
+        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+      >
+        <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
+          <ScrollView
+            style={styles.root}
+            contentContainerStyle={[
+              styles.scrollContent,
+              { paddingTop: insets.top + 16, paddingBottom: insets.bottom + 24 },
+            ]}
+            keyboardShouldPersistTaps="handled"
+            keyboardDismissMode={Platform.OS === 'ios' ? 'interactive' : 'on-drag'}
+            showsVerticalScrollIndicator={false}
+          >
+            <View style={styles.header}>
+              <Pressable
+                accessibilityRole="button"
+                accessibilityLabel={t('link.back')}
+                onPress={handleBack}
+                style={styles.backBtn}
+              >
+                <Ionicons name="arrow-back" size={22} color={colors.background} />
+              </Pressable>
+            </View>
 
-          <View style={styles.content}>
+            <View style={styles.content}>
+              <Typography
+                variant="swissTitle"
+                baseFontSize={40}
+                baseLineHeight={40}
+                style={styles.title}
+              >
+                {t('link.joinTitle')}
+              </Typography>
+              <Typography variant="body" color={colors.textSecondary} style={styles.subtitle}>
+                {t('link.joinSubtitle')}
+              </Typography>
+
+              <TextInput
+                ref={inputRef}
+                style={styles.hiddenInput}
+                value={code}
+                onChangeText={handleCodeChange}
+                maxLength={6}
+                autoFocus
+                autoCapitalize="characters"
+              />
+
+              <TouchableWithoutFeedback onPress={() => inputRef.current?.focus()}>
+                <View style={styles.digitRow}>
+                  {Array.from({ length: 6 }).map((_, i) => (
+                    <View
+                      key={i}
+                      style={[styles.digitBox, code.length === i && styles.digitBoxActive]}
+                    >
+                      <Typography variant="heading" baseFontSize={28} style={styles.digitText}>
+                        {code[i] ?? ''}
+                      </Typography>
+                    </View>
+                  ))}
+                </View>
+              </TouchableWithoutFeedback>
+
+              <TouchableOpacity onPress={handlePaste} style={styles.pasteBtn}>
+                <Typography variant="body" baseFontSize={14} color={colors.accent}>
+                  {t('link.paste')}
+                </Typography>
+              </TouchableOpacity>
+
+              {joinError && (
+                <Typography variant="caption" color={colors.pasion} style={styles.errorText}>
+                  {joinError}
+                </Typography>
+              )}
+            </View>
+
+            <View style={styles.ctaArea}>
+              <Button
+                label={linkMutation.isPending ? t('link.connecting') : t('link.connect')}
+                onPress={handleJoin}
+                disabled={code.length < 6 || linkMutation.isPending}
+              />
+              <Button
+                label={t('link.back')}
+                variant="ghost"
+                onPress={switchToShare}
+                style={styles.secondaryBtn}
+              />
+            </View>
+          </ScrollView>
+        </TouchableWithoutFeedback>
+      </KeyboardAvoidingView>
+    );
+  }
+
+  return (
+    <KeyboardAvoidingView
+      style={styles.keyboardAvoid}
+      behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+    >
+      <ScrollView
+        style={styles.root}
+        contentContainerStyle={[
+          styles.scrollContent,
+          { paddingTop: insets.top + 16, paddingBottom: insets.bottom + 24 },
+        ]}
+        keyboardShouldPersistTaps="handled"
+        keyboardDismissMode={Platform.OS === 'ios' ? 'interactive' : 'on-drag'}
+        showsVerticalScrollIndicator={false}
+      >
+        <View style={styles.header}>
+          <Pressable
+            accessibilityRole="button"
+            accessibilityLabel={t('link.back')}
+            onPress={handleBack}
+            style={styles.backBtn}
+          >
+            <Ionicons name="arrow-back" size={22} color={colors.background} />
+          </Pressable>
+        </View>
+
+        <View style={styles.content}>
+          <View style={styles.spinnerWrapper}>
             <Typography
               variant="swissTitle"
               baseFontSize={40}
               baseLineHeight={40}
               style={styles.title}
             >
-              {t('link.joinTitle')}
+              {t('link.shareTitle')}
             </Typography>
-            <Typography variant="body" color={colors.textSecondary} style={styles.subtitle}>
-              {t('link.joinSubtitle')}
-            </Typography>
-
-            <TextInput
-              ref={inputRef}
-              style={styles.hiddenInput}
-              value={code}
-              onChangeText={handleCodeChange}
-              maxLength={6}
-              autoFocus
-              autoCapitalize="characters"
-            />
-
-            <TouchableWithoutFeedback onPress={() => inputRef.current?.focus()}>
-              <View style={styles.digitRow}>
-                {Array.from({ length: 6 }).map((_, i) => (
-                  <View
-                    key={i}
-                    style={[styles.digitBox, code.length === i && styles.digitBoxActive]}
-                  >
-                    <Typography variant="heading" baseFontSize={28} style={styles.digitText}>
-                      {code[i] ?? ''}
-                    </Typography>
-                  </View>
-                ))}
-              </View>
-            </TouchableWithoutFeedback>
-
-            <TouchableOpacity onPress={handlePaste} style={styles.pasteBtn}>
-              <Typography variant="body" baseFontSize={14} color={colors.accent}>
-                {t('link.paste')}
-              </Typography>
-            </TouchableOpacity>
-
-            {joinError && (
-              <Typography variant="caption" color={colors.pasion} style={styles.errorText}>
-                {joinError}
-              </Typography>
-            )}
+            <ActivityIndicator size="large" color={colors.accent} style={styles.spinner} />
           </View>
 
-          <View style={[styles.ctaArea, { paddingBottom: insets.bottom + 24 }]}>
-            <Button
-              label={linkMutation.isPending ? t('link.connecting') : t('link.connect')}
-              onPress={handleJoin}
-              disabled={code.length < 6 || linkMutation.isPending}
-            />
-            <Button
-              label={t('link.back')}
-              variant="ghost"
-              onPress={switchToShare}
-              style={styles.secondaryBtn}
-            />
+          <Typography variant="body" color={colors.textSecondary} style={styles.subtitle}>
+            {t('link.shareSubtitle')}
+          </Typography>
+
+          <View style={styles.codeBox}>
+            <Typography variant="heading" baseFontSize={42} style={styles.code}>
+              {coupleCode}
+            </Typography>
           </View>
         </View>
-      </TouchableWithoutFeedback>
-    );
-  }
 
-  return (
-    <View style={[styles.root, { paddingTop: insets.top + 16 }]}>
-      <View style={styles.header}>
-        <Pressable
-          accessibilityRole="button"
-          accessibilityLabel={t('link.back')}
-          onPress={handleBack}
-          style={styles.backBtn}
-        >
-          <Ionicons name="arrow-back" size={22} color={colors.background} />
-        </Pressable>
-      </View>
-
-      <View style={styles.content}>
-        <View style={styles.spinnerWrapper}>
-          <Typography
-            variant="swissTitle"
-            baseFontSize={40}
-            baseLineHeight={40}
-            style={styles.title}
-          >
-            {t('link.shareTitle')}
-          </Typography>
-          <ActivityIndicator size="large" color={colors.accent} style={styles.spinner} />
+        <View style={styles.ctaArea}>
+          <Button label={t('link.shareLink')} onPress={handleShare} />
+          <Button
+            label={t('link.haveCode')}
+            variant="ghost"
+            onPress={switchToJoin}
+            style={styles.secondaryBtn}
+          />
         </View>
-
-        <Typography variant="body" color={colors.textSecondary} style={styles.subtitle}>
-          {t('link.shareSubtitle')}
-        </Typography>
-
-        <View style={styles.codeBox}>
-          <Typography variant="heading" baseFontSize={42} style={styles.code}>
-            {coupleCode}
-          </Typography>
-        </View>
-      </View>
-
-      <View style={[styles.ctaArea, { paddingBottom: insets.bottom + 24 }]}>
-        <Button label={t('link.shareLink')} onPress={handleShare} />
-        <Button
-          label={t('link.haveCode')}
-          variant="ghost"
-          onPress={switchToJoin}
-          style={styles.secondaryBtn}
-        />
-      </View>
-    </View>
+      </ScrollView>
+    </KeyboardAvoidingView>
   );
 }
 
 function createStyles(colors: ThemeColors) {
   return StyleSheet.create({
+    keyboardAvoid: {
+      flex: 1,
+      backgroundColor: colors.background,
+    },
     root: {
       flex: 1,
       backgroundColor: colors.background,
+    },
+    scrollContent: {
+      flexGrow: 1,
       paddingHorizontal: 24,
     },
     header: {
@@ -269,7 +307,7 @@ function createStyles(colors: ThemeColors) {
       borderRadius: 25,
     },
     content: {
-      flex: 1,
+      flexGrow: 1,
     },
     title: {
       marginBottom: 12,

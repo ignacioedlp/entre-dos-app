@@ -1,4 +1,12 @@
-import { View, TextInput, StyleSheet, Pressable } from 'react-native';
+import {
+  View,
+  TextInput,
+  StyleSheet,
+  Pressable,
+  ScrollView,
+  KeyboardAvoidingView,
+  Platform,
+} from 'react-native';
 import { useState, useMemo } from 'react';
 import { useForm, Controller } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -53,101 +61,127 @@ export default function ForgotPasswordScreen() {
   };
 
   return (
-    <View style={[styles.root, { paddingTop: insets.top + 24 }]}>
-      <View style={styles.header}>
-        <Logo size="lg" />
-      </View>
+    <KeyboardAvoidingView
+      style={styles.keyboardAvoid}
+      behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+    >
+      <ScrollView
+        style={styles.root}
+        contentContainerStyle={[
+          styles.scrollContent,
+          { paddingTop: insets.top + 24, paddingBottom: insets.bottom + 24 },
+        ]}
+        keyboardShouldPersistTaps="handled"
+        keyboardDismissMode={Platform.OS === 'ios' ? 'interactive' : 'on-drag'}
+        showsVerticalScrollIndicator={false}
+      >
+        <View style={styles.header}>
+          <Logo size="lg" />
+        </View>
 
-      <View style={styles.content}>
-        <Typography variant="swissTitle" baseFontSize={40} baseLineHeight={40} style={styles.title}>
-          {t('forgotPassword.title')}
-        </Typography>
-
-        {sent ? (
-          <Typography variant="body" color={colors.textSecondary} style={styles.subtitle}>
-            {t('forgotPassword.successMessage')}
-          </Typography>
-        ) : (
-          <>
-            <Typography variant="body" color={colors.textSecondary} style={styles.subtitle}>
-              {t('forgotPassword.subtitle')}
-            </Typography>
-
-            <Typography variant="body" baseFontSize={14}>
-              {t('forgotPassword.email')}
-            </Typography>
-            <Controller
-              control={control}
-              name="email"
-              render={({ field: { onChange, onBlur, value } }) => (
-                <TextInput
-                  style={[
-                    styles.input,
-                    { fontSize: inputFontSize },
-                    errors.email && styles.inputError,
-                  ]}
-                  placeholder={t('forgotPassword.emailPlaceholder')}
-                  placeholderTextColor={colors.textMuted}
-                  keyboardType="email-address"
-                  autoCapitalize="none"
-                  autoCorrect={false}
-                  onBlur={onBlur}
-                  onChangeText={onChange}
-                  value={value}
-                />
-              )}
-            />
-            {errors.email && (
-              <Typography variant="caption" color={colors.pasion} style={styles.errorText}>
-                {errors.email.message}
-              </Typography>
-            )}
-
-            {apiError && (
-              <Typography variant="caption" color={colors.pasion} style={styles.errorText}>
-                {apiError}
-              </Typography>
-            )}
-          </>
-        )}
-      </View>
-
-      <View style={[styles.ctaArea, { paddingBottom: insets.bottom + 24 }]}>
-        {!sent && (
-          <Button
-            label={isSubmitting ? t('forgotPassword.submitting') : t('forgotPassword.submit')}
-            onPress={handleSubmit(onSubmit)}
-            disabled={isSubmitting}
-          />
-        )}
-
-        <Pressable style={styles.backLink} onPress={() => router.back()}>
+        <View style={styles.content}>
           <Typography
-            variant="body"
-            baseFontSize={14}
-            color={colors.textSecondary}
-            style={styles.backLinkText}
+            variant="swissTitle"
+            baseFontSize={40}
+            baseLineHeight={40}
+            style={styles.title}
           >
-            {t('forgotPassword.backToLogin')}
+            {t('forgotPassword.title')}
           </Typography>
-        </Pressable>
-      </View>
-    </View>
+
+          {sent ? (
+            <Typography variant="body" color={colors.textSecondary} style={styles.subtitle}>
+              {t('forgotPassword.successMessage')}
+            </Typography>
+          ) : (
+            <>
+              <Typography variant="body" color={colors.textSecondary} style={styles.subtitle}>
+                {t('forgotPassword.subtitle')}
+              </Typography>
+
+              <Typography variant="body" baseFontSize={14}>
+                {t('forgotPassword.email')}
+              </Typography>
+              <Controller
+                control={control}
+                name="email"
+                render={({ field: { onChange, onBlur, value } }) => (
+                  <TextInput
+                    style={[
+                      styles.input,
+                      { fontSize: inputFontSize },
+                      errors.email && styles.inputError,
+                    ]}
+                    placeholder={t('forgotPassword.emailPlaceholder')}
+                    placeholderTextColor={colors.textMuted}
+                    keyboardType="email-address"
+                    autoCapitalize="none"
+                    autoCorrect={false}
+                    onBlur={onBlur}
+                    onChangeText={onChange}
+                    value={value}
+                  />
+                )}
+              />
+              {errors.email && (
+                <Typography variant="caption" color={colors.pasion} style={styles.errorText}>
+                  {errors.email.message}
+                </Typography>
+              )}
+
+              {apiError && (
+                <Typography variant="caption" color={colors.pasion} style={styles.errorText}>
+                  {apiError}
+                </Typography>
+              )}
+            </>
+          )}
+        </View>
+
+        <View style={styles.ctaArea}>
+          {!sent && (
+            <Button
+              label={isSubmitting ? t('forgotPassword.submitting') : t('forgotPassword.submit')}
+              onPress={handleSubmit(onSubmit)}
+              disabled={isSubmitting}
+            />
+          )}
+
+          <Pressable style={styles.backLink} onPress={() => router.back()}>
+            <Typography
+              variant="body"
+              baseFontSize={14}
+              color={colors.textSecondary}
+              style={styles.backLinkText}
+            >
+              {t('forgotPassword.backToLogin')}
+            </Typography>
+          </Pressable>
+        </View>
+      </ScrollView>
+    </KeyboardAvoidingView>
   );
 }
 
 function createStyles(colors: ThemeColors) {
   return StyleSheet.create({
+    keyboardAvoid: {
+      flex: 1,
+      backgroundColor: colors.background,
+    },
     root: {
       flex: 1,
       backgroundColor: colors.background,
+    },
+    scrollContent: {
+      flexGrow: 1,
       paddingHorizontal: 24,
     },
     header: {
       marginBottom: 48,
     },
     content: {
-      flex: 1,
+      flexGrow: 1,
     },
     title: {
       marginBottom: 12,

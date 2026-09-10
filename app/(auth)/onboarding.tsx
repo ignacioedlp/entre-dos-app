@@ -7,6 +7,9 @@ import {
   TouchableWithoutFeedback,
   Pressable,
   ActivityIndicator,
+  ScrollView,
+  KeyboardAvoidingView,
+  Platform,
 } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { router } from 'expo-router';
@@ -76,205 +79,239 @@ export default function OnboardingScreen() {
   };
 
   return (
-    <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
-      <View style={[styles.root, { paddingTop: insets.top + 16 }]}>
-        <View style={styles.header}>
-          <Logo size="sm" />
-          <View style={styles.dots}>
-            {Array.from({ length: TOTAL_STEPS }).map((_, i) => (
-              <View key={i} style={[styles.dot, i === step && styles.dotActive]} />
-            ))}
-          </View>
-        </View>
-
-        <View style={styles.content}>
-          {step === 0 && (
-            <Animated.View entering={FadeInDown.duration(400)} style={styles.stepContainer}>
-              <Typography
-                variant="swissTitle"
-                baseFontSize={40}
-                baseLineHeight={40}
-                style={styles.title}
-              >
-                {t('onboarding.nameTitle')}
-              </Typography>
-              <Typography variant="body" color={colors.textSecondary} style={styles.subtitle}>
-                {t('onboarding.nameSubtitle')}
-              </Typography>
-
-              <TextInput
-                style={[styles.input, { fontSize: inputFontSize }]}
-                value={displayName}
-                onChangeText={setDisplayName}
-                placeholder={t('onboarding.namePlaceholder')}
-                placeholderTextColor={colors.textMuted}
-                autoFocus
-                maxLength={30}
-                returnKeyType="done"
-                onSubmitEditing={() => {
-                  if (displayName.trim()) handleContinue();
-                }}
-              />
-            </Animated.View>
-          )}
-
-          {step === 1 && (
-            <Animated.View entering={FadeInDown.duration(400)} style={styles.stepContainer}>
-              <Typography
-                variant="swissTitle"
-                baseFontSize={40}
-                baseLineHeight={40}
-                style={styles.title}
-              >
-                {t('onboarding.countryTitle')}
-              </Typography>
-              <Typography variant="body" color={colors.textSecondary} style={styles.subtitle}>
-                {t('onboarding.countrySubtitle')}
-              </Typography>
-
-              <View style={styles.countryGrid}>
-                {SUPPORTED_COUNTRIES.map((supportedCountry) => {
-                  const isSelected = country === supportedCountry.code;
-                  return (
-                    <Pressable
-                      key={supportedCountry.code}
-                      onPress={() => setCountry(supportedCountry.code)}
-                      style={[styles.countryCard, isSelected && styles.countryCardSelected]}
-                    >
-                      <Typography variant="body" baseFontSize={26} style={styles.countryFlag}>
-                        {supportedCountry.flag}
-                      </Typography>
-                      <Typography variant="bodyBold" baseFontSize={14} style={styles.countryLabel}>
-                        {getCountryName(supportedCountry)}
-                      </Typography>
-                    </Pressable>
-                  );
-                })}
-              </View>
-
-              <Pressable style={styles.skipCountryButton} onPress={handleContinue}>
-                <Typography variant="body" baseFontSize={14} color={colors.textMuted}>
-                  {t('onboarding.countrySkip')}
-                </Typography>
-              </Pressable>
-            </Animated.View>
-          )}
-
-          {step === 2 && (
-            <Animated.View entering={FadeInDown.duration(400)} style={styles.stepContainer}>
-              <Typography
-                variant="swissTitle"
-                baseFontSize={40}
-                baseLineHeight={40}
-                style={styles.title}
-              >
-                {t('onboarding.languageTitle')}
-              </Typography>
-              <Typography variant="body" color={colors.textSecondary} style={styles.subtitle}>
-                {t('onboarding.languageSubtitle')}
-              </Typography>
-
-              <View style={styles.languageList}>
-                {LANGUAGES.map((lang) => {
-                  const isSelected = locale === lang.locale;
-                  return (
-                    <Pressable
-                      key={lang.locale}
-                      onPress={() => setLocale(lang.locale)}
-                      style={[styles.languageRow, isSelected && styles.languageRowSelected]}
-                    >
-                      {lang.flag}
-                      <Typography variant="bodyBold" baseFontSize={17} style={styles.languageLabel}>
-                        {lang.label}
-                      </Typography>
-                      {isSelected && (
-                        <Ionicons name="checkmark-circle" size={22} color={colors.accent} />
-                      )}
-                    </Pressable>
-                  );
-                })}
-              </View>
-            </Animated.View>
-          )}
-
-          {step === 3 && (
-            <Animated.View entering={FadeInDown.duration(400)} style={styles.stepContainer}>
-              <Typography
-                variant="swissTitle"
-                baseFontSize={40}
-                baseLineHeight={40}
-                style={styles.title}
-              >
-                {t('onboarding.explainTitle')}
-              </Typography>
-
-              <View style={styles.explainList}>
-                {STEPS.map((s, idx) => (
-                  <Animated.View
-                    key={s.key}
-                    entering={FadeInUp.delay(idx * 150).duration(400)}
-                    style={styles.explainItem}
-                  >
-                    <View style={styles.explainIcon}>
-                      <Ionicons name={s.icon} size={24} color={colors.accent} />
-                    </View>
-                    <View style={styles.explainText}>
-                      <Typography variant="bodyBold" baseFontSize={16}>
-                        {t(`onboarding.explainStep${idx + 1}Title` as any)}
-                      </Typography>
-                      <Typography
-                        variant="body"
-                        baseFontSize={14}
-                        baseLineHeight={20}
-                        color={colors.textSecondary}
-                      >
-                        {t(`onboarding.explainStep${idx + 1}` as any)}
-                      </Typography>
-                    </View>
-                  </Animated.View>
+    <KeyboardAvoidingView
+      style={styles.keyboardAvoid}
+      behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+    >
+      <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
+        <View style={styles.root}>
+          <ScrollView
+            style={styles.scroll}
+            contentContainerStyle={[
+              styles.scrollContent,
+              { paddingTop: insets.top + 16, paddingBottom: insets.bottom + 24 },
+            ]}
+            keyboardShouldPersistTaps="handled"
+            keyboardDismissMode={Platform.OS === 'ios' ? 'interactive' : 'on-drag'}
+            showsVerticalScrollIndicator={false}
+          >
+            <View style={styles.header}>
+              <Logo size="sm" />
+              <View style={styles.dots}>
+                {Array.from({ length: TOTAL_STEPS }).map((_, i) => (
+                  <View key={i} style={[styles.dot, i === step && styles.dotActive]} />
                 ))}
               </View>
+            </View>
 
-              {error && (
-                <Typography variant="caption" color={colors.pasion} style={styles.errorText}>
-                  {error}
-                </Typography>
+            <View style={styles.content}>
+              {step === 0 && (
+                <Animated.View entering={FadeInDown.duration(400)} style={styles.stepContainer}>
+                  <Typography
+                    variant="swissTitle"
+                    baseFontSize={40}
+                    baseLineHeight={40}
+                    style={styles.title}
+                  >
+                    {t('onboarding.nameTitle')}
+                  </Typography>
+                  <Typography variant="body" color={colors.textSecondary} style={styles.subtitle}>
+                    {t('onboarding.nameSubtitle')}
+                  </Typography>
+
+                  <TextInput
+                    style={[styles.input, { fontSize: inputFontSize }]}
+                    value={displayName}
+                    onChangeText={setDisplayName}
+                    placeholder={t('onboarding.namePlaceholder')}
+                    placeholderTextColor={colors.textMuted}
+                    autoFocus
+                    maxLength={30}
+                    returnKeyType="done"
+                    onSubmitEditing={() => {
+                      if (displayName.trim()) handleContinue();
+                    }}
+                  />
+                </Animated.View>
               )}
-            </Animated.View>
+
+              {step === 1 && (
+                <Animated.View entering={FadeInDown.duration(400)} style={styles.stepContainer}>
+                  <Typography
+                    variant="swissTitle"
+                    baseFontSize={40}
+                    baseLineHeight={40}
+                    style={styles.title}
+                  >
+                    {t('onboarding.countryTitle')}
+                  </Typography>
+                  <Typography variant="body" color={colors.textSecondary} style={styles.subtitle}>
+                    {t('onboarding.countrySubtitle')}
+                  </Typography>
+
+                  <View style={styles.countryGrid}>
+                    {SUPPORTED_COUNTRIES.map((supportedCountry) => {
+                      const isSelected = country === supportedCountry.code;
+                      return (
+                        <Pressable
+                          key={supportedCountry.code}
+                          onPress={() => setCountry(supportedCountry.code)}
+                          style={[styles.countryCard, isSelected && styles.countryCardSelected]}
+                        >
+                          <Typography variant="body" baseFontSize={26} style={styles.countryFlag}>
+                            {supportedCountry.flag}
+                          </Typography>
+                          <Typography
+                            variant="bodyBold"
+                            baseFontSize={14}
+                            style={styles.countryLabel}
+                          >
+                            {getCountryName(supportedCountry)}
+                          </Typography>
+                        </Pressable>
+                      );
+                    })}
+                  </View>
+
+                  <Pressable style={styles.skipCountryButton} onPress={handleContinue}>
+                    <Typography variant="body" baseFontSize={14} color={colors.textMuted}>
+                      {t('onboarding.countrySkip')}
+                    </Typography>
+                  </Pressable>
+                </Animated.View>
+              )}
+
+              {step === 2 && (
+                <Animated.View entering={FadeInDown.duration(400)} style={styles.stepContainer}>
+                  <Typography
+                    variant="swissTitle"
+                    baseFontSize={40}
+                    baseLineHeight={40}
+                    style={styles.title}
+                  >
+                    {t('onboarding.languageTitle')}
+                  </Typography>
+                  <Typography variant="body" color={colors.textSecondary} style={styles.subtitle}>
+                    {t('onboarding.languageSubtitle')}
+                  </Typography>
+
+                  <View style={styles.languageList}>
+                    {LANGUAGES.map((lang) => {
+                      const isSelected = locale === lang.locale;
+                      return (
+                        <Pressable
+                          key={lang.locale}
+                          onPress={() => setLocale(lang.locale)}
+                          style={[styles.languageRow, isSelected && styles.languageRowSelected]}
+                        >
+                          {lang.flag}
+                          <Typography
+                            variant="bodyBold"
+                            baseFontSize={17}
+                            style={styles.languageLabel}
+                          >
+                            {lang.label}
+                          </Typography>
+                          {isSelected && (
+                            <Ionicons name="checkmark-circle" size={22} color={colors.accent} />
+                          )}
+                        </Pressable>
+                      );
+                    })}
+                  </View>
+                </Animated.View>
+              )}
+
+              {step === 3 && (
+                <Animated.View entering={FadeInDown.duration(400)} style={styles.stepContainer}>
+                  <Typography
+                    variant="swissTitle"
+                    baseFontSize={40}
+                    baseLineHeight={40}
+                    style={styles.title}
+                  >
+                    {t('onboarding.explainTitle')}
+                  </Typography>
+
+                  <View style={styles.explainList}>
+                    {STEPS.map((s, idx) => (
+                      <Animated.View
+                        key={s.key}
+                        entering={FadeInUp.delay(idx * 150).duration(400)}
+                        style={styles.explainItem}
+                      >
+                        <View style={styles.explainIcon}>
+                          <Ionicons name={s.icon} size={24} color={colors.accent} />
+                        </View>
+                        <View style={styles.explainText}>
+                          <Typography variant="bodyBold" baseFontSize={16}>
+                            {t(`onboarding.explainStep${idx + 1}Title` as any)}
+                          </Typography>
+                          <Typography
+                            variant="body"
+                            baseFontSize={14}
+                            baseLineHeight={20}
+                            color={colors.textSecondary}
+                          >
+                            {t(`onboarding.explainStep${idx + 1}` as any)}
+                          </Typography>
+                        </View>
+                      </Animated.View>
+                    ))}
+                  </View>
+
+                  {error && (
+                    <Typography variant="caption" color={colors.pasion} style={styles.errorText}>
+                      {error}
+                    </Typography>
+                  )}
+                </Animated.View>
+              )}
+            </View>
+
+            <View style={styles.ctaArea}>
+              {step < LAST_STEP ? (
+                <Button
+                  label={t('onboarding.continue')}
+                  onPress={handleContinue}
+                  disabled={step === 0 && !displayName.trim()}
+                />
+              ) : (
+                <Button
+                  label={submitting ? t('onboarding.completing') : t('onboarding.letsGo')}
+                  onPress={handleComplete}
+                  disabled={submitting}
+                />
+              )}
+            </View>
+          </ScrollView>
+
+          {submitting && (
+            <View style={styles.loadingOverlay}>
+              <ActivityIndicator size="large" color={colors.accent} />
+            </View>
           )}
         </View>
-
-        <View style={[styles.ctaArea, { paddingBottom: insets.bottom + 24 }]}>
-          {step < LAST_STEP ? (
-            <Button
-              label={t('onboarding.continue')}
-              onPress={handleContinue}
-              disabled={step === 0 && !displayName.trim()}
-            />
-          ) : (
-            <Button
-              label={submitting ? t('onboarding.completing') : t('onboarding.letsGo')}
-              onPress={handleComplete}
-              disabled={submitting}
-            />
-          )}
-        </View>
-
-        {submitting && (
-          <View style={styles.loadingOverlay}>
-            <ActivityIndicator size="large" color={colors.accent} />
-          </View>
-        )}
-      </View>
-    </TouchableWithoutFeedback>
+      </TouchableWithoutFeedback>
+    </KeyboardAvoidingView>
   );
 }
 
 function createStyles(colors: ThemeColors) {
   return StyleSheet.create({
+    keyboardAvoid: {
+      flex: 1,
+      backgroundColor: colors.background,
+    },
     root: {
       flex: 1,
       backgroundColor: colors.background,
+    },
+    scroll: {
+      flex: 1,
+    },
+    scrollContent: {
+      flexGrow: 1,
       paddingHorizontal: 24,
     },
     header: {
@@ -298,7 +335,7 @@ function createStyles(colors: ThemeColors) {
       width: 24,
     },
     content: {
-      flex: 1,
+      flexGrow: 1,
     },
     stepContainer: {
       flex: 1,

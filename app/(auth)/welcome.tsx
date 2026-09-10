@@ -1,4 +1,4 @@
-import { View, StyleSheet, Dimensions } from 'react-native';
+import { View, StyleSheet, useWindowDimensions } from 'react-native';
 import { useEffect, useMemo } from 'react';
 import { useRouter } from 'expo-router';
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -16,8 +16,6 @@ import { Button } from '../../components/ui/Button';
 import { GameCard, GameCardData } from '../../components/cards/GameCard';
 import { useColors } from '@/context/ThemeContext';
 import { ThemeColors } from '../../constants/colors';
-
-const { width: W, height: H } = Dimensions.get('window');
 
 interface CardLayout extends GameCardData {
   rotation: number;
@@ -66,31 +64,55 @@ type PreviewCardLayout = Omit<CardLayout, 'label' | 'title' | 'description'> & {
   rarity: string;
 };
 
-const PREVIEW_CARDS_LAYOUT: PreviewCardLayout[] = [
-  {
-    key: 'legendary',
-    rarity: 'legendaria',
-    rotation: -12,
-    left: W * -0.06,
-    top: H * 0.15,
-    width: W * 0.54,
-  },
-  { key: 'passion', rarity: 'pasion', rotation: 14, left: W * 0.44, top: H * 0.1, width: W * 0.52 },
-  { key: 'common', rarity: 'comun', rotation: -8, left: W * 0.0, top: H * 0.5, width: W * 0.5 },
-  { key: 'rare', rarity: 'rara', rotation: 10, left: W * 0.46, top: H * 0.45, width: W * 0.52 },
-];
-
 export default function WelcomeScreen() {
   const router = useRouter();
   const insets = useSafeAreaInsets();
+  const { width, height } = useWindowDimensions();
   const { t } = useTranslation('auth');
   const { t: tCommon } = useTranslation('common');
   const colors = useColors();
-  const styles = useMemo(() => createStyles(colors), [colors]);
+  const styles = useMemo(() => createStyles(colors, height), [colors, height]);
+  const previewCardsLayout = useMemo<PreviewCardLayout[]>(
+    () => [
+      {
+        key: 'legendary',
+        rarity: 'legendaria',
+        rotation: -12,
+        left: width * -0.06,
+        top: height * 0.15,
+        width: width * 0.54,
+      },
+      {
+        key: 'passion',
+        rarity: 'pasion',
+        rotation: 14,
+        left: width * 0.44,
+        top: height * 0.1,
+        width: width * 0.52,
+      },
+      {
+        key: 'common',
+        rarity: 'comun',
+        rotation: -8,
+        left: 0,
+        top: height * 0.5,
+        width: width * 0.5,
+      },
+      {
+        key: 'rare',
+        rarity: 'rara',
+        rotation: 10,
+        left: width * 0.46,
+        top: height * 0.45,
+        width: width * 0.52,
+      },
+    ],
+    [height, width]
+  );
 
   return (
     <SafeAreaView style={styles.root}>
-      {PREVIEW_CARDS_LAYOUT.map((layout, i) => (
+      {previewCardsLayout.map((layout, i) => (
         <AnimatedCard
           key={i}
           card={{
@@ -125,7 +147,7 @@ export default function WelcomeScreen() {
   );
 }
 
-const createStyles = (colors: ThemeColors) =>
+const createStyles = (colors: ThemeColors, height: number) =>
   StyleSheet.create({
     root: {
       flex: 1,
@@ -136,7 +158,7 @@ const createStyles = (colors: ThemeColors) =>
       bottom: 0,
       left: 0,
       right: 0,
-      height: H * 0.38,
+      height: height * 0.38,
     },
     logoArea: {
       position: 'absolute',
