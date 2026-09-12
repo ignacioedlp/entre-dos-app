@@ -32,6 +32,30 @@ interface GameCardProps {
   variant?: 'full' | 'thumbnail';
 }
 
+function contrastingTextColor(backgroundColor: string) {
+  const value = backgroundColor.trim();
+  const match = value.match(/^#([0-9a-f]{3}|[0-9a-f]{6})$/i);
+
+  if (!match) return '#ffffff';
+
+  const hex =
+    match[1].length === 3
+      ? match[1]
+          .split('')
+          .map((character) => character + character)
+          .join('')
+      : match[1];
+  const channels = [0, 2, 4].map((offset) => {
+    const channel = Number.parseInt(hex.slice(offset, offset + 2), 16) / 255;
+    return channel <= 0.04045 ? channel / 12.92 : Math.pow((channel + 0.055) / 1.055, 2.4);
+  });
+  const luminance = channels[0] * 0.2126 + channels[1] * 0.7152 + channels[2] * 0.0722;
+  const whiteContrast = 1.05 / (luminance + 0.05);
+  const darkContrast = (luminance + 0.05) / 0.05;
+
+  return darkContrast >= whiteContrast ? '#0f1115' : '#ffffff';
+}
+
 export function GameCard({
   card,
   width = 10,
@@ -41,6 +65,7 @@ export function GameCard({
 }: GameCardProps) {
   const bg = rarityColor[card.rarity];
   const fg = rarityTextColor[card.rarity];
+  const eventTextColor = card.event ? contrastingTextColor(card.event.color) : fg;
   const h = width * (4 / 3);
   const watermarkSize = Math.round(width * 0.4);
 
@@ -102,13 +127,14 @@ export function GameCard({
                   style={[
                     styles.badge,
                     {
-                      borderColor: card.event ? card.event.color + '55' : fg + '55',
+                      backgroundColor: card.event ? card.event.color : 'transparent',
+                      borderColor: card.event ? card.event.color : fg + '55',
                     },
                   ]}
                 >
                   <Typography
                     variant="cardLabel"
-                    color={card.event?.color ?? fg}
+                    color={eventTextColor}
                     baseFontSize={9}
                     style={{ opacity: 1, letterSpacing: 1.5 }}
                   >

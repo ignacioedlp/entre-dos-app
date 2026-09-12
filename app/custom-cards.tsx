@@ -236,14 +236,6 @@ export default function CustomCardsScreen() {
               {t('customCards.count', { count: activeCards.length, limit: data?.limit ?? 20 })}
             </Typography>
           </View>
-          {data?.cards.length === 0 ? (
-            <View style={styles.empty}>
-              <Ionicons name="sparkles-outline" size={38} color={colors.textMuted} />
-              <Typography variant="body" color={colors.textSecondary} style={styles.centered}>
-                {t('customCards.empty')}
-              </Typography>
-            </View>
-          ) : null}
           <View style={styles.grid}>
             <Pressable
               accessibilityRole="button"
@@ -252,7 +244,7 @@ export default function CustomCardsScreen() {
               onPress={openCreate}
               style={({ pressed }) => [
                 styles.addCard,
-                { width: cardWidth },
+                { width: cardWidth, height: cardWidth * (4 / 3) },
                 pressed && styles.pressed,
                 activeCards.length >= (data?.limit ?? 20) && styles.disabled,
               ]}

@@ -83,6 +83,7 @@
     "save": "Save",
     "cancel": "Cancel",
     "remove": "Remove date",
+    "chooseDate": "Choose the date",
     "saved": "Anniversary saved!",
     "removed": "Anniversary removed",
     "errorInvalidDate": "Please enter a valid date",

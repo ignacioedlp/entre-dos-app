@@ -2,29 +2,29 @@ import {
   View,
   StyleSheet,
   Pressable,
-  TextInput,
   ScrollView,
   ActivityIndicator,
   Image,
   Modal,
+  Platform,
 } from 'react-native';
+import DateTimePicker, { DateTimePickerEvent } from '@react-native-community/datetimepicker';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useTranslation } from 'react-i18next';
 import moment from 'moment';
 import 'moment/locale/es';
 
-import { useColors } from '@/context/ThemeContext';
+import { useColors, useTheme } from '@/context/ThemeContext';
 import { ThemeColors } from '@/constants/colors';
 import { apiGetCoupleStatus, apiUpdateCoupleAnniversary, apiUnlinkCouple } from '@/lib/api';
 import { Button } from '@/components/ui/Button';
 import { useAuth } from '@/context/AuthContext';
 import i18n from '@/i18n';
 import { Typography } from '@/components/ui/Typography';
-import { useScaledFontSize } from '@/context/FontScaleContext';
 import Animated, {
   cancelAnimation,
   Easing,
@@ -172,20 +172,14 @@ export default function RelationshipScreen() {
   const { t } = useTranslation('settings');
   const { logout } = useAuth();
   const queryClient = useQueryClient();
-  const inputFontSize = useScaledFontSize(18);
-  const separatorFontSize = useScaledFontSize(20);
-  const colors = useColors();
+  const { colors, theme } = useTheme();
   const styles = useMemo(() => createStyles(colors), [colors]);
 
   const [editing, setEditing] = useState(false);
   const [unlinkVisible, setUnlinkVisible] = useState(false);
-  const [day, setDay] = useState('');
-  const [month, setMonth] = useState('');
-  const [year, setYear] = useState('');
+  const [selectedDate, setSelectedDate] = useState(new Date());
+  const [showAndroidPicker, setShowAndroidPicker] = useState(false);
   const [error, setError] = useState<string | null>(null);
-
-  const monthRef = useRef<TextInput>(null);
-  const yearRef = useRef<TextInput>(null);
 
   const { data, isLoading } = useQuery({
     queryKey: ['couple-status'],
@@ -212,48 +206,28 @@ export default function RelationshipScreen() {
   function startEditing() {
     setError(null);
     if (couple?.anniversary) {
-      const m = moment(couple.anniversary);
-      setDay(m.format('DD'));
-      setMonth(m.format('MM'));
-      setYear(m.format('YYYY'));
+      setSelectedDate(moment(couple.anniversary, 'YYYY-MM-DD').toDate());
     } else {
-      setDay('');
-      setMonth('');
-      setYear('');
+      setSelectedDate(new Date());
     }
     setEditing(true);
+    setShowAndroidPicker(Platform.OS === 'android');
   }
 
   function cancelEditing() {
     setEditing(false);
+    setShowAndroidPicker(false);
     setError(null);
   }
 
-  function handleDayChange(text: string) {
-    const clean = text.replace(/\D/g, '');
-    setDay(clean);
-    if (clean.length === 2) monthRef.current?.focus();
-  }
-
-  function handleMonthChange(text: string) {
-    const clean = text.replace(/\D/g, '');
-    setMonth(clean);
-    if (clean.length === 2) yearRef.current?.focus();
-  }
-
-  function handleYearChange(text: string) {
-    setYear(text.replace(/\D/g, ''));
+  function handleDateChange(event: DateTimePickerEvent, value?: Date) {
+    if (Platform.OS === 'android') setShowAndroidPicker(false);
+    if (event.type === 'set' && value) setSelectedDate(value);
   }
 
   async function handleSave() {
     setError(null);
-
-    if (!day || !month || !year || year.length < 4) {
-      setError(t('relationship.errorRequired'));
-      return;
-    }
-
-    const dateStr = `${year}-${month.padStart(2, '0')}-${day.padStart(2, '0')}`;
+    const dateStr = moment(selectedDate).format('YYYY-MM-DD');
     const parsed = moment(dateStr, 'YYYY-MM-DD', true);
 
     if (!parsed.isValid()) {
@@ -405,56 +379,46 @@ export default function RelationshipScreen() {
               </View>
             ) : (
               <View style={styles.editContainer}>
-                {/* Date Inputs */}
-                <View style={styles.inputsRow}>
-                  <TextInput
-                    style={[styles.dateInput, { fontSize: inputFontSize }]}
-                    value={day}
-                    onChangeText={handleDayChange}
-                    placeholder={t('relationship.day')}
-                    placeholderTextColor={colors.textMuted}
-                    keyboardType="number-pad"
-                    maxLength={2}
-                    textAlign="center"
-                    autoFocus
-                  />
-                  <Typography
-                    variant="bodyBold"
-                    style={{ fontSize: separatorFontSize }}
-                    color={colors.textMuted}
-                  >
-                    /
+                <Typography variant="label" color={colors.textSecondary}>
+                  {t('relationship.chooseDate')}
+                </Typography>
+                <Pressable
+                  accessibilityRole={Platform.OS === 'android' ? 'button' : 'text'}
+                  accessibilityLabel={t('relationship.chooseDate')}
+                  disabled={Platform.OS === 'ios'}
+                  onPress={() => setShowAndroidPicker(true)}
+                  style={styles.dateSelection}
+                >
+                  <Ionicons name="calendar-outline" size={20} color={colors.accent} />
+                  <Typography variant="bodyBold" baseFontSize={16} style={styles.selectedDateText}>
+                    {moment(selectedDate).locale(i18n.language).format('LL')}
                   </Typography>
-                  <TextInput
-                    ref={monthRef}
-                    style={[styles.dateInput, { fontSize: inputFontSize }]}
-                    value={month}
-                    onChangeText={handleMonthChange}
-                    placeholder={t('relationship.month')}
-                    placeholderTextColor={colors.textMuted}
-                    keyboardType="number-pad"
-                    maxLength={2}
-                    textAlign="center"
+                  {Platform.OS === 'android' ? (
+                    <Ionicons name="chevron-down" size={18} color={colors.textMuted} />
+                  ) : null}
+                </Pressable>
+
+                {Platform.OS === 'ios' ? (
+                  <DateTimePicker
+                    accentColor={colors.accent}
+                    display="inline"
+                    locale={i18n.language.startsWith('es') ? 'es-AR' : 'en-US'}
+                    maximumDate={new Date()}
+                    mode="date"
+                    onChange={handleDateChange}
+                    style={styles.datePicker}
+                    themeVariant={theme}
+                    value={selectedDate}
                   />
-                  <Typography
-                    variant="bodyBold"
-                    style={{ fontSize: separatorFontSize }}
-                    color={colors.textMuted}
-                  >
-                    /
-                  </Typography>
-                  <TextInput
-                    ref={yearRef}
-                    style={[styles.dateInput, styles.yearInput, { fontSize: inputFontSize }]}
-                    value={year}
-                    onChangeText={handleYearChange}
-                    placeholder={t('relationship.year')}
-                    placeholderTextColor={colors.textMuted}
-                    keyboardType="number-pad"
-                    maxLength={4}
-                    textAlign="center"
+                ) : showAndroidPicker ? (
+                  <DateTimePicker
+                    display="default"
+                    maximumDate={new Date()}
+                    mode="date"
+                    onChange={handleDateChange}
+                    value={selectedDate}
                   />
-                </View>
+                ) : null}
 
                 {error && (
                   <Typography
@@ -685,25 +649,23 @@ function createStyles(colors: ThemeColors) {
       padding: 20,
       gap: 16,
     },
-    inputsRow: {
+    dateSelection: {
       flexDirection: 'row',
       alignItems: 'center',
-      justifyContent: 'center',
-      gap: 8,
-    },
-    dateInput: {
       backgroundColor: colors.surfaceAlt,
       borderRadius: 12,
       borderWidth: 1,
       borderColor: colors.border,
-      paddingVertical: 14,
-      width: 56,
-      fontFamily: 'Inter_700Bold',
-      color: colors.textPrimary,
-      textAlign: 'center',
+      minHeight: 52,
+      paddingHorizontal: 14,
+      gap: 10,
     },
-    yearInput: {
-      width: 80,
+    selectedDateText: {
+      flex: 1,
+    },
+    datePicker: {
+      alignSelf: 'center',
+      width: '100%',
     },
     saveBtn: {
       backgroundColor: colors.accent,

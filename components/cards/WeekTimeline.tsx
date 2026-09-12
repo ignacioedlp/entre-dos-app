@@ -5,7 +5,7 @@ import { useRouter } from 'expo-router';
 
 import { CardHistoryItem } from '../../lib/api';
 import { RarityKey, rarityColor, rarityGlow, ThemeColors } from '../../constants/colors';
-import { useColors } from '../../context/ThemeContext';
+import { useTheme } from '../../context/ThemeContext';
 import { Typography } from '../ui/Typography';
 
 const RARITY_MAP: Record<string, RarityKey> = {
@@ -68,20 +68,23 @@ function TimelineEntry({
   play,
   isLast,
   currentUserId,
+  isLightTheme,
   colors,
   styles,
 }: {
   play: CardHistoryItem;
   isLast: boolean;
   currentUserId: string;
+  isLightTheme: boolean;
   colors: ThemeColors;
   styles: ReturnType<typeof createStyles>;
 }) {
   const { t } = useTranslation(['home', 'common']);
   const router = useRouter();
   const rarity = RARITY_MAP[play.rarity] ?? 'comun';
-  const dotColor = rarityColor[rarity];
-  const dotGlow = rarityGlow[rarity];
+  const isLightCommon = isLightTheme && rarity === 'comun';
+  const dotColor = isLightCommon ? '#64748b' : rarityColor[rarity];
+  const dotGlow = isLightCommon ? 'rgba(71, 85, 105, 0.28)' : rarityGlow[rarity];
   const isMine = play.userId === currentUserId;
   const playerLabel = isMine
     ? t('home:weekTimeline.you')
@@ -150,7 +153,7 @@ function TimelineEntry({
               {categoryLabel}
             </Typography>
           </View>
-          <View style={[styles.badge, { borderColor: dotColor + '55' }]}>
+          <View style={[styles.badge, { borderColor: dotColor }]}>
             <Typography
               variant="cardLabel"
               baseFontSize={9}
@@ -206,7 +209,7 @@ function TimelineEntry({
 
 export function WeekTimeline({ plays, isLoading, currentUserId }: WeekTimelineProps) {
   const { t } = useTranslation('home');
-  const colors = useColors();
+  const { colors, theme } = useTheme();
   const styles = createStyles(colors);
 
   return (
@@ -250,6 +253,7 @@ export function WeekTimeline({ plays, isLoading, currentUserId }: WeekTimelinePr
             play={play}
             isLast={i === plays.length - 1}
             currentUserId={currentUserId}
+            isLightTheme={theme === 'light'}
             colors={colors}
             styles={styles}
           />

@@ -83,6 +83,7 @@
     "save": "Guardar",
     "cancel": "Cancelar",
     "remove": "Eliminar fecha",
+    "chooseDate": "Elegí la fecha",
     "saved": "¡Aniversario guardado!",
     "removed": "Aniversario eliminado",
     "errorInvalidDate": "Ingresá una fecha válida",

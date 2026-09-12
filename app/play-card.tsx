@@ -215,10 +215,7 @@ export default function CardDetailSheet() {
                   pressed && styles.swapButtonPressed,
                 ]}
               >
-                <Ionicons name="swap-horizontal" size={16} color={colors.pasion} />
-                <Typography variant="bodyBold" baseFontSize={12} color={colors.pasion}>
-                  {isSwapping ? t('cardSwap.swapping') : t('cardSwap.button')}
-                </Typography>
+                <Ionicons name="swap-horizontal" size={24} color={colors.pasion} />
               </Pressable>
             )}
           </View>
