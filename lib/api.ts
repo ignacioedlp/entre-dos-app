@@ -372,6 +372,48 @@ export interface AlbumMomentsResponse {
   nextCursor: string | null;
 }
 
+export interface AlbumAccessResponse {
+  access: 'premium' | 'rewarded' | 'locked';
+  expiresAt: string | null;
+  rewardedAdAvailable: boolean;
+  rewardedAccessMinutes: number;
+}
+
+export type AlbumAccessClaimResponse =
+  | ({ status: 'granted' } & AlbumAccessResponse)
+  | {
+      status: 'ad_required';
+      attemptId: string;
+      adUnitId: string;
+      userId: string;
+      customData: string;
+    };
+
+export type AlbumAccessAttemptResponse =
+  | { status: 'pending' | 'expired' }
+  | { status: 'granted'; expiresAt: string };
+
+export async function apiGetAlbumAccess(platform: 'ios' | 'android'): Promise<AlbumAccessResponse> {
+  const res = await api.get<AlbumAccessResponse>('/album/access', { params: { platform } });
+  return res.data;
+}
+
+export async function apiClaimAlbumAccess(
+  platform: 'ios' | 'android'
+): Promise<AlbumAccessClaimResponse> {
+  const res = await api.post<AlbumAccessClaimResponse>('/album/access/claim', { platform });
+  return res.data;
+}
+
+export async function apiGetAlbumAccessAttempt(
+  attemptId: string
+): Promise<AlbumAccessAttemptResponse> {
+  const res = await api.get<AlbumAccessAttemptResponse>(`/album/access/attempts/${attemptId}`, {
+    timeout: 1800,
+  });
+  return res.data;
+}
+
 export async function apiGetAlbumMoments(cursor?: string | null): Promise<AlbumMomentsResponse> {
   const res = await api.get<AlbumMomentsResponse>('/album/moments', {
     params: { limit: 20, ...(cursor ? { cursor } : {}) },

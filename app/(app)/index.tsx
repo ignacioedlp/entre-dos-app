@@ -44,6 +44,7 @@ const { width: SCREEN_WIDTH } = Dimensions.get('window');
 const HOME_AUTO_REFRESH_MS = 30_000;
 const HORIZONTAL_SWIPE_DISTANCE = 48;
 const HORIZONTAL_SWIPE_VELOCITY = 500;
+const CAROUSEL_VERTICAL_PADDING = 32;
 const homeEntrance = (delay: number) =>
   FadeInDown.delay(delay).duration(260).reduceMotion(ReduceMotion.System);
 
@@ -577,14 +578,14 @@ function createStyles(colors: ReturnType<typeof useColors>) {
     },
     carouselHitArea: {
       width: SCREEN_WIDTH,
-      height: CARD_HEIGHT,
+      height: CARD_HEIGHT + CAROUSEL_VERTICAL_PADDING * 2,
       alignItems: 'center',
       justifyContent: 'center',
       overflow: 'hidden',
     },
     carouselStage: {
       width: SCREEN_WIDTH,
-      height: CARD_HEIGHT,
+      height: CARD_HEIGHT + CAROUSEL_VERTICAL_PADDING * 2,
       alignItems: 'center',
       justifyContent: 'center',
       overflow: 'hidden',

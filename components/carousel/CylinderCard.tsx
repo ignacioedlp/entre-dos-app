@@ -8,7 +8,7 @@ import Animated, {
 } from 'react-native-reanimated';
 
 import { GameCard } from '../cards/GameCard';
-import { RarityKey, rarityGlow } from '../../constants/colors';
+import { RarityKey } from '../../constants/colors';
 import { DeckCard } from '../../lib/api';
 
 const { width: SCREEN_WIDTH } = Dimensions.get('window');
@@ -42,7 +42,6 @@ export function CylinderCard({
   onTap,
 }: CylinderCardProps) {
   const rarity = RARITY_MAP[card.rarity] ?? 'comun';
-  const glow = rarityGlow[rarity];
   const { t } = useTranslation(['common', 'home']);
 
   const categoryLabel = t(`category.${card.category}`, {
@@ -58,7 +57,6 @@ export function CylinderCard({
     const isActive = activeIndex.value === index;
     const y = isActive ? dragY.value : 0;
     const zIndex = Math.round((2 - distance) * 100);
-    const shadowOpacity = interpolate(distance, [0, 1], [0.5, 0.2], Extrapolation.CLAMP);
 
     return {
       transform: [
@@ -69,11 +67,6 @@ export function CylinderCard({
       ],
       opacity: visible ? opacity : 0,
       zIndex,
-      shadowColor: glow,
-      shadowOpacity,
-      shadowRadius: 24,
-      shadowOffset: { width: 0, height: 8 },
-      elevation: visible ? Math.round((2 - distance) * 10) : 0,
       pointerEvents: visible ? 'auto' : 'none',
     };
   });
@@ -108,7 +101,7 @@ export function CylinderCard({
 const styles = StyleSheet.create({
   cardSlot: {
     position: 'absolute',
-    width: CARD_WIDTH,
-    height: CARD_HEIGHT,
+    width: CARD_WIDTH ,
+    height: CARD_HEIGHT ,
   },
 });

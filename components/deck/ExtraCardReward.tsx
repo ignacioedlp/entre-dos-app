@@ -12,7 +12,6 @@ import * as Sentry from '@sentry/react-native';
 import { useQueryClient } from '@tanstack/react-query';
 import { useTranslation } from 'react-i18next';
 import { Toast } from 'toastify-react-native';
-import { AdEventType, RewardedAd, RewardedAdEventType } from 'react-native-google-mobile-ads';
 import Animated, {
   Extrapolation,
   interpolate,
@@ -23,14 +22,9 @@ import Animated, {
 import { useAds } from '@/context/AdsContext';
 import { useColors } from '@/context/ThemeContext';
 import type { ThemeColors } from '@/constants/colors';
-import {
-  apiClaimExtraCard,
-  apiGetExtraCardAttempt,
-  DeckCard,
-  DeckResponse,
-  ExtraCardClaimResponse,
-} from '@/lib/api';
+import { apiClaimExtraCard, apiGetExtraCardAttempt, DeckCard, DeckResponse } from '@/lib/api';
 import { triggerFeedback } from '@/lib/feedback';
+import { rewardedAdErrorDiagnostics, showRewardedAd } from '@/lib/rewarded-ads';
 import { Button } from '@/components/ui/Button';
 import { Typography } from '@/components/ui/Typography';
 import { GameCard } from '@/components/cards/GameCard';
@@ -56,74 +50,6 @@ const SIDE_SCALE = 0.82;
 const SIDE_ROTATION = 8;
 
 const delay = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
-
-function adErrorDiagnostics(error: unknown) {
-  if (!(error instanceof Error)) return { message: String(error) };
-  const nativeError = error as Error & { code?: unknown };
-  return {
-    name: nativeError.name,
-    message: nativeError.message,
-    code: typeof nativeError.code === 'string' ? nativeError.code : undefined,
-  };
-}
-
-function showRewardedAd(claim: Extract<ExtraCardClaimResponse, { status: 'ad_required' }>) {
-  return new Promise<void>((resolve, reject) => {
-    const ad = RewardedAd.createForAdRequest(claim.adUnitId, {
-      // Entre Dos does not request ATT or use the IDFA. Keep every rewarded
-      // ad request non-personalized, irrespective of the UMP regional choice.
-      requestNonPersonalizedAdsOnly: true,
-      serverSideVerificationOptions: {
-        userId: claim.userId,
-        customData: claim.customData,
-      },
-    });
-    let earned = false;
-    let settled = false;
-    let loadTimeout: ReturnType<typeof setTimeout>;
-    const subscriptions: (() => void)[] = [];
-    const cleanup = () => {
-      clearTimeout(loadTimeout);
-      subscriptions.forEach((unsubscribe) => unsubscribe());
-    };
-    const fail = (error: Error) => {
-      if (settled) return;
-      settled = true;
-      cleanup();
-      reject(error);
-    };
-    subscriptions.push(
-      ad.addAdEventListener(RewardedAdEventType.LOADED, () => {
-        // This timeout only protects the loading phase. Rewarded videos can
-        // legitimately last longer than 20 seconds, so leaving it active
-        // would remove EARNED_REWARD listeners while the ad is still playing.
-        clearTimeout(loadTimeout);
-        if (__DEV__) console.info('[ads] Rewarded ad loaded');
-        void ad.show().catch(fail);
-      }),
-      ad.addAdEventListener(RewardedAdEventType.EARNED_REWARD, () => {
-        if (__DEV__) console.info('[ads] Client earned rewarded ad');
-        earned = true;
-        settled = true;
-        cleanup();
-        resolve();
-      }),
-      ad.addAdEventListener(AdEventType.CLOSED, () => {
-        if (__DEV__) console.info(`[ads] Rewarded ad closed; earned=${earned}`);
-        if (!earned && !settled) {
-          fail(new Error('rewarded-ad-closed'));
-        }
-      }),
-      ad.addAdEventListener(AdEventType.ERROR, (error) => {
-        if (!settled) {
-          fail(error);
-        }
-      })
-    );
-    loadTimeout = setTimeout(() => fail(new Error('rewarded-ad-load-timeout')), 20_000);
-    ad.load();
-  });
-}
 
 export function ExtraCardReward({ extraCard, carousel }: ExtraCardRewardProps) {
   const { t } = useTranslation('home');
@@ -209,7 +135,7 @@ export function ExtraCardReward({ extraCard, carousel }: ExtraCardRewardProps) {
         void queryClient.invalidateQueries({ queryKey: ['deck'] });
       }
     } catch (error) {
-      const diagnostics = adErrorDiagnostics(error);
+      const diagnostics = rewardedAdErrorDiagnostics(error);
       Sentry.captureException(error, {
         tags: { area: 'ads', flow: 'extra-card', stage, platform: Platform.OS },
         extra: diagnostics,

@@ -1,18 +1,41 @@
 import { Ionicons } from '@expo/vector-icons';
-import { useInfiniteQuery, useQuery } from '@tanstack/react-query';
-import { Image, Pressable, ScrollView, SectionList, StyleSheet, View } from 'react-native';
-import { useMemo } from 'react';
-import { useRouter } from 'expo-router';
+import * as Sentry from '@sentry/react-native';
+import { useInfiniteQuery, useQuery, useQueryClient } from '@tanstack/react-query';
+import {
+  Image,
+  Platform,
+  Pressable,
+  ScrollView,
+  SectionList,
+  StyleSheet,
+  View,
+} from 'react-native';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { useFocusEffect, useRouter } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useTranslation } from 'react-i18next';
+import { Toast } from 'toastify-react-native';
 
 import { GameCard } from '@/components/cards/GameCard';
 import { Typography } from '@/components/ui/Typography';
 import { darkColors, RarityKey, ThemeColors } from '@/constants/colors';
+import { useAds } from '@/context/AdsContext';
 import { useColors } from '@/context/ThemeContext';
-import { AlbumMoment, apiGetAlbumMoments, apiGetEntitlements } from '@/lib/api';
+import {
+  AlbumAccessResponse,
+  AlbumMoment,
+  apiClaimAlbumAccess,
+  apiGetAlbumAccess,
+  apiGetAlbumAccessAttempt,
+  apiGetAlbumMoments,
+} from '@/lib/api';
+import { rewardedAdErrorDiagnostics, showRewardedAd } from '@/lib/rewarded-ads';
 
 type AlbumSection = { title: string; data: AlbumMoment[] };
+type RewardPhase = 'idle' | 'preparing' | 'loading' | 'confirming';
+
+const delay = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
+const nativePlatform = Platform.OS === 'android' ? 'android' : 'ios';
 
 const RARITY_MAP: Record<AlbumMoment['card']['rarity'], RarityKey> = {
   common: 'comun',
@@ -101,19 +124,108 @@ export default function AlbumScreen() {
   const { t, i18n } = useTranslation('home');
   const colors = useColors();
   const styles = useMemo(() => createStyles(colors), [colors]);
+  const queryClient = useQueryClient();
+  const { ensureReady } = useAds();
+  const [rewardPhase, setRewardPhase] = useState<RewardPhase>('idle');
+  const mounted = useRef(true);
 
-  const entitlementQuery = useQuery({
-    queryKey: ['entitlements'],
-    queryFn: apiGetEntitlements,
+  const accessQuery = useQuery({
+    queryKey: ['album-access', nativePlatform],
+    queryFn: () => apiGetAlbumAccess(nativePlatform),
   });
-  const premium = entitlementQuery.data?.premium === true;
+  const refetchAccess = accessQuery.refetch;
+  const hasAccess = accessQuery.data?.access !== 'locked' && accessQuery.data !== undefined;
   const momentsQuery = useInfiniteQuery({
     queryKey: ['album-moments'],
     queryFn: ({ pageParam }) => apiGetAlbumMoments(pageParam),
     initialPageParam: null as string | null,
-    enabled: premium,
+    enabled: hasAccess,
     getNextPageParam: (page) => page.nextCursor,
   });
+
+  useEffect(() => {
+    mounted.current = true;
+    return () => {
+      mounted.current = false;
+    };
+  }, []);
+
+  useFocusEffect(
+    useCallback(() => {
+      void refetchAccess();
+    }, [refetchAccess])
+  );
+
+  async function pollAttempt(attemptId: string) {
+    setRewardPhase('confirming');
+    const deadline = Date.now() + 30_000;
+    let pollDelay = 400;
+    while (Date.now() < deadline) {
+      try {
+        const result = await apiGetAlbumAccessAttempt(attemptId);
+        if (result.status === 'granted') return result.expiresAt;
+        if (result.status === 'expired') throw new Error('rewarded-attempt-expired');
+      } catch (error) {
+        if (error instanceof Error && error.message === 'rewarded-attempt-expired') throw error;
+      }
+      await delay(Math.min(pollDelay, Math.max(deadline - Date.now(), 0)));
+      pollDelay = Math.min(pollDelay * 2, 2000);
+    }
+    return null;
+  }
+
+  async function watchAd() {
+    if (rewardPhase !== 'idle') return;
+    setRewardPhase('preparing');
+    let stage: 'claim' | 'initialization' | 'load' | 'verification' = 'claim';
+    try {
+      const result = await apiClaimAlbumAccess(nativePlatform);
+      if (result.status === 'granted') {
+        queryClient.setQueryData(['album-access', nativePlatform], result);
+      } else {
+        stage = 'initialization';
+        const ready = await ensureReady();
+        if (!ready) throw new Error('ads-consent-unavailable');
+        setRewardPhase('loading');
+        stage = 'load';
+        await showRewardedAd(result);
+        stage = 'verification';
+        const expiresAt = await pollAttempt(result.attemptId);
+        if (expiresAt) {
+          const access: AlbumAccessResponse = {
+            access: 'rewarded',
+            expiresAt,
+            rewardedAdAvailable: false,
+            rewardedAccessMinutes: accessQuery.data?.rewardedAccessMinutes ?? 30,
+          };
+          queryClient.setQueryData(['album-access', nativePlatform], access);
+        } else {
+          Toast.info(t('album.adConfirmingDelayed'));
+          await refetchAccess();
+        }
+      }
+      void queryClient.invalidateQueries({ queryKey: ['album-moments'] });
+    } catch (error) {
+      const diagnostics = rewardedAdErrorDiagnostics(error);
+      Sentry.captureException(error, {
+        tags: { area: 'ads', flow: 'album-access', stage, platform: Platform.OS },
+        extra: diagnostics,
+      });
+      const closed = error instanceof Error && error.message === 'rewarded-ad-closed';
+      Toast.warn(t(closed ? 'album.adClosed' : 'album.adUnavailable'));
+    } finally {
+      if (mounted.current) setRewardPhase('idle');
+    }
+  }
+
+  const rewardLabel =
+    rewardPhase === 'preparing'
+      ? t('album.adPreparing')
+      : rewardPhase === 'loading'
+        ? t('album.adLoading')
+        : rewardPhase === 'confirming'
+          ? t('album.adConfirming')
+          : t('album.watchAd');
 
   const sections = useMemo<AlbumSection[]>(() => {
     const grouped = new Map<string, AlbumMoment[]>();
@@ -124,22 +236,95 @@ export default function AlbumScreen() {
     return [...grouped.entries()].map(([title, data]) => ({ title, data }));
   }, [i18n.language, momentsQuery.data?.pages]);
 
-  if (entitlementQuery.isSuccess && !premium) {
+  if (accessQuery.isError) {
     return (
-      <View style={[styles.root, styles.centered, { paddingTop: insets.top }]}>
+      <ScrollView
+        style={styles.root}
+        contentContainerStyle={[
+          styles.centered,
+          { paddingTop: insets.top + 24, paddingBottom: insets.bottom + 24 },
+        ]}
+        showsVerticalScrollIndicator={false}
+      >
+        <Ionicons name="cloud-offline-outline" size={52} color={colors.textMuted} />
+        <Typography variant="heading" style={styles.lockedTitle}>
+          {t('album.accessErrorTitle')}
+        </Typography>
+        <Typography variant="body" color={colors.textSecondary} style={styles.lockedCopy}>
+          {t('album.accessErrorCopy')}
+        </Typography>
+        <Pressable
+          accessibilityRole="button"
+          accessibilityLabel={t('album.retry')}
+          onPress={() => void refetchAccess()}
+          style={({ pressed }) => [
+            styles.secondaryButton,
+            styles.retryButton,
+            pressed && styles.buttonPressed,
+          ]}
+        >
+          <Typography variant="label" color={colors.textPrimary}>
+            {t('album.retry')}
+          </Typography>
+        </Pressable>
+      </ScrollView>
+    );
+  }
+
+  if (accessQuery.isSuccess && accessQuery.data.access === 'locked') {
+    return (
+      <ScrollView
+        style={styles.root}
+        contentContainerStyle={[
+          styles.centered,
+          { paddingTop: insets.top + 24, paddingBottom: insets.bottom + 24 },
+        ]}
+        showsVerticalScrollIndicator={false}
+      >
         <Ionicons name="images-outline" size={56} color={colors.pasion} />
         <Typography variant="heading" style={styles.lockedTitle}>
           {t('album.lockedTitle')}
         </Typography>
         <Typography variant="body" color={colors.textSecondary} style={styles.lockedCopy}>
-          {t('album.lockedCopy')}
+          {t('album.lockedCopy', { minutes: accessQuery.data.rewardedAccessMinutes })}
         </Typography>
-        <Pressable onPress={() => router.push('/paywall')} style={styles.primaryButton}>
-          <Typography variant="label" color="#FFFFFF">
-            {t('album.unlock')}
+        <View style={styles.lockedActions}>
+          <Pressable
+            accessibilityRole="button"
+            accessibilityLabel={t('album.subscribe')}
+            onPress={() => router.push('/paywall')}
+            style={({ pressed }) => [styles.primaryButton, pressed && styles.buttonPressed]}
+            testID="album-subscribe"
+          >
+            <Typography variant="label" color="#FFFFFF">
+              {t('album.subscribe')}
+            </Typography>
+          </Pressable>
+          {accessQuery.data.rewardedAdAvailable ? (
+            <Pressable
+              accessibilityRole="button"
+              accessibilityLabel={`${t('album.watchAd')}. ${t('album.adAccessDuration', { minutes: accessQuery.data.rewardedAccessMinutes })}`}
+              disabled={rewardPhase !== 'idle'}
+              onPress={watchAd}
+              style={({ pressed }) => [
+                styles.secondaryButton,
+                pressed && styles.buttonPressed,
+                rewardPhase !== 'idle' && styles.buttonDisabled,
+              ]}
+              testID="album-watch-ad"
+            >
+              <Typography variant="label" color={colors.textPrimary}>
+                {rewardLabel}
+              </Typography>
+            </Pressable>
+          ) : null}
+        </View>
+        {accessQuery.data.rewardedAdAvailable ? (
+          <Typography variant="caption" color={colors.textMuted} style={styles.adDuration}>
+            {t('album.adAccessDuration', { minutes: accessQuery.data.rewardedAccessMinutes })}
           </Typography>
-        </Pressable>
-      </View>
+        ) : null}
+      </ScrollView>
     );
   }
 
@@ -151,7 +336,7 @@ export default function AlbumScreen() {
           {t('album.subtitle')}
         </Typography>
       </View>
-      {entitlementQuery.isLoading || momentsQuery.isLoading ? (
+      {accessQuery.isLoading || momentsQuery.isLoading ? (
         <AlbumSkeleton styles={styles} />
       ) : (
         <SectionList
@@ -228,7 +413,13 @@ export default function AlbumScreen() {
 function createStyles(colors: ThemeColors) {
   return StyleSheet.create({
     root: { flex: 1, backgroundColor: colors.background },
-    centered: { alignItems: 'center', justifyContent: 'center', paddingHorizontal: 36, gap: 16 },
+    centered: {
+      flexGrow: 1,
+      alignItems: 'center',
+      justifyContent: 'center',
+      paddingHorizontal: 36,
+      gap: 16,
+    },
     header: { paddingHorizontal: 24, paddingBottom: 20, gap: 8 },
     content: { paddingHorizontal: 24, paddingBottom: 32 },
     skeletonContent: { paddingHorizontal: 24, paddingBottom: 32 },
@@ -297,11 +488,28 @@ function createStyles(colors: ThemeColors) {
     loadingMore: { paddingVertical: 20, textAlign: 'center' },
     lockedTitle: { textAlign: 'center' },
     lockedCopy: { textAlign: 'center' },
+    lockedActions: { width: '100%', maxWidth: 320, gap: 12, marginTop: 4 },
     primaryButton: {
       backgroundColor: colors.pasion,
       borderRadius: 999,
-      paddingHorizontal: 22,
       paddingVertical: 14,
+      alignItems: 'center',
+      shadowColor: colors.glowPasion,
+      shadowOffset: { width: 0, height: 8 },
+      shadowOpacity: 0.4,
+      shadowRadius: 18,
+      elevation: 8,
     },
+    secondaryButton: {
+      borderRadius: 999,
+      borderWidth: 1,
+      borderColor: colors.textMuted,
+      paddingVertical: 14,
+      alignItems: 'center',
+    },
+    retryButton: { width: '100%', maxWidth: 320, marginTop: 4 },
+    buttonPressed: { opacity: 0.8, transform: [{ scale: 0.985 }] },
+    buttonDisabled: { opacity: 0.45 },
+    adDuration: { textAlign: 'center', marginTop: -4 },
   });
 }

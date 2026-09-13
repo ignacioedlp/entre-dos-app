@@ -1,4 +1,4 @@
-import { StyleSheet } from 'react-native';
+import { StyleProp, StyleSheet, ViewStyle } from 'react-native';
 import Animated from 'react-native-reanimated';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Ionicons } from '@expo/vector-icons';
@@ -28,7 +28,7 @@ interface GameCardProps {
   card: GameCardData;
   width?: number;
   rotation?: number; // degrees for scattered layout
-  style?: object;
+  style?: StyleProp<ViewStyle>;
   variant?: 'full' | 'thumbnail';
 }
 
@@ -68,131 +68,144 @@ export function GameCard({
   const eventTextColor = card.event ? contrastingTextColor(card.event.color) : fg;
   const h = width * (4 / 3);
   const watermarkSize = Math.round(width * 0.4);
+  const hasRarityGlow = card.rarity === 'rara' || card.rarity === 'legendaria';
+  const isLegendary = card.rarity === 'legendaria';
+  const borderRadius = variant === 'thumbnail' ? 12 : 24;
 
   return (
     <Animated.View
       style={[
-        styles.card,
+        styles.cardFrame,
         {
           width,
           height: h,
-          backgroundColor: bg,
-          borderRadius: variant === 'thumbnail' ? 12 : 24,
+          borderRadius,
           transform: [{ rotate: `${rotation}deg` }],
+        },
+        hasRarityGlow && {
+          shadowColor: bg,
+          shadowOpacity: isLegendary ? 0.68 : 0.5,
+          shadowRadius: variant === 'thumbnail' ? (isLegendary ? 14 : 11) : isLegendary ? 26 : 20,
+          shadowOffset: { width: 0, height: variant === 'thumbnail' ? 4 : 8 },
+          elevation: isLegendary ? 12 : 8,
         },
         style,
       ]}
     >
-      {/* Diagonal glare overlay — top-left highlight */}
-      <LinearGradient
-        colors={['rgba(255,255,255,0.20)', 'transparent']}
-        start={{ x: 0, y: 0 }}
-        end={{ x: 1, y: 1 }}
-        style={StyleSheet.absoluteFillObject}
-        pointerEvents="none"
-      />
+      <Animated.View style={[styles.card, { backgroundColor: bg, borderRadius }]}> 
+        {/* Diagonal glare overlay — top-left highlight */}
+        <LinearGradient
+          colors={['rgba(255,255,255,0.20)', 'transparent']}
+          start={{ x: 0, y: 0 }}
+          end={{ x: 1, y: 1 }}
+          style={StyleSheet.absoluteFillObject}
+          pointerEvents="none"
+        />
 
-      {card.category && (
-        <Animated.View style={styles.watermark} pointerEvents="none">
-          <CategoryWatermark category={card.category} color={fg} size={watermarkSize} />
-        </Animated.View>
-      )}
+        {card.category && (
+          <Animated.View style={styles.watermark} pointerEvents="none">
+            <CategoryWatermark category={card.category} color={fg} size={watermarkSize} />
+          </Animated.View>
+        )}
 
-      {card.specialWatermark && (
-        <Animated.View style={styles.watermark} pointerEvents="none">
-          <Ionicons name={card.specialWatermark} color={fg} size={watermarkSize} />
-        </Animated.View>
-      )}
+        {card.specialWatermark && (
+          <Animated.View style={styles.watermark} pointerEvents="none">
+            <Ionicons name={card.specialWatermark} color={fg} size={watermarkSize} />
+          </Animated.View>
+        )}
 
-      {variant === 'full' && (
-        <Animated.View style={styles.inner}>
-          {/* Rarity label */}
-          <Animated.View style={{ gap: 10 }}>
-            {/* Event badge — top-left corner */}
-            <Animated.View
-              style={{
-                flexDirection: 'row',
-                alignItems: 'center',
-                justifyContent: 'space-between',
-                gap: 8,
-                width: '100%',
-              }}
-            >
-              <Typography variant="cardLabel" color={fg}>
-                {card.label}
-              </Typography>
+        {variant === 'full' && (
+          <Animated.View style={styles.inner}>
+            {/* Rarity label */}
+            <Animated.View style={{ gap: 10 }}>
+              {/* Event badge — top-left corner */}
+              <Animated.View
+                style={{
+                  flexDirection: 'row',
+                  alignItems: 'center',
+                  justifyContent: 'space-between',
+                  gap: 8,
+                  width: '100%',
+                }}
+              >
+                <Typography variant="cardLabel" color={fg}>
+                  {card.label}
+                </Typography>
 
-              {(card.event || card.extraLabel) && (
-                <Animated.View
-                  style={[
-                    styles.badge,
-                    {
-                      backgroundColor: card.event ? card.event.color : 'transparent',
-                      borderColor: card.event ? card.event.color : fg + '55',
-                    },
-                  ]}
-                >
-                  <Typography
-                    variant="cardLabel"
-                    color={eventTextColor}
-                    baseFontSize={9}
-                    style={{ opacity: 1, letterSpacing: 1.5 }}
+                {(card.event || card.extraLabel) && (
+                  <Animated.View
+                    style={[
+                      styles.badge,
+                      {
+                        backgroundColor: card.event ? card.event.color : 'transparent',
+                        borderColor: card.event ? card.event.color : fg + '55',
+                      },
+                    ]}
                   >
-                    {card.extraLabel ?? card.event?.name}
-                  </Typography>
-                </Animated.View>
-              )}
+                    <Typography
+                      variant="cardLabel"
+                      color={eventTextColor}
+                      baseFontSize={9}
+                      style={{ opacity: 1, letterSpacing: 1.5 }}
+                    >
+                      {card.extraLabel ?? card.event?.name}
+                    </Typography>
+                  </Animated.View>
+                )}
+              </Animated.View>
+              <Typography
+                variant="cardTitle"
+                color={fg}
+                baseFontSize={24}
+                baseLineHeight={28}
+                numberOfLines={4}
+              >
+                {card.title}
+              </Typography>
             </Animated.View>
+            <Typography
+              variant="body"
+              color={fg}
+              baseFontSize={14}
+              baseLineHeight={18}
+              numberOfLines={4}
+            >
+              {card.description}
+            </Typography>
+          </Animated.View>
+        )}
+
+        {variant === 'thumbnail' && (
+          <Animated.View style={styles.thumbnailInner}>
             <Typography
               variant="cardTitle"
               color={fg}
-              baseFontSize={24}
-              baseLineHeight={28}
-              numberOfLines={4}
+              baseFontSize={18}
+              baseLineHeight={21}
+              numberOfLines={2}
             >
               {card.title}
             </Typography>
+            <Typography
+              variant="body"
+              color={fg}
+              baseFontSize={12}
+              baseLineHeight={15}
+              numberOfLines={3}
+            >
+              {card.description}
+            </Typography>
           </Animated.View>
-          <Typography
-            variant="body"
-            color={fg}
-            baseFontSize={14}
-            baseLineHeight={18}
-            numberOfLines={4}
-          >
-            {card.description}
-          </Typography>
-        </Animated.View>
-      )}
-
-      {variant === 'thumbnail' && (
-        <Animated.View style={styles.thumbnailInner}>
-          <Typography
-            variant="cardTitle"
-            color={fg}
-            baseFontSize={18}
-            baseLineHeight={21}
-            numberOfLines={2}
-          >
-            {card.title}
-          </Typography>
-          <Typography
-            variant="body"
-            color={fg}
-            baseFontSize={12}
-            baseLineHeight={15}
-            numberOfLines={3}
-          >
-            {card.description}
-          </Typography>
-        </Animated.View>
-      )}
+        )}
+      </Animated.View>
     </Animated.View>
   );
 }
 
 const styles = StyleSheet.create({
+  cardFrame: {},
   card: {
+    flex: 1,
     borderRadius: 24,
     overflow: 'hidden',
     padding: 18,
