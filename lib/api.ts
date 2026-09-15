@@ -215,9 +215,7 @@ export interface WeeklyPackOpenResponse {
 }
 
 export async function apiOpenWeeklyPack(weekStart: string): Promise<WeeklyPackOpenResponse> {
-  // Django canonicalizes this endpoint with a trailing slash. Avoid a redirect:
-  // native HTTP stacks do not handle redirected PUT requests consistently.
-  const res = await api.put<WeeklyPackOpenResponse>('/deck/weekly-pack/open/', { weekStart });
+  const res = await api.put<WeeklyPackOpenResponse>('/deck/weekly-pack/open', { weekStart });
   return res.data;
 }
 

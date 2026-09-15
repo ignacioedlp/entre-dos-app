@@ -2,7 +2,7 @@ import { useEffect, useMemo, useRef, useState } from 'react';
 import { AccessibilityInfo, Image, Modal, Pressable, StyleSheet, View } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useTranslation } from 'react-i18next';
-import { Gesture, GestureDetector } from 'react-native-gesture-handler';
+import { Gesture, GestureDetector, GestureHandlerRootView } from 'react-native-gesture-handler';
 import Svg, { Defs, Ellipse, RadialGradient, Stop } from 'react-native-svg';
 import Animated, {
   FadeIn,
@@ -170,14 +170,6 @@ export function WeeklyPackOpening({
     ],
     opacity: interpolate(openProgress.value, [0, 0.85, 1], [1, 0.8, 0]),
   }));
-  const cardStackStyle = useAnimatedStyle(() => ({
-    transform: [
-      { translateY: interpolate(openProgress.value, [0, 1], [50, -20]) },
-      { scale: interpolate(openProgress.value, [0, 1], [0.88, 1]) },
-    ],
-    opacity: interpolate(openProgress.value, [0, 0.25, 1], [0, 0.35, 1]),
-  }));
-
   return (
     <Modal
       visible={visible}
@@ -186,107 +178,104 @@ export function WeeklyPackOpening({
       statusBarTranslucent
       onRequestClose={phase === 'sealed' ? onSkip : undefined}
     >
-      <View style={styles.root} accessibilityViewIsModal>
-        <View style={styles.sealedContent}>
-          <View style={styles.copy}>
-            <Typography variant="cardLabel" color={colors.pasion} style={styles.eyebrow}>
-              {t('weeklyPack.eyebrow')}
-            </Typography>
-            <Typography
-              variant="heading"
-              baseFontSize={34}
-              baseLineHeight={37}
-              color="#FFFFFF"
-              style={styles.title}
-            >
-              {t('weeklyPack.title')}
-            </Typography>
-            <Typography variant="body" color="rgba(255,255,255,.62)" style={styles.description}>
-              {t('weeklyPack.description')}
-            </Typography>
-          </View>
+      <GestureHandlerRootView style={styles.gestureRoot}>
+        <View style={styles.root} accessibilityViewIsModal>
+          <View style={styles.sealedContent}>
+            <View style={styles.copy}>
+              <Typography variant="cardLabel" color={colors.pasion} style={styles.eyebrow}>
+                {t('weeklyPack.eyebrow')}
+              </Typography>
+              <Typography
+                variant="heading"
+                baseFontSize={34}
+                baseLineHeight={37}
+                color="#FFFFFF"
+                style={styles.title}
+              >
+                {t('weeklyPack.title')}
+              </Typography>
+              <Typography variant="body" color="rgba(255,255,255,.62)" style={styles.description}>
+                {t('weeklyPack.description')}
+              </Typography>
+            </View>
 
-          <GestureDetector gesture={tearGesture}>
-            <Animated.View
-              collapsable={false}
-              accessible
-              accessibilityRole="button"
-              accessibilityLabel={t('weeklyPack.gestureHint')}
-              accessibilityHint={t('weeklyPack.description')}
-              onAccessibilityTap={beginOpening}
-              style={styles.packetStage}
-            >
-              <View pointerEvents="none" style={styles.packetGlow}>
-                <Svg width="100%" height="100%" viewBox="0 0 374 454">
-                  <Defs>
-                    <RadialGradient id="packetBacklight" cx="50%" cy="48%" r="50%">
-                      <Stop offset="0%" stopColor={colors.pasion} stopOpacity={0.42} />
-                      <Stop offset="38%" stopColor={colors.pasion} stopOpacity={0.24} />
-                      <Stop offset="72%" stopColor={colors.pasion} stopOpacity={0.09} />
-                      <Stop offset="100%" stopColor={colors.pasion} stopOpacity={0} />
-                    </RadialGradient>
-                  </Defs>
-                  <Ellipse cx="187" cy="227" rx="184" ry="224" fill="url(#packetBacklight)" />
-                </Svg>
-              </View>
+            <GestureDetector gesture={tearGesture}>
+              <Animated.View
+                collapsable={false}
+                accessible
+                accessibilityRole="button"
+                accessibilityLabel={t('weeklyPack.gestureHint')}
+                accessibilityHint={t('weeklyPack.description')}
+                onAccessibilityTap={beginOpening}
+                style={styles.packetStage}
+              >
+                <View pointerEvents="none" style={styles.packetGlow}>
+                  <Svg width="100%" height="100%" viewBox="0 0 374 454">
+                    <Defs>
+                      <RadialGradient id="packetBacklight" cx="50%" cy="48%" r="50%">
+                        <Stop offset="0%" stopColor={colors.pasion} stopOpacity={0.42} />
+                        <Stop offset="38%" stopColor={colors.pasion} stopOpacity={0.24} />
+                        <Stop offset="72%" stopColor={colors.pasion} stopOpacity={0.09} />
+                        <Stop offset="100%" stopColor={colors.pasion} stopOpacity={0} />
+                      </RadialGradient>
+                    </Defs>
+                    <Ellipse cx="187" cy="227" rx="184" ry="224" fill="url(#packetBacklight)" />
+                  </Svg>
+                </View>
 
-              <Animated.View style={[styles.cardStack, cardStackStyle]} pointerEvents="none">
-                <View style={[styles.previewCard, styles.previewCardLeft]} />
-                <View style={[styles.previewCard, styles.previewCardRight]} />
-                <View style={[styles.previewCard, styles.previewCardCenter]} />
-              </Animated.View>
-
-              <Animated.View style={[styles.packet, packetBodyStyle]}>
-                <Image
-                  source={require('../../assets/images/weekly-pack-minimal.png')}
-                  resizeMode="contain"
-                  style={styles.packetImage}
-                  accessibilityIgnoresInvertColors
-                />
-
-                <Animated.View style={[styles.tearStrip, tearStripStyle]} pointerEvents="none">
-                  <View style={styles.tearLine} />
-                  <Animated.View style={[styles.cutProgress, cutStyle]} />
-                  <Animated.View style={[styles.seal, sealStyle]}>
-                    <Ionicons name="heart-outline" size={20} color="#FFFFFF" />
-                  </Animated.View>
-                  <Ionicons
-                    name="arrow-forward"
-                    size={18}
-                    color="#FFFFFF"
-                    style={styles.tearArrow}
+                <Animated.View style={[styles.packet, packetBodyStyle]}>
+                  <Image
+                    source={require('../../assets/images/weekly-pack-minimal.png')}
+                    resizeMode="contain"
+                    style={styles.packetImage}
+                    accessibilityIgnoresInvertColors
                   />
+
+                  <Animated.View style={[styles.tearStrip, tearStripStyle]} pointerEvents="none">
+                    <View style={styles.tearLine} />
+                    <Animated.View style={[styles.cutProgress, cutStyle]} />
+                    <Animated.View style={[styles.seal, sealStyle]}>
+                      <Ionicons name="heart-outline" size={20} color="#FFFFFF" />
+                    </Animated.View>
+                    <Ionicons
+                      name="arrow-forward"
+                      size={18}
+                      color="#FFFFFF"
+                      style={styles.tearArrow}
+                    />
+                  </Animated.View>
                 </Animated.View>
               </Animated.View>
-            </Animated.View>
-          </GestureDetector>
+            </GestureDetector>
 
-          <View style={styles.actions}>
-            <Button
-              label={phase === 'claiming' ? t('weeklyPack.opening') : t('weeklyPack.open')}
-              onPress={beginOpening}
-              disabled={phase !== 'sealed'}
-            />
-            <Pressable
-              accessibilityRole="button"
-              accessibilityLabel={t('weeklyPack.skip')}
-              disabled={phase !== 'sealed'}
-              onPress={onSkip}
-              style={styles.skipButton}
-            >
-              <Typography variant="button" color="rgba(255,255,255,.42)">
-                {t('weeklyPack.skip')}
-              </Typography>
-            </Pressable>
+            <View style={styles.actions}>
+              <Button
+                label={phase === 'claiming' ? t('weeklyPack.opening') : t('weeklyPack.open')}
+                onPress={beginOpening}
+                disabled={phase !== 'sealed'}
+              />
+              <Pressable
+                accessibilityRole="button"
+                accessibilityLabel={t('weeklyPack.skip')}
+                disabled={phase !== 'sealed'}
+                onPress={onSkip}
+                style={styles.skipButton}
+              >
+                <Typography variant="button" color="rgba(255,255,255,.42)">
+                  {t('weeklyPack.skip')}
+                </Typography>
+              </Pressable>
+            </View>
           </View>
         </View>
-      </View>
+      </GestureHandlerRootView>
     </Modal>
   );
 }
 
 function createStyles(colors: ThemeColors) {
   return StyleSheet.create({
+    gestureRoot: { flex: 1 },
     root: {
       flex: 1,
       backgroundColor: '#0A0C10',
@@ -330,31 +319,6 @@ function createStyles(colors: ThemeColors) {
       shadowRadius: 24,
     },
     packetImage: { width: '100%', height: '100%' },
-    cardStack: {
-      position: 'absolute',
-      left: 40,
-      right: 40,
-      top: 34,
-      height: 220,
-    },
-    previewCard: {
-      position: 'absolute',
-      left: 28,
-      width: 134,
-      height: 190,
-      borderRadius: 14,
-      borderWidth: 1,
-      borderColor: 'rgba(255,255,255,.18)',
-    },
-    previewCardLeft: {
-      backgroundColor: colors.rara,
-      transform: [{ translateX: -12 }, { rotate: '-10deg' }],
-    },
-    previewCardRight: {
-      backgroundColor: colors.epica,
-      transform: [{ translateX: 40 }, { rotate: '10deg' }],
-    },
-    previewCardCenter: { backgroundColor: colors.comun, transform: [{ translateX: 14 }] },
     tearStrip: {
       position: 'absolute',
       left: 20,
