@@ -1,4 +1,3 @@
-import * as Sentry from '@sentry/react-native';
 import { createContext, useCallback, useContext, useState, ReactNode, useEffect } from 'react';
 import * as Localization from 'expo-localization';
 import { GoogleSignin } from '@react-native-google-signin/google-signin';
@@ -15,6 +14,7 @@ import {
 } from '../lib/api';
 import { clearAll, getProfile, getToken, ProfileData, setProfile, setToken } from '../lib/storage';
 import i18n from '@/i18n';
+import { identifyUser, resetAnalytics, trackError, trackEvent } from '@/lib/analytics';
 
 export class DeletionPendingError extends Error {
   deletionScheduledFor: string;
@@ -60,6 +60,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }));
 
   const resetSession = useCallback(() => {
+    trackEvent('auth_signed_out');
+    resetAnalytics();
     clearAll();
     queryClient.clear();
     setState({ user: null, token: null });
@@ -91,6 +93,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
     setProfile(profile);
     setState({ user: profile, token: accessToken });
+    identifyUser(profile);
   }
 
   async function login(email: string, password: string): Promise<ProfileData> {
@@ -98,6 +101,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       const { accessToken, profile } = await apiLogin(email, password);
       persistSession(accessToken, profile);
       i18n.changeLanguage(profile.locale);
+      trackEvent('auth_signed_in', { method: 'password' });
       return profile;
     } catch (err: any) {
       const code = err?.response?.data?.code;
@@ -113,6 +117,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     const locale = deviceLang === 'en' ? 'en' : 'es';
     const { accessToken, profile } = await apiRegister(email, password, passwordConfirm, locale);
     persistSession(accessToken, profile);
+    trackEvent('auth_registered', { method: 'password', locale });
   }
 
   async function googleLogin(): Promise<ProfileData> {
@@ -132,9 +137,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       const { accessToken, profile } = await apiGoogleAuth(idToken, locale);
       persistSession(accessToken, profile);
       i18n.changeLanguage(profile.locale);
+      trackEvent('auth_signed_in', { method: 'google' });
       return profile;
     } catch (err: any) {
-      Sentry.captureException(err, { tags: { flow: 'google_login' } });
+      trackError(err, { area: 'auth', flow: 'google_login' });
       const code = err?.response?.data?.code;
       if (code === 'ACCOUNT_DELETION_PENDING') {
         throw new DeletionPendingError(
@@ -173,11 +179,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       );
       persistSession(accessToken, profile);
       i18n.changeLanguage(profile.locale);
+      trackEvent('auth_signed_in', { method: 'apple' });
       return profile;
     } catch (err: any) {
       // Cancelling the native sheet is an expected user action, not an error to report.
       if (err?.code !== 'ERR_REQUEST_CANCELED') {
-        Sentry.captureException(err, { tags: { flow: 'apple_login' } });
+        trackError(err, { area: 'auth', flow: 'apple_login' });
       }
       const code = err?.response?.data?.code;
       if (code === 'ACCOUNT_DELETION_PENDING') {
@@ -195,6 +202,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     const { accessToken, profile } = await apiResetPassword(token, password);
     persistSession(accessToken, profile);
     i18n.changeLanguage(profile.locale);
+    trackEvent('password_reset_completed');
     return profile;
   }
 
@@ -205,6 +213,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   function updateProfile(profile: ProfileData): void {
     setProfile(profile);
     setState((prev) => ({ ...prev, user: profile }));
+    identifyUser(profile);
   }
 
   return (

@@ -42,6 +42,8 @@
       "expo-router",
       "expo-font",
       "expo-apple-authentication",
+      "expo-audio",
+      "expo-localization",
       [
         "expo-image-picker",
         {
@@ -73,14 +75,6 @@
               }
             ]
           }
-        }
-      ],
-      [
-        "@sentry/react-native/expo",
-        {
-          "organization": "tofidev",
-          "project": "react-native",
-          "url": "https://sentry.io/"
         }
       ]
     ],

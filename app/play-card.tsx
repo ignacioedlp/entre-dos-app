@@ -13,6 +13,7 @@ import { apiGetDeck, apiPlayCard, apiSwapCard, DeckCard, DeckResponse } from '..
 import { SwipeToConfirm } from '../components/ui/SwipeToConfirm';
 import { Typography } from '../components/ui/Typography';
 import { triggerFeedback } from '../lib/feedback';
+import { trackError, trackEvent } from '@/lib/analytics';
 
 const RARITY_MAP: Record<string, RarityKey> = {
   common: 'comun',
@@ -51,10 +52,12 @@ export default function CardDetailSheet() {
         };
       });
       queryClient.invalidateQueries({ queryKey: ['deck-history'] });
+      trackEvent('card_played', { card_id: cardId });
       triggerFeedback('success');
       Toast.success(t('playCard.success'));
       router.replace({ pathname: '/play-thread', params: { playId: play.id } });
-    } catch {
+    } catch (error) {
+      trackError(error, { area: 'deck', flow: 'play_card' });
       playing.current = false;
       setIsPlaying(false);
       setConfirmAttempt((attempt) => attempt + 1);
@@ -106,9 +109,11 @@ export default function CardDetailSheet() {
         // Keep the optimistic cache update when a refresh is temporarily unavailable.
       }
       triggerFeedback('success');
+      trackEvent('card_swapped', { card_id: cardId, changes_remaining: result.changesRemaining });
       Toast.success(t('cardSwap.success'));
       router.back();
-    } catch {
+    } catch (error) {
+      trackError(error, { area: 'deck', flow: 'swap_card' });
       triggerFeedback('error');
       Toast.error(t('cardSwap.error'));
       setIsSwapping(false);

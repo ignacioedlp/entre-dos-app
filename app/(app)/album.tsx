@@ -1,5 +1,4 @@
 import { Ionicons } from '@expo/vector-icons';
-import * as Sentry from '@sentry/react-native';
 import { useInfiniteQuery, useQuery, useQueryClient } from '@tanstack/react-query';
 import {
   Image,
@@ -30,6 +29,7 @@ import {
   apiGetAlbumMoments,
 } from '@/lib/api';
 import { rewardedAdErrorDiagnostics, showRewardedAd } from '@/lib/rewarded-ads';
+import { trackError, trackEvent } from '@/lib/analytics';
 
 type AlbumSection = { title: string; data: AlbumMoment[] };
 type RewardPhase = 'idle' | 'preparing' | 'loading' | 'confirming';
@@ -177,6 +177,7 @@ export default function AlbumScreen() {
   async function watchAd() {
     if (rewardPhase !== 'idle') return;
     setRewardPhase('preparing');
+    trackEvent('album_access_claim_started');
     let stage: 'claim' | 'initialization' | 'load' | 'verification' = 'claim';
     try {
       const result = await apiClaimAlbumAccess(nativePlatform);
@@ -207,9 +208,12 @@ export default function AlbumScreen() {
       void queryClient.invalidateQueries({ queryKey: ['album-moments'] });
     } catch (error) {
       const diagnostics = rewardedAdErrorDiagnostics(error);
-      Sentry.captureException(error, {
-        tags: { area: 'ads', flow: 'album-access', stage, platform: Platform.OS },
-        extra: diagnostics,
+      trackError(error, {
+        area: 'ads',
+        flow: 'album-access',
+        stage,
+        platform: Platform.OS,
+        ...diagnostics,
       });
       const closed = error instanceof Error && error.message === 'rewarded-ad-closed';
       Toast.warn(t(closed ? 'album.adClosed' : 'album.adUnavailable'));

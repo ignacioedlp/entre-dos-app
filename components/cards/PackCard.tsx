@@ -1,11 +1,11 @@
 import { View, StyleSheet, TouchableOpacity, Dimensions } from 'react-native';
 import { useTranslation } from 'react-i18next';
 import { Toast } from 'toastify-react-native';
-import * as Sentry from '@sentry/react-native';
 
 import { Pack } from '../../lib/api';
 import { useRevenueCat } from '../../context/RevenueCatContext';
 import { Typography } from '../ui/Typography';
+import { trackError, trackEvent } from '@/lib/analytics';
 
 const { width: SCREEN_WIDTH } = Dimensions.get('window');
 const CARD_GAP = 12;
@@ -83,19 +83,11 @@ export function PackCard({ pack, half, isPremium, onPress }: PackCardProps) {
   }
 
   async function handleSubscribe() {
+    trackEvent('subscription_cta_tapped', { pack_id: pack.id, is_premium_pack: !pack.isBase });
     try {
       await presentPaywallIfNeeded();
     } catch (e) {
-      Sentry.captureException(e, {
-        tags: {
-          area: 'subscriptions',
-          flow: 'packSubscribeTap',
-        },
-        extra: {
-          packId: pack.id,
-          packName: pack.name,
-        },
-      });
+      trackError(e, { area: 'subscriptions', flow: 'packSubscribeTap', pack_id: pack.id });
       Toast.error(t('paywall.error'));
     }
   }

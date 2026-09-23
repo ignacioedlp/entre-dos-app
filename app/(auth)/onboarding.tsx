@@ -27,6 +27,7 @@ import i18n from '@/i18n';
 import { SUPPORTED_COUNTRIES, LANGUAGES } from '@/lib/countries';
 import { Typography } from '../../components/ui/Typography';
 import { useScaledFontSize } from '../../context/FontScaleContext';
+import { trackError, trackEvent } from '@/lib/analytics';
 
 const STEPS = [
   { icon: 'calendar-outline' as const, key: 'Step1' },
@@ -70,8 +71,10 @@ export default function OnboardingScreen() {
       const updated = await apiCompleteOnboarding(displayName.trim(), locale, country);
       updateProfile(updated);
       i18n.changeLanguage(locale);
+      trackEvent('onboarding_completed', { locale, country_selected: Boolean(country) });
       router.replace('/(app)/');
-    } catch {
+    } catch (error) {
+      trackError(error, { area: 'onboarding', flow: 'complete' });
       setError('Something went wrong. Please try again.');
     } finally {
       setSubmitting(false);

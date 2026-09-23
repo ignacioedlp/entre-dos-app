@@ -8,7 +8,6 @@ import {
   StyleSheet,
   View,
 } from 'react-native';
-import * as Sentry from '@sentry/react-native';
 import { useQueryClient } from '@tanstack/react-query';
 import { useTranslation } from 'react-i18next';
 import { Toast } from 'toastify-react-native';
@@ -29,6 +28,7 @@ import { Button } from '@/components/ui/Button';
 import { Typography } from '@/components/ui/Typography';
 import { GameCard } from '@/components/cards/GameCard';
 import { WeeklyCardReveal } from './WeeklyPackOpening';
+import { trackError, trackEvent } from '@/lib/analytics';
 
 type Phase = 'idle' | 'preparing' | 'loading' | 'confirming';
 
@@ -73,6 +73,7 @@ export function ExtraCardReward({ extraCard, carousel }: ExtraCardRewardProps) {
   }, []);
 
   function applyGrantedCard(card: DeckCard) {
+    trackEvent('extra_card_claimed', { source: extraCard.requiresAd ? 'rewarded_ad' : 'premium' });
     queryClient.setQueryData<DeckResponse>(['deck'], (current) =>
       current
         ? {
@@ -112,6 +113,7 @@ export function ExtraCardReward({ extraCard, carousel }: ExtraCardRewardProps) {
   async function claim() {
     if (phase !== 'idle') return;
     setPhase('preparing');
+    trackEvent('extra_card_claim_started', { requires_ad: extraCard.requiresAd });
     let stage: 'claim' | 'initialization' | 'load' | 'verification' = 'claim';
     try {
       const result = await apiClaimExtraCard(Platform.OS === 'android' ? 'android' : 'ios');
@@ -136,9 +138,12 @@ export function ExtraCardReward({ extraCard, carousel }: ExtraCardRewardProps) {
       }
     } catch (error) {
       const diagnostics = rewardedAdErrorDiagnostics(error);
-      Sentry.captureException(error, {
-        tags: { area: 'ads', flow: 'extra-card', stage, platform: Platform.OS },
-        extra: diagnostics,
+      trackError(error, {
+        area: 'ads',
+        flow: 'extra-card',
+        stage,
+        platform: Platform.OS,
+        ...diagnostics,
       });
       if (__DEV__) {
         // Keep the native Google Mobile Ads error code visible during local QA.

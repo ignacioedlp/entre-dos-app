@@ -1,8 +1,7 @@
-import * as Sentry from '@sentry/react-native';
 import { vexo } from 'vexo-analytics';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { AppState, Modal, StyleSheet, View } from 'react-native';
-import { Stack, useRouter } from 'expo-router';
+import { Stack, usePathname, useRouter } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
 import * as SplashScreen from 'expo-splash-screen';
 import * as Updates from 'expo-updates';
@@ -28,6 +27,7 @@ import { useTranslation } from 'react-i18next';
 import { Typography } from '@/components/ui/Typography';
 import { Button } from '@/components/ui/Button';
 import { ThemeColors } from '@/constants/colors';
+import { trackError, trackEvent, trackScreen } from '@/lib/analytics';
 
 const toastConfig = {
   success: (props: any) => <SuccessToast {...props} />,
@@ -35,12 +35,6 @@ const toastConfig = {
   warn: (props: any) => <WarnToast {...props} />,
   info: (props: any) => <InfoToast {...props} />,
 };
-
-Sentry.init({
-  dsn: process.env.EXPO_PUBLIC_SENTRY_DSN,
-  tracesSampleRate: 1.0,
-  enabled: !__DEV__,
-});
 
 vexo(process.env.EXPO_PUBLIC_VEXO_API_KEY!);
 
@@ -87,7 +81,7 @@ function UpdatePrompt() {
         setUpdateReady(true);
       }
     } catch (error) {
-      Sentry.captureException(error, { tags: { flow: 'eas_update_check' } });
+      trackError(error, { area: 'updates', flow: 'eas_update_check' });
     } finally {
       checkingRef.current = false;
     }
@@ -109,7 +103,7 @@ function UpdatePrompt() {
       await Updates.reloadAsync();
     } catch (error) {
       setRestarting(false);
-      Sentry.captureException(error, { tags: { flow: 'eas_update_reload' } });
+      trackError(error, { area: 'updates', flow: 'eas_update_reload' });
     }
   };
 
@@ -150,6 +144,7 @@ function UpdatePrompt() {
 
 function RootLayout() {
   const router = useRouter();
+  const pathname = usePathname();
   const [fontsLoaded, fontError] = useFonts({
     Inter_400Regular,
     Inter_700Bold,
@@ -162,6 +157,10 @@ function RootLayout() {
     }
   }, [fontsLoaded, fontError]);
 
+  useEffect(() => {
+    if (pathname) trackScreen(pathname);
+  }, [pathname]);
+
   // Notification listeners (foreground receive + tap response)
   useEffect(() => {
     let active = true;
@@ -169,6 +168,7 @@ function RootLayout() {
       .then((response) => {
         const playId = response?.notification.request.content.data?.cardPlayId;
         if (active && playId) {
+          trackEvent('notification_opened', { destination: 'play_thread' });
           router.push({ pathname: '/play-thread', params: { playId: String(playId) } });
           Notifications.clearLastNotificationResponseAsync();
         }
@@ -185,6 +185,7 @@ function RootLayout() {
     const responseSub = Notifications.addNotificationResponseReceivedListener((response) => {
       const playId = response.notification.request.content.data?.cardPlayId;
       if (playId) {
+        trackEvent('notification_opened', { destination: 'play_thread' });
         router.push({ pathname: '/play-thread', params: { playId: String(playId) } });
       }
     });
@@ -282,4 +283,4 @@ function createUpdatePromptStyles(colors: ThemeColors) {
   });
 }
 
-export default Sentry.wrap(RootLayout);
+export default RootLayout;

@@ -1,6 +1,6 @@
 import { createContext, ReactNode, useCallback, useContext, useEffect, useState } from 'react';
-import * as Sentry from '@sentry/react-native';
 import mobileAds, { AdsConsent } from 'react-native-google-mobile-ads';
+import { trackError } from '@/lib/analytics';
 
 interface AdsContextValue {
   ready: boolean;
@@ -20,7 +20,7 @@ async function initializeAds(): Promise<boolean> {
         await mobileAds().initialize();
         return true;
       } catch (error) {
-        Sentry.captureException(error, { tags: { area: 'ads', flow: 'consent-init' } });
+        trackError(error, { area: 'ads', flow: 'consent-init' });
         try {
           const consent = await AdsConsent.getConsentInfo();
           if (!consent.canRequestAds) return false;

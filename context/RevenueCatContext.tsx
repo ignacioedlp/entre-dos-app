@@ -10,8 +10,8 @@ import {
 import { Platform } from 'react-native';
 import Purchases, { LOG_LEVEL, CustomerInfo } from 'react-native-purchases';
 import RevenueCatUI from 'react-native-purchases-ui';
-import * as Sentry from '@sentry/react-native';
 import { useAuth } from './AuthContext';
+import { trackError, trackEvent } from '@/lib/analytics';
 
 const ENTITLEMENT_ID = 'Passion';
 
@@ -100,14 +100,7 @@ export function RevenueCatProvider({ children }: { children: ReactNode }) {
       }) ?? process.env.EXPO_PUBLIC_RC_API_KEY;
 
     if (!apiKey) {
-      Sentry.captureMessage('Missing RevenueCat API key for current platform', {
-        level: 'error',
-        tags: {
-          area: 'subscriptions',
-          flow: 'ensureRevenueCatReady',
-          platform: Platform.OS,
-        },
-      });
+      trackEvent('subscription_configuration_missing', { platform: Platform.OS });
       throw new Error(`Missing ${keyName}`);
     }
 
@@ -148,10 +141,7 @@ export function RevenueCatProvider({ children }: { children: ReactNode }) {
         await ensureRevenueCatReady();
         await fetchEntitlementData();
       } catch (e) {
-        Sentry.captureException(e, {
-          tags: { area: 'subscriptions', flow: 'init' },
-          extra: { platform: Platform.OS },
-        });
+        trackError(e, { area: 'subscriptions', flow: 'init', platform: Platform.OS });
         console.warn('RevenueCat init failed:', e);
       } finally {
         setLoading(false);
@@ -177,16 +167,14 @@ export function RevenueCatProvider({ children }: { children: ReactNode }) {
 
   const presentPaywall = useCallback(async (): Promise<void> => {
     await ensureRevenueCatReady();
+    trackEvent('paywall_opened', { source: 'direct' });
 
     try {
       await RevenueCatUI.presentPaywall({
         displayCloseButton: true,
       });
     } catch (e) {
-      Sentry.captureException(e, {
-        tags: { area: 'subscriptions', flow: 'presentPaywall' },
-        extra: { platform: Platform.OS },
-      });
+      trackError(e, { area: 'subscriptions', flow: 'presentPaywall', platform: Platform.OS });
       throw e;
     }
   }, [ensureRevenueCatReady]);
@@ -194,6 +182,7 @@ export function RevenueCatProvider({ children }: { children: ReactNode }) {
   const presentPaywallIfNeeded = useCallback(async (): Promise<void> => {
     try {
       await ensureRevenueCatReady();
+      trackEvent('paywall_opened', { source: 'required_entitlement' });
 
       const result = await RevenueCatUI.presentPaywallIfNeeded({
         requiredEntitlementIdentifier: ENTITLEMENT_ID,
@@ -201,17 +190,7 @@ export function RevenueCatProvider({ children }: { children: ReactNode }) {
       });
 
       if (result === RevenueCatUI.PAYWALL_RESULT.NOT_PRESENTED) {
-        Sentry.captureMessage('RevenueCat paywall returned NOT_PRESENTED on subscribe tap', {
-          level: 'warning',
-          tags: {
-            area: 'subscriptions',
-            flow: 'presentPaywallIfNeeded',
-          },
-          extra: {
-            entitlementId: ENTITLEMENT_ID,
-            hasCustomerInfo: customerInfo != null,
-          },
-        });
+        trackEvent('paywall_not_presented', { has_customer_info: customerInfo != null });
 
         await RevenueCatUI.presentPaywall({
           displayCloseButton: true,
@@ -219,27 +198,10 @@ export function RevenueCatProvider({ children }: { children: ReactNode }) {
       }
 
       if (result === RevenueCatUI.PAYWALL_RESULT.ERROR) {
-        Sentry.captureMessage('RevenueCat paywall returned ERROR result', {
-          level: 'error',
-          tags: {
-            area: 'subscriptions',
-            flow: 'presentPaywallIfNeeded',
-          },
-          extra: {
-            entitlementId: ENTITLEMENT_ID,
-          },
-        });
+        trackEvent('paywall_result', { result: 'error' });
       }
     } catch (e) {
-      Sentry.captureException(e, {
-        tags: {
-          area: 'subscriptions',
-          flow: 'presentPaywallIfNeeded',
-        },
-        extra: {
-          entitlementId: ENTITLEMENT_ID,
-        },
-      });
+      trackError(e, { area: 'subscriptions', flow: 'presentPaywallIfNeeded' });
 
       console.warn('RevenueCat presentPaywallIfNeeded failed, falling back to presentPaywall:', e);
       try {
@@ -247,15 +209,7 @@ export function RevenueCatProvider({ children }: { children: ReactNode }) {
           displayCloseButton: true,
         });
       } catch (fallbackError) {
-        Sentry.captureException(fallbackError, {
-          tags: {
-            area: 'subscriptions',
-            flow: 'presentPaywallFallback',
-          },
-          extra: {
-            entitlementId: ENTITLEMENT_ID,
-          },
-        });
+        trackError(fallbackError, { area: 'subscriptions', flow: 'presentPaywallFallback' });
         throw fallbackError;
       }
     }
@@ -268,6 +222,7 @@ export function RevenueCatProvider({ children }: { children: ReactNode }) {
   const restorePurchases = useCallback(async (): Promise<CustomerInfo> => {
     const info = await Purchases.restorePurchases();
     updateFromCustomerInfo(info);
+    trackEvent('purchases_restored', { has_entitlement: checkEntitlement(info) });
     return info;
   }, []);
 
