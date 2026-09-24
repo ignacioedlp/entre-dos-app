@@ -48,7 +48,6 @@
     "i18next": "^25.10.9",
     "moment": "^2.30.1",
     "posthog-react-native": "^4.77.0",
-    "posthog-react-native-session-replay": "^1.6.0",
     "react": "19.2.0",
     "react-dom": "19.2.0",
     "react-hook-form": "^7.72.0",

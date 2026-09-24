@@ -64,6 +64,7 @@
             "extraProguardRules": "-keep class com.google.android.gms.internal.consent_sdk.** { *; }"
           },
           "ios": {
+            "deploymentTarget": "16.0",
             "extraPods": [
               {
                 "name": "GoogleUtilities",

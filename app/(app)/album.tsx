@@ -19,6 +19,7 @@ import { GameCard } from '@/components/cards/GameCard';
 import { Typography } from '@/components/ui/Typography';
 import { darkColors, RarityKey, ThemeColors } from '@/constants/colors';
 import { useAds } from '@/context/AdsContext';
+import { useRevenueCat } from '@/context/RevenueCatContext';
 import { useColors } from '@/context/ThemeContext';
 import {
   AlbumAccessResponse,
@@ -126,6 +127,7 @@ export default function AlbumScreen() {
   const styles = useMemo(() => createStyles(colors), [colors]);
   const queryClient = useQueryClient();
   const { ensureReady } = useAds();
+  const { presentPaywallIfNeeded } = useRevenueCat();
   const [rewardPhase, setRewardPhase] = useState<RewardPhase>('idle');
   const mounted = useRef(true);
 
@@ -222,6 +224,17 @@ export default function AlbumScreen() {
     }
   }
 
+  async function subscribe() {
+    trackEvent('subscription_cta_tapped', { source: 'album' });
+    try {
+      await presentPaywallIfNeeded();
+      await refetchAccess();
+    } catch (error) {
+      trackError(error, { area: 'subscriptions', flow: 'albumSubscribeTap' });
+      Toast.error(t('paywall.error'));
+    }
+  }
+
   const rewardLabel =
     rewardPhase === 'preparing'
       ? t('album.adPreparing')
@@ -296,7 +309,7 @@ export default function AlbumScreen() {
           <Pressable
             accessibilityRole="button"
             accessibilityLabel={t('album.subscribe')}
-            onPress={() => router.push('/paywall')}
+            onPress={() => void subscribe()}
             style={({ pressed }) => [styles.primaryButton, pressed && styles.buttonPressed]}
             testID="album-subscribe"
           >

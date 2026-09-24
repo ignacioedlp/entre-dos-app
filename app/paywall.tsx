@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { View, StyleSheet, ActivityIndicator } from 'react-native';
 import { useRouter } from 'expo-router';
 import { useTranslation } from 'react-i18next';
@@ -14,45 +14,45 @@ export default function PaywallScreen() {
   const { presentPaywall } = useRevenueCat();
   const colors = useColors();
   const styles = useMemo(() => createStyles(colors), [colors]);
-  const dismissedRef = useRef(false);
+  const startedRef = useRef(false);
+  const mountedRef = useRef(false);
+  const [error, setError] = useState(false);
 
   useEffect(() => {
+    mountedRef.current = true;
+    return () => {
+      mountedRef.current = false;
+    };
+  }, []);
+
+  useEffect(() => {
+    if (startedRef.current) return;
+    startedRef.current = true;
+
     async function openPaywall() {
       try {
         await presentPaywall();
-      } finally {
-        if (!dismissedRef.current) {
-          dismissedRef.current = true;
+        if (mountedRef.current) {
           router.back();
         }
+      } catch {
+        if (mountedRef.current) setError(true);
       }
     }
 
-    openPaywall().catch(() => {
-      if (!dismissedRef.current) {
-        dismissedRef.current = true;
-        router.back();
-      }
-    });
-
-    return () => {
-      if (!dismissedRef.current) {
-        dismissedRef.current = true;
-        router.back();
-      }
-    };
+    void openPaywall();
   }, [presentPaywall, router]);
 
   return (
     <View style={[styles.root, styles.centered]}>
-      <ActivityIndicator color={colors.accent} size="large" />
+      {!error && <ActivityIndicator color={colors.accent} size="large" />}
       <Typography
         variant="body"
         baseFontSize={14}
         color={colors.textMuted}
         style={styles.loadingText}
       >
-        {t('paywall.loading')}
+        {t(error ? 'paywall.error' : 'paywall.loading')}
       </Typography>
     </View>
   );

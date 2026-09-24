@@ -216,7 +216,7 @@ export default function HomeScreen() {
     .onUpdate((e) => {
       const isVerticalDrag = Math.abs(e.translationY) >= Math.abs(e.translationX);
 
-      if (isVerticalDrag && e.translationY > 0) {
+      if (isVerticalDrag) {
         dragY.value = e.translationY;
       }
     })
@@ -235,13 +235,14 @@ export default function HomeScreen() {
         return;
       }
 
-      if (dragY.value > 80) {
+      if (Math.abs(dragY.value) > 80) {
         const card = list[activeIndex.value];
         if (!card) {
           dragY.value = withSpring(0, { damping: 18, stiffness: 200 });
           return;
         }
-        dragY.value = withTiming(CARD_HEIGHT * 1.3, { duration: 260 }, () => {
+        const direction = dragY.value > 0 ? 1 : -1;
+        dragY.value = withTiming(direction * CARD_HEIGHT * 1.3, { duration: 260 }, () => {
           runOnJS(doNavigate)(card);
         });
         return;
