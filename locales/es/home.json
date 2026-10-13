@@ -217,14 +217,19 @@
     "save": "GUARDAR CARTA",
     "saving": "GUARDANDO...",
     "error": "No pudimos guardar la carta.",
-    "categories": { "date": "Cita", "action": "Acción", "home": "En casa" }
+    "categories": {
+      "date": "Cita",
+      "action": "Acción",
+      "home": "En casa"
+    }
   },
   "paywall": {
-    "title": "DESBLOQUEA PASSION",
+    "title": "Reavivá la chispa hoy",
     "subtitle": "Llevá tu relación al siguiente nivel con contenido exclusivo para vos y tu pareja.",
     "feature1": "Acceso a todos los packs premium",
     "feature2": "Nuevas cartas cada semana",
     "feature3": "Compartido con tu pareja",
+    "feature4": "Desbloqueá el álbum de recuerdos",
     "monthly": "Mensual",
     "annual": "Anual",
     "bestValue": "MEJOR PRECIO",
@@ -236,6 +241,16 @@
     "perMonth": "/mes",
     "loading": "Cargando planes...",
     "error": "No se pudieron cargar los planes",
-    "retry": "Reintentar"
+    "retry": "Reintentar",
+    "close": "Cerrar",
+    "annualPrice": "{{price}}/año",
+    "monthlyPrice": "{{price}}/mes",
+    "annualEquivalent": "Equivale a {{price}}/mes, con cobro anual",
+    "renewal": "El pago se cargará a tu cuenta de la tienda. La suscripción se renueva automáticamente salvo que la canceles al menos 24 horas antes de finalizar el período actual. Podés gestionarla o cancelarla desde los ajustes de tu cuenta.",
+    "purchaseError": "No se pudo completar la compra. Volvé a intentar.",
+    "restoreError": "No se pudieron restaurar las compras. Volvé a intentar.",
+    "nothingToRestore": "No se encontró una suscripción Passion activa para esta cuenta de la tienda.",
+    "pending": "Tu compra todavía no se activó. Podés restaurarla cuando esté aprobada.",
+    "linkError": "No se pudo abrir el enlace. Volvé a intentar."
   }
 }

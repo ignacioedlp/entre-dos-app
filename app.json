@@ -30,9 +30,7 @@
       },
       "predictiveBackGestureEnabled": false,
       "package": "com.entredos.app",
-      "permissions": [
-        "com.google.android.gms.permission.AD_ID"
-      ],
+      "permissions": ["com.google.android.gms.permission.AD_ID"],
       "googleServicesFile": "./google-services.json"
     },
     "web": {
@@ -42,7 +40,15 @@
       "expo-router",
       "expo-font",
       "expo-apple-authentication",
-      "expo-audio",
+      [
+        "expo-audio",
+        {
+          "enableBackgroundPlayback": false,
+          "enableBackgroundRecording": false,
+          "microphonePermission": false,
+          "recordAudioAndroid": false
+        }
+      ],
       "expo-localization",
       [
         "expo-image-picker",

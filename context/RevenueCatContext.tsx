@@ -8,7 +8,13 @@ import {
   ReactNode,
 } from 'react';
 import { Platform } from 'react-native';
-import Purchases, { LOG_LEVEL, CustomerInfo } from 'react-native-purchases';
+import { useRouter } from 'expo-router';
+import Purchases, {
+  LOG_LEVEL,
+  CustomerInfo,
+  PurchasesOffering,
+  PurchasesPackage,
+} from 'react-native-purchases';
 import RevenueCatUI from 'react-native-purchases-ui';
 import { useAuth } from './AuthContext';
 import { trackError, trackEvent } from '@/lib/analytics';
@@ -34,6 +40,9 @@ interface RevenueCatContextValue {
   loading: boolean;
   presentPaywall: () => Promise<void>;
   presentPaywallIfNeeded: () => Promise<void>;
+  getPaywallOffering: () => Promise<PurchasesOffering>;
+  purchasePackage: (pkg: PurchasesPackage) => Promise<CustomerInfo>;
+  dismissPaywall: () => void;
   presentCustomerCenter: () => Promise<void>;
   restorePurchases: () => Promise<CustomerInfo>;
 }
@@ -46,7 +55,11 @@ function checkEntitlement(info: CustomerInfo | null): boolean {
 
 export function RevenueCatProvider({ children }: { children: ReactNode }) {
   const { user, token } = useAuth();
+  const router = useRouter();
+  const paywallRequest = useRef<{ promise: Promise<void>; resolve: () => void } | null>(null);
   const configuredRef = useRef(false);
+  const configuringRef = useRef<Promise<void> | null>(null);
+  const [configured, setConfigured] = useState(false);
   const [customerInfo, setCustomerInfo] = useState<CustomerInfo | null>(null);
   const [isSubscribed, setIsSubscribed] = useState(false);
   const [isPurchaser, setIsPurchaser] = useState(false);
@@ -84,6 +97,7 @@ export function RevenueCatProvider({ children }: { children: ReactNode }) {
   }
 
   const ensureRevenueCatReady = useCallback(async () => {
+    if (configuringRef.current) return configuringRef.current;
     if (configuredRef.current) return;
 
     const keyName = Platform.select({
@@ -108,14 +122,21 @@ export function RevenueCatProvider({ children }: { children: ReactNode }) {
       Purchases.setLogLevel(LOG_LEVEL.VERBOSE);
     }
 
-    Purchases.configure({ apiKey });
-
-    if (user?.userId) {
-      const { customerInfo } = await Purchases.logIn(user.userId);
-      updateFromCustomerInfo(customerInfo);
+    const initialization = (async () => {
+      Purchases.configure({ apiKey });
+      if (user?.userId) {
+        const { customerInfo } = await Purchases.logIn(user.userId);
+        updateFromCustomerInfo(customerInfo);
+      }
+      configuredRef.current = true;
+      setConfigured(true);
+    })();
+    configuringRef.current = initialization;
+    try {
+      await initialization;
+    } finally {
+      configuringRef.current = null;
     }
-
-    configuredRef.current = true;
   }, [user]);
 
   useEffect(() => {
@@ -153,7 +174,7 @@ export function RevenueCatProvider({ children }: { children: ReactNode }) {
 
   // Listen for real-time subscription changes
   useEffect(() => {
-    if (!configuredRef.current) return;
+    if (!configured) return;
 
     const listener = (info: CustomerInfo) => {
       updateFromCustomerInfo(info);
@@ -163,68 +184,70 @@ export function RevenueCatProvider({ children }: { children: ReactNode }) {
     return () => {
       Purchases.removeCustomerInfoUpdateListener(listener);
     };
-  }, [user]);
+  }, [configured, user]);
 
-  const presentPaywall = useCallback(async (): Promise<void> => {
-    await ensureRevenueCatReady();
+  // Own the purchase UI so missing/unsupported remote templates cannot show
+  // RevenueCat's generic paywall without subscription benefits.
+  const presentPaywall = useCallback((): Promise<void> => {
+    if (paywallRequest.current) return paywallRequest.current.promise;
+    let resolve!: () => void;
+    const promise = new Promise<void>((done) => {
+      resolve = done;
+    });
+    paywallRequest.current = { promise, resolve };
     trackEvent('paywall_opened', { source: 'direct' });
+    router.push('/paywall');
+    return promise;
+  }, [router]);
 
-    try {
-      await RevenueCatUI.presentPaywall({
-        displayCloseButton: true,
-      });
-    } catch (e) {
-      trackError(e, { area: 'subscriptions', flow: 'presentPaywall', platform: Platform.OS });
-      throw e;
-    }
-  }, [ensureRevenueCatReady]);
+  const dismissPaywall = useCallback(() => {
+    paywallRequest.current?.resolve();
+    paywallRequest.current = null;
+  }, []);
 
   const presentPaywallIfNeeded = useCallback(async (): Promise<void> => {
-    try {
-      await ensureRevenueCatReady();
-      trackEvent('paywall_opened', { source: 'required_entitlement' });
+    await ensureRevenueCatReady();
+    const info = await Purchases.getCustomerInfo();
+    updateFromCustomerInfo(info);
+    if (!checkEntitlement(info)) await presentPaywall();
+  }, [ensureRevenueCatReady, presentPaywall]);
 
-      const result = await RevenueCatUI.presentPaywallIfNeeded({
-        requiredEntitlementIdentifier: ENTITLEMENT_ID,
-        displayCloseButton: true,
-      });
-
-      if (result === RevenueCatUI.PAYWALL_RESULT.NOT_PRESENTED) {
-        trackEvent('paywall_not_presented', { has_customer_info: customerInfo != null });
-
-        await RevenueCatUI.presentPaywall({
-          displayCloseButton: true,
-        });
-      }
-
-      if (result === RevenueCatUI.PAYWALL_RESULT.ERROR) {
-        trackEvent('paywall_result', { result: 'error' });
-      }
-    } catch (e) {
-      trackError(e, { area: 'subscriptions', flow: 'presentPaywallIfNeeded' });
-
-      console.warn('RevenueCat presentPaywallIfNeeded failed, falling back to presentPaywall:', e);
-      try {
-        await RevenueCatUI.presentPaywall({
-          displayCloseButton: true,
-        });
-      } catch (fallbackError) {
-        trackError(fallbackError, { area: 'subscriptions', flow: 'presentPaywallFallback' });
-        throw fallbackError;
-      }
+  const getPaywallOffering = useCallback(async (): Promise<PurchasesOffering> => {
+    await ensureRevenueCatReady();
+    const offerings = await Purchases.getOfferings();
+    const identifier = process.env.EXPO_PUBLIC_RC_OFFERING_ID;
+    const offering = identifier ? offerings.all[identifier] : offerings.current;
+    if (!offering || (!offering.annual && !offering.monthly)) {
+      throw new Error('No monthly or annual subscription offering available');
     }
-  }, [customerInfo, ensureRevenueCatReady]);
+    trackEvent('paywall_offering_loaded', { offering_id: offering.identifier });
+    return offering;
+  }, [ensureRevenueCatReady]);
+
+  const purchasePackage = useCallback(
+    async (pkg: PurchasesPackage): Promise<CustomerInfo> => {
+      await ensureRevenueCatReady();
+      const { customerInfo: info } = await Purchases.purchasePackage(pkg);
+      updateFromCustomerInfo(info);
+      await fetchEntitlementData();
+      trackEvent('subscription_purchased', { product_id: pkg.product.identifier });
+      return info;
+    },
+    [ensureRevenueCatReady, fetchEntitlementData]
+  );
 
   const presentCustomerCenter = useCallback(async (): Promise<void> => {
     await RevenueCatUI.presentCustomerCenter();
   }, []);
 
   const restorePurchases = useCallback(async (): Promise<CustomerInfo> => {
+    await ensureRevenueCatReady();
     const info = await Purchases.restorePurchases();
+    await fetchEntitlementData();
     updateFromCustomerInfo(info);
     trackEvent('purchases_restored', { has_entitlement: checkEntitlement(info) });
     return info;
-  }, []);
+  }, [ensureRevenueCatReady, fetchEntitlementData]);
 
   return (
     <RevenueCatContext.Provider
@@ -236,6 +259,9 @@ export function RevenueCatProvider({ children }: { children: ReactNode }) {
         loading,
         presentPaywall,
         presentPaywallIfNeeded,
+        getPaywallOffering,
+        purchasePackage,
+        dismissPaywall,
         presentCustomerCenter,
         restorePurchases,
       }}

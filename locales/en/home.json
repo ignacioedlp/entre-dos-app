@@ -217,14 +217,19 @@
     "save": "SAVE CARD",
     "saving": "SAVING...",
     "error": "We couldn't save the card.",
-    "categories": { "date": "Date", "action": "Action", "home": "At home" }
+    "categories": {
+      "date": "Date",
+      "action": "Action",
+      "home": "At home"
+    }
   },
   "paywall": {
-    "title": "UNLOCK PASSION",
+    "title": "Rekindle the spark today",
     "subtitle": "Take your relationship to the next level with exclusive content for you and your partner.",
     "feature1": "Access to all premium packs",
     "feature2": "New cards every week",
     "feature3": "Shared with your partner",
+    "feature4": "Unlock your memory album",
     "monthly": "Monthly",
     "annual": "Annual",
     "bestValue": "BEST VALUE",
@@ -236,6 +241,16 @@
     "perMonth": "/month",
     "loading": "Loading plans...",
     "error": "Could not load plans",
-    "retry": "Try again"
+    "retry": "Try again",
+    "close": "Close",
+    "annualPrice": "{{price}}/year",
+    "monthlyPrice": "{{price}}/month",
+    "annualEquivalent": "Equivalent to {{price}}/month, billed annually",
+    "renewal": "Payment will be charged to your store account. Subscriptions renew automatically unless canceled at least 24 hours before the end of the current period. Manage or cancel in your account settings.",
+    "purchaseError": "Could not complete your purchase. Please try again.",
+    "restoreError": "Could not restore purchases. Please try again.",
+    "nothingToRestore": "No active Passion subscription was found for this store account.",
+    "pending": "Your purchase has not activated yet. You can restore purchases once it is approved.",
+    "linkError": "Could not open the link. Please try again."
   }
 }

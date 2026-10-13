@@ -44,3 +44,5 @@ yarn-error.*
 google-services.json
 google-key.json
 .env.local
+
+.expo-cli-patch
