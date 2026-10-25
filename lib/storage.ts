@@ -11,7 +11,7 @@ export interface ProfileData {
   avatarUrl: string | null;
   coupleId: string | null;
   coupleCode: string;
-  locale: 'es' | 'en';
+  locale: 'es' | 'en' | 'pt';
   country: string | null;
   pushNotifications: boolean;
   onboardingCompleted: boolean;

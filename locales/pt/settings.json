@@ -1,0 +1,215 @@
+{
+  "title": "CONFIGURAÇÕES.",
+  "signOut": "Sair",
+  "signOutConfirmTitle": "Sair",
+  "signOutConfirmMessage": "Tem certeza de que deseja sair?",
+  "deleteAccount": "EXCLUIR CONTA",
+  "deleteAccountConfirmTitle": "Excluir conta",
+  "deleteAccountConfirmMessage": "Sua conta será excluída em 7 dias. Se você tiver uma assinatura ativa, ela será cancelada. Você pode desfazer esta ação entrando antes dessa data.",
+  "deleteAccountSuccess": "Solicitação enviada. Sua conta será excluída em 7 dias.",
+  "deleteAccountError": "Não foi possível processar a solicitação. Tente novamente.",
+  "menu": {
+    "notifications": "NOTIFICAÇÕES",
+    "language": "IDIOMA",
+    "country": "PAÍS",
+    "terms": "TERMOS E CONDIÇÕES",
+    "privacy": "POLÍTICA DE PRIVACIDADE",
+    "faq": "PERGUNTAS FREQUENTES",
+    "subscription": "GERENCIAR ASSINATURA",
+    "restorePurchases": "RESTAURAR COMPRAS",
+    "feedback": "SONS E VIBRAÇÃO",
+    "fontSize": "TAMANHO DA FONTE",
+    "theme": "TEMA"
+  },
+  "feedback": {
+    "back": "Voltar às configurações",
+    "title": "SONS E VIBRAÇÃO.",
+    "soundTitle": "Sons",
+    "soundDescription": "Reproduzir sons curtos ao abrir pacotes e concluir ações.",
+    "hapticsTitle": "Vibração",
+    "hapticsDescription": "Sentir uma vibração sutil ao selecionar e confirmar ações."
+  },
+  "theme": { "title": "TEMA.", "light": "Claro", "dark": "Escuro", "system": "Padrão do sistema" },
+  "fontSize": {
+    "title": "TAMANHO DA FONTE.",
+    "small": "Pequeno",
+    "default": "Padrão",
+    "large": "Grande",
+    "extraLarge": "Muito grande"
+  },
+  "notifications": {
+    "title": "NOTIFICAÇÕES.",
+    "toggleLabel": "Notificações",
+    "toggleDescription": "Receba novidades sobre o jogo e os anúncios."
+  },
+  "language": { "title": "IDIOMA." },
+  "profile": {
+    "title": "MEU PERFIL.",
+    "displayName": "Nome de exibição",
+    "namePlaceholder": "Digite seu nome",
+    "edit": "Editar",
+    "save": "Salvar",
+    "cancel": "Cancelar",
+    "nameUpdated": "Nome atualizado!",
+    "cardsPlayed": "Cartas jogadas",
+    "noCardsYet": "Nenhuma carta jogada ainda",
+    "changePhoto": "Alterar foto",
+    "camera": "Câmera",
+    "gallery": "Galeria",
+    "manage": "Gerenciar",
+    "manageRelationship": "Gerenciar meu relacionamento",
+    "partner": "Seu par",
+    "togetherYears_zero": "Juntos há menos de um ano",
+    "togetherYears_one": "Juntos há um ano",
+    "togetherYears_other": "Juntos há {{count}} anos",
+    "anniversaryEmpty": "Defina sua data especial",
+    "linkRelationship": "Conecte-se ao seu par",
+    "linkRelationshipDescription": "Compartilhem o jogo e criem memórias juntos"
+  },
+  "relationship": {
+    "title": "MEU RELACIONAMENTO.",
+    "togetherSince": "Juntos desde {{date}}",
+    "anniversary": "Aniversário de relacionamento",
+    "notSet": "Ainda não definido",
+    "setDate": "Definir data",
+    "edit": "Editar",
+    "save": "Salvar",
+    "cancel": "Cancelar",
+    "remove": "Remover data",
+    "chooseDate": "Escolha a data",
+    "saved": "Aniversário salvo!",
+    "removed": "Aniversário removido",
+    "errorInvalidDate": "Digite uma data válida",
+    "errorFutureDate": "A data não pode estar no futuro",
+    "errorRequired": "Preencha todos os campos",
+    "day": "DD",
+    "month": "MM",
+    "year": "AAAA",
+    "unlink": "Desconectar",
+    "unlinkConfirmTitle": "Desconectar",
+    "unlinkConfirmMessage": "Tem certeza de que deseja se desconectar do seu par? Esta ação não pode ser desfeita.",
+    "unlinkConfirm": "Desconectar"
+  },
+  "terms": {
+    "title": "TERMOS E CONDIÇÕES.",
+    "lastUpdated": "Última atualização: março de 2026",
+    "items": [
+      {
+        "title": "1. Aceitação dos Termos",
+        "body": "Ao baixar, instalar ou usar o Entre Dos (\"o App\"), você concorda em cumprir estes Termos e Condições. Se não concordar, não use o App."
+      },
+      {
+        "title": "2. Descrição do Serviço",
+        "body": "Entre Dos é um jogo de cartas desenvolvido para casais. O App oferece baralhos digitais com atividades, perguntas e propostas destinadas a fortalecer relacionamentos."
+      },
+      {
+        "title": "3. Elegibilidade",
+        "body": "Você deve ter pelo menos 18 anos para usar o App. Ao usá-lo, você declara e garante que atende a esse requisito de idade."
+      },
+      {
+        "title": "4. Contas de Usuário",
+        "body": "Você é responsável por manter a confidencialidade das credenciais da sua conta. Você concorda em assumir a responsabilidade por todas as atividades realizadas na sua conta."
+      },
+      {
+        "title": "5. Uso Aceitável",
+        "body": "Você concorda em não usar o App de forma indevida, incluindo, entre outros: tentar obter acesso não autorizado, interferir no funcionamento do App ou usá-lo para qualquer finalidade ilegal."
+      },
+      {
+        "title": "6. Propriedade Intelectual",
+        "body": "Todo o conteúdo, design, gráficos e outros materiais do App pertencem ao Entre Dos e são protegidos pelas leis de propriedade intelectual aplicáveis. Você não pode reproduzir, distribuir ou criar obras derivadas sem consentimento prévio por escrito."
+      },
+      {
+        "title": "7. Limitação de Responsabilidade",
+        "body": "O App é fornecido no estado em que se encontra. O Entre Dos não será responsável por danos indiretos, incidentais, especiais ou consequenciais decorrentes do uso do App."
+      },
+      {
+        "title": "8. Alterações nos Termos",
+        "body": "Reservamo-nos o direito de modificar estes Termos a qualquer momento. Continuar usando o App após as alterações constitui aceitação dos Termos atualizados."
+      },
+      {
+        "title": "9. Contato",
+        "body": "Se você tiver dúvidas sobre estes Termos, entre em contato pelo e-mail support@entredos.app."
+      }
+    ]
+  },
+  "privacy": {
+    "title": "POLÍTICA DE PRIVACIDADE.",
+    "lastUpdated": "Última atualização: agosto de 2026",
+    "adPreferences": "OPÇÕES DE PRIVACIDADE DOS ANÚNCIOS",
+    "adPreferencesUnavailable": "As opções de privacidade não estão disponíveis agora.",
+    "items": [
+      {
+        "title": "1. Informações que Coletamos",
+        "body": "Coletamos as informações que você fornece ao criar sua conta, como nome, endereço de e-mail e data de aniversário do relacionamento. Também coletamos dados de uso para melhorar sua experiência no app."
+      },
+      {
+        "title": "2. Uso das Informações",
+        "body": "Usamos suas informações para operar e manter o app, personalizar sua experiência, enviar notificações relacionadas ao jogo e melhorar nossos serviços."
+      },
+      {
+        "title": "3. Armazenamento e Segurança",
+        "body": "Suas informações são armazenadas com segurança em servidores protegidos. Implementamos medidas técnicas e organizacionais para proteger seus dados pessoais contra acesso não autorizado."
+      },
+      {
+        "title": "4. Compartilhamento de Informações",
+        "body": "Não vendemos, comercializamos ou transferimos suas informações pessoais a terceiros. Compartilhamos dados apenas com prestadores de serviços necessários ao funcionamento do app."
+      },
+      {
+        "title": "5. Seus Direitos",
+        "body": "Você tem o direito de acessar, corrigir ou excluir suas informações pessoais a qualquer momento. Você pode solicitar uma cópia dos seus dados ou sua exclusão entrando em contato diretamente conosco."
+      },
+      {
+        "title": "6. Publicidade e Tecnologias Semelhantes",
+        "body": "Exibimos anúncios recompensados não personalizados pelo Google AdMob. Não solicitamos a permissão App Tracking Transparency (ATT) da Apple, não acessamos o IDFA e não usamos dados de outros apps ou sites para personalizar anúncios. O AdMob pode processar identificadores do dispositivo, endereço IP aproximado, diagnósticos, desempenho e interações com anúncios para veiculação técnica, limitação de frequência, prevenção de fraudes e relatórios agregados. Quando aplicável, você pode revisar ou alterar seu consentimento nas opções de privacidade dos anúncios."
+      },
+      {
+        "title": "7. Menores de Idade",
+        "body": "Entre Dos não se destina a menores de 18 anos. Não coletamos intencionalmente informações de menores. Se descobrirmos que coletamos dados de um menor, eles serão excluídos imediatamente."
+      },
+      {
+        "title": "8. Alterações nesta Política",
+        "body": "Reservamo-nos o direito de atualizar esta política a qualquer momento. Avisaremos sobre alterações significativas pelo app ou por e-mail."
+      },
+      {
+        "title": "9. Contato",
+        "body": "Se você tiver dúvidas sobre esta política de privacidade, entre em contato pelo e-mail support@entredos.app."
+      }
+    ]
+  },
+  "faq": {
+    "title": "PERGUNTAS FREQUENTES.",
+    "items": [
+      {
+        "question": "O que é o Entre Dos?",
+        "answer": "Entre Dos é um jogo de cartas desenvolvido para casais. Cada carta contém atividades, perguntas ou propostas para ajudar você a se conectar ao seu par."
+      },
+      {
+        "question": "Como jogo uma carta?",
+        "answer": "Abra uma carta do seu baralho e deslize para confirmar. Após a jogada, a carta será marcada como concluída e adicionada ao seu histórico."
+      },
+      {
+        "question": "Posso jogar uma carta novamente?",
+        "answer": "Atualmente, cada carta pode ser jogada apenas uma vez. Novas cartas são adicionadas ao seu baralho regularmente, então sempre há algo novo para explorar."
+      },
+      {
+        "question": "Como altero meu idioma?",
+        "answer": "Vá até Configurações > Idioma e selecione o idioma de sua preferência. O app oferece inglês, espanhol e português."
+      },
+      {
+        "question": "Como funcionam as notificações?",
+        "answer": "Você pode ativar ou desativar as notificações em Configurações > Notificações. Quando ativadas, você receberá lembretes sobre novas cartas e atividades do jogo."
+      },
+      {
+        "question": "Como excluo minha conta?",
+        "answer": "Vá até Configurações > Excluir conta. Sua conta será excluída em 7 dias e você pode cancelar a solicitação entrando antes dessa data."
+      }
+    ]
+  },
+  "country": {
+    "title": "País",
+    "description": "Usamos seu país para mostrar eventos na data certa.",
+    "saved": "País salvo",
+    "saved_description": "Seu país foi atualizado com sucesso.",
+    "saveError": "Não foi possível salvar o país. Tente novamente."
+  }
+}

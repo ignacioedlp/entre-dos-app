@@ -1,0 +1,33 @@
+{
+  "title": "NOTIFICAÇÕES.",
+  "empty": "Sem notificações",
+  "emptyDescription": "Suas atividades e novidades aparecerão aqui.",
+  "readAll": "Marcar todas como lidas",
+  "buckets": { "today": "Hoje", "yesterday": "Ontem", "earlier": "Anteriores" },
+  "setup": {
+    "title": "Ative as notificações",
+    "body": "Saiba quando seu par jogar uma carta e não perca nenhuma novidade.",
+    "enable": "Ativar",
+    "later": "Agora não"
+  },
+  "category": {
+    "manual": "NEWS",
+    "played": "Jogada",
+    "system": "Sistema",
+    "deck_reset": "Novo baralho",
+    "event_cards": "Evento",
+    "extra_card_unlocked": "Carta extra",
+    "couple_linked": "Par conectado",
+    "play_comment": "Comentário",
+    "play_schedule": "Data",
+    "play_schedule_removed": "Data"
+  },
+  "alert": {
+    "disabledTitle": "Notificações desativadas",
+    "disabledMessage": "Para receber notificações, ative-as nas configurações do seu dispositivo.",
+    "enableFailedTitle": "Não foi possível ativar as notificações",
+    "enableFailedMessage": "Verifique sua conexão e tente novamente.",
+    "cancel": "Cancelar",
+    "openSettings": "Abrir configurações"
+  }
+}

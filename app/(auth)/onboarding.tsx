@@ -46,7 +46,7 @@ export default function OnboardingScreen() {
   const [step, setStep] = useState(0);
   const [displayName, setDisplayName] = useState(user?.displayName ?? '');
   const [country, setCountry] = useState<string | null>(user?.country ?? null);
-  const [locale, setLocale] = useState<'es' | 'en'>(user?.locale ?? 'es');
+  const [locale, setLocale] = useState<'es' | 'en' | 'pt'>(user?.locale ?? 'es');
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -56,6 +56,9 @@ export default function OnboardingScreen() {
   const getCountryName = (supportedCountry: (typeof SUPPORTED_COUNTRIES)[number]) => {
     if (languageI18n.language.startsWith('es')) {
       return supportedCountry.name_es;
+    }
+    if (languageI18n.language.startsWith('pt')) {
+      return supportedCountry.name_pt;
     }
     return supportedCountry.name_en;
   };

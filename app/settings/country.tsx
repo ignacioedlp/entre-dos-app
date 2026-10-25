@@ -53,6 +53,9 @@ export default function CountrySettingsScreen() {
     if (i18n.language.startsWith('es')) {
       return country.name_es;
     }
+    if (i18n.language.startsWith('pt')) {
+      return country.name_pt;
+    }
     return country.name_en;
   };
 

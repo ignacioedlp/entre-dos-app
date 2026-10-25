@@ -1,0 +1,26 @@
+{
+  "viewAll": "VER TUDO",
+  "skip": "Pular",
+  "confirm": "Confirmar",
+  "continue": "Continuar",
+  "cancel": "Cancelar",
+  "back": "Voltar",
+  "loading": "Carregando...",
+  "signOut": "Sair",
+  "settings": "Configurações",
+  "close": "Fechar",
+  "update": {
+    "title": "Nova versão disponível",
+    "message": "A atualização está pronta. Reinicie o app para aplicá-la.",
+    "restart": "Reiniciar agora",
+    "restarting": "Reiniciando..."
+  },
+  "category": { "date": "Encontro", "action": "Ação", "home": "Em casa" },
+  "rarity": {
+    "common": "Comum",
+    "rare": "Rara",
+    "epic": "Épica",
+    "legendary": "Lendária",
+    "passion": "Paixão"
+  }
+}

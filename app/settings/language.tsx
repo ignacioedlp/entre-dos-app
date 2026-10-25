@@ -23,7 +23,7 @@ export default function LanguageScreen() {
   const colors = useColors();
   const styles = useMemo(() => createStyles(colors), [colors]);
 
-  async function handleSelect(locale: 'es' | 'en') {
+  async function handleSelect(locale: 'es' | 'en' | 'pt') {
     if (loading || locale === user?.locale) return;
     setLoading(true);
     try {

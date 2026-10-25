@@ -17,6 +17,7 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useTranslation } from 'react-i18next';
 import moment from 'moment';
 import 'moment/locale/es';
+import 'moment/locale/pt-br';
 
 import { useColors, useTheme } from '@/context/ThemeContext';
 import { ThemeColors } from '@/constants/colors';
@@ -258,11 +259,15 @@ export default function RelationshipScreen() {
   }
 
   const linkedDate = couple?.linkedAt
-    ? moment(couple.linkedAt).locale(i18n.language).format('LL')
+    ? moment(couple.linkedAt)
+        .locale(i18n.language.startsWith('pt') ? 'pt-br' : i18n.language)
+        .format('LL')
     : '';
 
   const anniversaryDate = couple?.anniversary
-    ? moment(couple.anniversary).locale(i18n.language).format('LL')
+    ? moment(couple.anniversary)
+        .locale(i18n.language.startsWith('pt') ? 'pt-br' : i18n.language)
+        .format('LL')
     : null;
 
   return (
@@ -391,7 +396,9 @@ export default function RelationshipScreen() {
                 >
                   <Ionicons name="calendar-outline" size={20} color={colors.accent} />
                   <Typography variant="bodyBold" baseFontSize={16} style={styles.selectedDateText}>
-                    {moment(selectedDate).locale(i18n.language).format('LL')}
+                    {moment(selectedDate)
+                      .locale(i18n.language.startsWith('pt') ? 'pt-br' : i18n.language)
+                      .format('LL')}
                   </Typography>
                   {Platform.OS === 'android' ? (
                     <Ionicons name="chevron-down" size={18} color={colors.textMuted} />
@@ -402,7 +409,13 @@ export default function RelationshipScreen() {
                   <DateTimePicker
                     accentColor={colors.accent}
                     display="inline"
-                    locale={i18n.language.startsWith('es') ? 'es-AR' : 'en-US'}
+                    locale={
+                      i18n.language.startsWith('pt')
+                        ? 'pt-BR'
+                        : i18n.language.startsWith('es')
+                          ? 'es-AR'
+                          : 'en-US'
+                    }
                     maximumDate={new Date()}
                     mode="date"
                     onChange={handleDateChange}

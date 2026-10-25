@@ -15,6 +15,7 @@
     "later": "Not now"
   },
   "category": {
+    "manual": "NEWS",
     "played": "Played",
     "system": "System",
     "deck_reset": "Deck reset",

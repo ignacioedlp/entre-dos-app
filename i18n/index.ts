@@ -16,6 +16,12 @@ import esHome from '@/locales/es/home.json';
 import esSettings from '@/locales/es/settings.json';
 import esNotifications from '@/locales/es/notifications.json';
 
+import ptCommon from '@/locales/pt/common.json';
+import ptAuth from '@/locales/pt/auth.json';
+import ptHome from '@/locales/pt/home.json';
+import ptSettings from '@/locales/pt/settings.json';
+import ptNotifications from '@/locales/pt/notifications.json';
+
 const deviceLang = Localization.getLocales()[0]?.languageCode ?? 'en';
 
 // eslint-disable-next-line import/no-named-as-default-member
@@ -25,6 +31,13 @@ i18n.use(initReactI18next).init({
   ns: ['common', 'auth', 'home', 'settings', 'notifications'],
   defaultNS: 'common',
   resources: {
+    pt: {
+      common: ptCommon,
+      auth: ptAuth,
+      home: ptHome,
+      settings: ptSettings,
+      notifications: ptNotifications,
+    },
     en: {
       common: enCommon,
       auth: enAuth,

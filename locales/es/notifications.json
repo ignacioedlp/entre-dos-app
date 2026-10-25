@@ -15,6 +15,7 @@
     "later": "Ahora no"
   },
   "category": {
+    "manual": "NEWS",
     "played": "Jugada",
     "system": "Sistema",
     "deck_reset": "Mazo renovado",

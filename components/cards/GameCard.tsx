@@ -65,7 +65,7 @@ export function GameCard({
 }: GameCardProps) {
   const bg = rarityColor[card.rarity];
   const fg = rarityTextColor[card.rarity];
-  const eventTextColor = card.event ? contrastingTextColor(card.event.color) : fg;
+  const eventTextColor = card.event ? contrastingTextColor(bg) : fg;
   const h = width * (4 / 3);
   const watermarkSize = Math.round(width * 0.4);
   const hasRarityGlow = card.rarity === 'rara' || card.rarity === 'legendaria';
@@ -137,8 +137,8 @@ export function GameCard({
                     style={[
                       styles.badge,
                       {
-                        backgroundColor: card.event ? card.event.color : 'transparent',
-                        borderColor: card.event ? card.event.color : fg + '55',
+                        backgroundColor: 'transparent',
+                        borderColor: card.event ? eventTextColor : fg + '55',
                       },
                     ]}
                   >

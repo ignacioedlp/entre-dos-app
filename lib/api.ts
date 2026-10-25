@@ -628,7 +628,7 @@ export async function apiGetProfile(): Promise<ProfileData> {
   return res.data.profile;
 }
 
-export async function apiUpdateLocale(locale: 'es' | 'en'): Promise<ProfileData> {
+export async function apiUpdateLocale(locale: 'es' | 'en' | 'pt'): Promise<ProfileData> {
   const res = await api.put<{ profile: ProfileData }>('/profiles/me', { locale });
   return res.data.profile;
 }
@@ -655,7 +655,7 @@ export async function apiUpdateDisplayName(displayName: string): Promise<Profile
 
 export async function apiCompleteOnboarding(
   displayName: string,
-  locale: 'es' | 'en',
+  locale: 'es' | 'en' | 'pt',
   country?: string | null
 ): Promise<ProfileData> {
   const res = await api.put<{ profile: ProfileData }>('/profiles/me', {

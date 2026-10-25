@@ -114,7 +114,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   async function register(email: string, password: string, passwordConfirm: string): Promise<void> {
     const deviceLang = Localization.getLocales()[0]?.languageCode ?? 'es';
-    const locale = deviceLang === 'en' ? 'en' : 'es';
+    const locale = deviceLang === 'pt' ? 'pt' : deviceLang === 'en' ? 'en' : 'es';
     const { accessToken, profile } = await apiRegister(email, password, passwordConfirm, locale);
     persistSession(accessToken, profile);
     trackEvent('auth_registered', { method: 'password', locale });
@@ -133,7 +133,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         throw new Error('No Google ID token received');
       }
       const deviceLang = Localization.getLocales()[0]?.languageCode ?? 'es';
-      const locale = deviceLang === 'en' ? 'en' : 'es';
+      const locale = deviceLang === 'pt' ? 'pt' : deviceLang === 'en' ? 'en' : 'es';
       const { accessToken, profile } = await apiGoogleAuth(idToken, locale);
       persistSession(accessToken, profile);
       i18n.changeLanguage(profile.locale);
@@ -167,7 +167,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         throw new Error('No Apple identity token or user identifier received');
       }
       const deviceLang = Localization.getLocales()[0]?.languageCode ?? 'es';
-      const locale = deviceLang === 'en' ? 'en' : 'es';
+      const locale = deviceLang === 'pt' ? 'pt' : deviceLang === 'en' ? 'en' : 'es';
       const fullName = [credential.fullName?.givenName, credential.fullName?.familyName]
         .filter(Boolean)
         .join(' ');
