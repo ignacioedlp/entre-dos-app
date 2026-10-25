@@ -1,3 +1,4 @@
+import { useTabContentPadding } from '@/hooks/useTabContentPadding';
 import { AmbientScrollView } from '@/components/ui/AmbientLights';
 import {
   View,
@@ -28,6 +29,7 @@ import { Typography } from '@/components/ui/Typography';
 import { useScaledFontSize } from '@/context/FontScaleContext';
 
 export default function ProfileScreen() {
+  const tabContentPadding = useTabContentPadding();
   const insets = useSafeAreaInsets();
   const { t } = useTranslation('settings');
   const { user, updateProfile } = useAuth();
@@ -98,6 +100,7 @@ export default function ProfileScreen() {
     <AmbientScrollView
       style={[styles.root, { paddingTop: insets.top + 20 }]}
       keyboardShouldPersistTaps="handled"
+      contentContainerStyle={tabContentPadding}
     >
       {/* Header */}
       <View style={styles.header}>

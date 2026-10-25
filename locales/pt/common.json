@@ -15,12 +15,22 @@
     "restart": "Reiniciar agora",
     "restarting": "Reiniciando..."
   },
-  "category": { "date": "Encontro", "action": "Ação", "home": "Em casa" },
+  "category": {
+    "date": "Encontro",
+    "action": "Ação",
+    "home": "Em casa"
+  },
   "rarity": {
     "common": "Comum",
     "rare": "Rara",
     "epic": "Épica",
     "legendary": "Lendária",
     "passion": "Paixão"
+  },
+  "tabs": {
+    "home": "Início",
+    "album": "Álbum",
+    "packs": "Pacotes",
+    "profile": "Perfil"
   }
 }

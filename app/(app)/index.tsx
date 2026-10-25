@@ -1,3 +1,4 @@
+import { useTabContentPadding } from '@/hooks/useTabContentPadding';
 import { AmbientLights } from '@/components/ui/AmbientLights';
 import { useRef, useEffect, useMemo, useState, useCallback } from 'react';
 import { View, StyleSheet, Dimensions, ScrollView, Pressable } from 'react-native';
@@ -86,6 +87,7 @@ function HomeSkeleton({ styles }: { styles: ReturnType<typeof createStyles> }) {
 }
 
 export default function HomeScreen() {
+  const tabContentPadding = useTabContentPadding();
   const insets = useSafeAreaInsets();
   const router = useRouter();
   const queryClient = useQueryClient();
@@ -335,7 +337,11 @@ export default function HomeScreen() {
           </View>
         </Animated.View>
 
-        <ScrollView showsVerticalScrollIndicator={false} style={styles.scroll}>
+        <ScrollView
+          showsVerticalScrollIndicator={false}
+          style={styles.scroll}
+          contentContainerStyle={tabContentPadding}
+        >
           {isLoading ? (
             <HomeSkeleton styles={styles} />
           ) : showNeverDealt ? (

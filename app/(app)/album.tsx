@@ -1,3 +1,4 @@
+import { useTabContentPadding } from '@/hooks/useTabContentPadding';
 import { AmbientScrollView, AmbientLights } from '@/components/ui/AmbientLights';
 import { Ionicons } from '@expo/vector-icons';
 import { useInfiniteQuery, useQuery, useQueryClient } from '@tanstack/react-query';
@@ -70,10 +71,11 @@ function CardThumbnail({ card }: Pick<AlbumMoment, 'card'>) {
 }
 
 function AlbumSkeleton({ styles }: { styles: ReturnType<typeof createStyles> }) {
+  const tabContentPadding = useTabContentPadding();
   return (
     <ScrollView
       accessibilityLabel="Cargando álbum"
-      contentContainerStyle={styles.skeletonContent}
+      contentContainerStyle={[styles.skeletonContent, tabContentPadding]}
       showsVerticalScrollIndicator={false}
     >
       <View style={styles.skeletonMonth} />
@@ -121,6 +123,7 @@ const thumbnailStyles = StyleSheet.create({
 });
 
 export default function AlbumScreen() {
+  const tabContentPadding = useTabContentPadding();
   const insets = useSafeAreaInsets();
   const router = useRouter();
   const { t, i18n } = useTranslation('home');
@@ -261,6 +264,7 @@ export default function AlbumScreen() {
         contentContainerStyle={[
           styles.centered,
           { paddingTop: insets.top + 24, paddingBottom: insets.bottom + 24 },
+          tabContentPadding,
         ]}
         showsVerticalScrollIndicator={false}
       >
@@ -296,6 +300,7 @@ export default function AlbumScreen() {
         contentContainerStyle={[
           styles.centered,
           { paddingTop: insets.top + 24, paddingBottom: insets.bottom + 24 },
+          tabContentPadding,
         ]}
         showsVerticalScrollIndicator={false}
       >
@@ -361,7 +366,7 @@ export default function AlbumScreen() {
         <SectionList
           sections={sections}
           keyExtractor={(moment) => moment.id}
-          contentContainerStyle={styles.content}
+          contentContainerStyle={[styles.content, tabContentPadding]}
           stickySectionHeadersEnabled={false}
           onEndReached={() => {
             if (momentsQuery.hasNextPage && !momentsQuery.isFetchingNextPage) {

@@ -26,5 +26,11 @@
     "epic": "Epic",
     "legendary": "Legendary",
     "passion": "Passion"
+  },
+  "tabs": {
+    "home": "Home",
+    "album": "Album",
+    "packs": "Packs",
+    "profile": "Profile"
   }
 }

@@ -1,3 +1,4 @@
+import { useTabContentPadding } from '@/hooks/useTabContentPadding';
 import { AmbientLights } from '@/components/ui/AmbientLights';
 import { View, StyleSheet, ScrollView, RefreshControl } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -52,6 +53,7 @@ function PackSkeleton({ styles }: { styles: ReturnType<typeof createStyles> }) {
 }
 
 export default function PacksScreen() {
+  const tabContentPadding = useTabContentPadding();
   const insets = useSafeAreaInsets();
   const { t } = useTranslation('home');
   const { isSubscribed } = useRevenueCat();
@@ -113,7 +115,7 @@ export default function PacksScreen() {
       ) : (
         <ScrollView
           style={styles.scroll}
-          contentContainerStyle={styles.scrollContent}
+          contentContainerStyle={[styles.scrollContent, tabContentPadding]}
           showsVerticalScrollIndicator={false}
           refreshControl={
             <RefreshControl
