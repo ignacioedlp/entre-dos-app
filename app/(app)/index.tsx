@@ -1,3 +1,4 @@
+import { AmbientLights } from '@/components/ui/AmbientLights';
 import { useRef, useEffect, useMemo, useState, useCallback } from 'react';
 import { View, StyleSheet, Dimensions, ScrollView, Pressable } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -310,6 +311,7 @@ export default function HomeScreen() {
 
   return (
     <View style={[createStyles(colors).root, { paddingTop: insets.top + 20 }]}>
+      <AmbientLights />
       <WeeklyPackOpening
         visible={packVisible}
         onClaim={claimWeeklyPack}

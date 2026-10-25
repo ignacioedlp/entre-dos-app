@@ -1,3 +1,4 @@
+import { AmbientScrollView } from '@/components/ui/AmbientLights';
 import {
   View,
   TextInput,
@@ -5,7 +6,6 @@ import {
   Pressable,
   Modal,
   Platform,
-  ScrollView,
   KeyboardAvoidingView,
 } from 'react-native';
 import { useState, useMemo, useEffect } from 'react';
@@ -160,7 +160,7 @@ export default function LoginScreen() {
       style={styles.keyboardAvoid}
       behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
     >
-      <ScrollView
+      <AmbientScrollView
         style={styles.root}
         contentContainerStyle={[
           styles.scrollContent,
@@ -336,7 +336,7 @@ export default function LoginScreen() {
             </Typography>
           </Pressable>
         </View>
-      </ScrollView>
+      </AmbientScrollView>
 
       <Modal
         visible={!!deletionPending}

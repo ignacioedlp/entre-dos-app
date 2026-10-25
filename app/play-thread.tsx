@@ -1,3 +1,4 @@
+import { AmbientLights } from '@/components/ui/AmbientLights';
 import DateTimePicker from '@react-native-community/datetimepicker';
 import { Ionicons } from '@expo/vector-icons';
 import * as ImagePicker from 'expo-image-picker';
@@ -380,6 +381,7 @@ export default function PlayThreadScreen() {
       behavior={Platform.OS === 'ios' ? 'padding' : undefined}
       style={[styles.root, { paddingTop: insets.top + 20 }]}
     >
+      <AmbientLights />
       <View style={styles.header}>
         <Pressable
           accessibilityLabel={t('playThread.back')}

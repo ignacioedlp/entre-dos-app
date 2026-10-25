@@ -1,3 +1,4 @@
+import { AmbientLights } from '@/components/ui/AmbientLights';
 import { View, StyleSheet, ScrollView } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useTranslation } from 'react-i18next';
@@ -20,6 +21,7 @@ export default function TermsScreen() {
 
   return (
     <View style={styles.root}>
+      <AmbientLights />
       <ScrollView
         contentContainerStyle={[
           styles.scrollContent,

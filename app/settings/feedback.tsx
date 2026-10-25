@@ -1,3 +1,4 @@
+import { AmbientLights } from '@/components/ui/AmbientLights';
 import { useMemo, useState } from 'react';
 import { Pressable, StyleSheet, View } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
@@ -43,6 +44,7 @@ export default function FeedbackSettingsScreen() {
 
   return (
     <View style={[styles.root, { paddingTop: insets.top + 20 }]}>
+      <AmbientLights />
       <View style={styles.header}>
         <Pressable
           accessibilityRole="button"

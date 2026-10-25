@@ -1,3 +1,4 @@
+import { AmbientLights } from '@/components/ui/AmbientLights';
 import { View, StyleSheet, useWindowDimensions } from 'react-native';
 import { useEffect, useMemo } from 'react';
 import { useRouter } from 'expo-router';
@@ -112,6 +113,7 @@ export default function WelcomeScreen() {
 
   return (
     <SafeAreaView style={styles.root}>
+      <AmbientLights />
       {previewCardsLayout.map((layout, i) => (
         <AnimatedCard
           key={i}

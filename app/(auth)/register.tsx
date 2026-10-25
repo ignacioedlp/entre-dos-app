@@ -1,3 +1,4 @@
+import { AmbientLights } from '@/components/ui/AmbientLights';
 import {
   View,
   TextInput,
@@ -115,6 +116,7 @@ export default function RegisterScreen() {
       behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
     >
       <View style={styles.root}>
+        <AmbientLights />
         <ScrollView
           style={styles.scroll}
           contentContainerStyle={[

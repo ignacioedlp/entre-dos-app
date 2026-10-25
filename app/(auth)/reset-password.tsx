@@ -1,3 +1,4 @@
+import { AmbientLights } from '@/components/ui/AmbientLights';
 import {
   View,
   TextInput,
@@ -58,6 +59,7 @@ export default function ResetPasswordScreen() {
   if (!token) {
     return (
       <View style={[styles.root, { paddingTop: insets.top + 24 }]}>
+        <AmbientLights />
         <View style={styles.header}>
           <Logo size="lg" />
         </View>
@@ -114,6 +116,7 @@ export default function ResetPasswordScreen() {
       behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
     >
       <View style={styles.root}>
+        <AmbientLights />
         <ScrollView
           style={styles.scroll}
           contentContainerStyle={[

@@ -1,3 +1,4 @@
+import { AmbientLights } from '@/components/ui/AmbientLights';
 import { View, StyleSheet, ScrollView, RefreshControl } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useQuery } from '@tanstack/react-query';
@@ -85,6 +86,7 @@ export default function PacksScreen() {
 
   return (
     <View style={[styles.root, { paddingTop: insets.top + 20 }]}>
+      <AmbientLights />
       <Animated.View entering={packEntrance(0)} style={styles.header}>
         <Typography variant="heading" style={styles.title}>
           {t('packs.title')}

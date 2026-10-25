@@ -1,3 +1,4 @@
+import { AmbientLights } from '@/components/ui/AmbientLights';
 import { useMemo, useState } from 'react';
 import {
   Alert,
@@ -195,6 +196,7 @@ export default function CustomCardsScreen() {
 
   return (
     <View style={[styles.root, { paddingTop: insets.top + 20 }]}>
+      <AmbientLights />
       <Stack.Screen options={{ headerShown: false }} />
       <View style={styles.header}>
         <Pressable

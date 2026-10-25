@@ -1,3 +1,4 @@
+import { AmbientLights } from '@/components/ui/AmbientLights';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { ActivityIndicator, Linking, Pressable, ScrollView, StyleSheet, View } from 'react-native';
 import { useRouter } from 'expo-router';
@@ -105,6 +106,7 @@ export default function PaywallScreen() {
 
   return (
     <View style={styles.root}>
+      <AmbientLights />
       <ScrollView
         contentContainerStyle={[
           styles.content,

@@ -1,3 +1,4 @@
+import { AmbientLights } from '@/components/ui/AmbientLights';
 import { useMemo, useState } from 'react';
 import { View, StyleSheet, ScrollView, Pressable } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -26,6 +27,7 @@ export default function FaqScreen() {
 
   return (
     <View style={styles.root}>
+      <AmbientLights />
       <ScrollView
         contentContainerStyle={[
           styles.scrollContent,

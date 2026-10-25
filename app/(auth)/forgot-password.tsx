@@ -1,9 +1,9 @@
+import { AmbientScrollView } from '@/components/ui/AmbientLights';
 import {
   View,
   TextInput,
   StyleSheet,
   Pressable,
-  ScrollView,
   KeyboardAvoidingView,
   Platform,
 } from 'react-native';
@@ -65,7 +65,7 @@ export default function ForgotPasswordScreen() {
       style={styles.keyboardAvoid}
       behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
     >
-      <ScrollView
+      <AmbientScrollView
         style={styles.root}
         contentContainerStyle={[
           styles.scrollContent,
@@ -158,7 +158,7 @@ export default function ForgotPasswordScreen() {
             </Typography>
           </Pressable>
         </View>
-      </ScrollView>
+      </AmbientScrollView>
     </KeyboardAvoidingView>
   );
 }

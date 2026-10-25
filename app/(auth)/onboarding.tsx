@@ -1,3 +1,4 @@
+import { AmbientLights } from '@/components/ui/AmbientLights';
 import { useState, useMemo } from 'react';
 import {
   View,
@@ -91,6 +92,7 @@ export default function OnboardingScreen() {
     >
       <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
         <View style={styles.root}>
+          <AmbientLights />
           <ScrollView
             style={styles.scroll}
             contentContainerStyle={[

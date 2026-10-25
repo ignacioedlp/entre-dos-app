@@ -1,9 +1,9 @@
+import { AmbientScrollView } from '@/components/ui/AmbientLights';
 import {
   View,
   StyleSheet,
   Pressable,
   TextInput,
-  ScrollView,
   ActivityIndicator,
   Image,
   ActionSheetIOS,
@@ -95,7 +95,7 @@ export default function ProfileScreen() {
   }
 
   return (
-    <ScrollView
+    <AmbientScrollView
       style={[styles.root, { paddingTop: insets.top + 20 }]}
       keyboardShouldPersistTaps="handled"
     >
@@ -256,7 +256,7 @@ export default function ProfileScreen() {
           </Pressable>
         )}
       </View>
-    </ScrollView>
+    </AmbientScrollView>
   );
 }
 

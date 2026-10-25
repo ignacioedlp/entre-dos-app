@@ -1,8 +1,8 @@
+import { AmbientScrollView } from '@/components/ui/AmbientLights';
 import {
   View,
   StyleSheet,
   Pressable,
-  ScrollView,
   ActivityIndicator,
   Image,
   Modal,
@@ -271,7 +271,7 @@ export default function RelationshipScreen() {
     : null;
 
   return (
-    <ScrollView
+    <AmbientScrollView
       style={[styles.root, { paddingTop: insets.top + 20 }]}
       keyboardShouldPersistTaps="handled"
     >
@@ -546,7 +546,7 @@ export default function RelationshipScreen() {
           </Modal>
         </>
       )}
-    </ScrollView>
+    </AmbientScrollView>
   );
 }
 

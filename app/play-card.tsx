@@ -1,3 +1,4 @@
+import { AmbientLights } from '@/components/ui/AmbientLights';
 import { useRef, useMemo, useState } from 'react';
 import { Alert, Platform, Pressable, StyleSheet, View } from 'react-native';
 import { Stack, useLocalSearchParams, useRouter } from 'expo-router';
@@ -132,6 +133,7 @@ export default function CardDetailSheet() {
       <View
         style={[styles.root, { paddingTop: insets.top + 24, paddingBottom: insets.bottom + 24 }]}
       >
+        <AmbientLights />
         <Typography
           variant="body"
           baseFontSize={15}
@@ -188,6 +190,7 @@ export default function CardDetailSheet() {
           },
         ]}
       >
+        <AmbientLights />
         <View style={styles.header}>
           <Typography variant="heading" baseFontSize={24} baseLineHeight={28} style={styles.title}>
             {t('playCard.title')}

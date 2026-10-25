@@ -1,3 +1,4 @@
+import { AmbientScrollView } from '@/components/ui/AmbientLights';
 import { useState, useRef, useEffect, useMemo } from 'react';
 import {
   View,
@@ -9,7 +10,6 @@ import {
   TouchableOpacity,
   ActivityIndicator,
   Pressable,
-  ScrollView,
   KeyboardAvoidingView,
   Platform,
 } from 'react-native';
@@ -126,7 +126,7 @@ export default function WaitingScreen() {
         behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
       >
         <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
-          <ScrollView
+          <AmbientScrollView
             style={styles.root}
             contentContainerStyle={[
               styles.scrollContent,
@@ -211,7 +211,7 @@ export default function WaitingScreen() {
                 style={styles.secondaryBtn}
               />
             </View>
-          </ScrollView>
+          </AmbientScrollView>
         </TouchableWithoutFeedback>
       </KeyboardAvoidingView>
     );
@@ -222,7 +222,7 @@ export default function WaitingScreen() {
       style={styles.keyboardAvoid}
       behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
     >
-      <ScrollView
+      <AmbientScrollView
         style={styles.root}
         contentContainerStyle={[
           styles.scrollContent,
@@ -276,7 +276,7 @@ export default function WaitingScreen() {
             style={styles.secondaryBtn}
           />
         </View>
-      </ScrollView>
+      </AmbientScrollView>
     </KeyboardAvoidingView>
   );
 }

@@ -44,7 +44,7 @@
     "error": "Não foi possível trocar a carta. Tente novamente."
   },
   "playThread": {
-    "title": "CONVERSA DA JOGADA",
+    "title": "JOGADA",
     "back": "Voltar",
     "loading": "Carregando conversa...",
     "loadError": "Não foi possível carregar esta conversa.",

@@ -1,3 +1,4 @@
+import { AmbientScrollView, AmbientLights } from '@/components/ui/AmbientLights';
 import { Ionicons } from '@expo/vector-icons';
 import { useInfiniteQuery, useQuery, useQueryClient } from '@tanstack/react-query';
 import {
@@ -255,7 +256,7 @@ export default function AlbumScreen() {
 
   if (accessQuery.isError) {
     return (
-      <ScrollView
+      <AmbientScrollView
         style={styles.root}
         contentContainerStyle={[
           styles.centered,
@@ -284,13 +285,13 @@ export default function AlbumScreen() {
             {t('album.retry')}
           </Typography>
         </Pressable>
-      </ScrollView>
+      </AmbientScrollView>
     );
   }
 
   if (accessQuery.isSuccess && accessQuery.data.access === 'locked') {
     return (
-      <ScrollView
+      <AmbientScrollView
         style={styles.root}
         contentContainerStyle={[
           styles.centered,
@@ -341,12 +342,13 @@ export default function AlbumScreen() {
             {t('album.adAccessDuration', { minutes: accessQuery.data.rewardedAccessMinutes })}
           </Typography>
         ) : null}
-      </ScrollView>
+      </AmbientScrollView>
     );
   }
 
   return (
     <View style={[styles.root, { paddingTop: insets.top + 20 }]}>
+      <AmbientLights />
       <View style={styles.header}>
         <Typography variant="heading">{t('album.title')}</Typography>
         <Typography variant="body" color={colors.textSecondary}>
